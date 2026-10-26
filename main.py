@@ -7,19 +7,16 @@ from itertools import combinations
 from datetime import datetime as _datetime
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Image de fond (URL GitHub ou locale)
-IMAGE_URL = "https://raw.githubusercontent.com/JAFFRY-pegasus/pegasus-backend-v2/main/images/Horse-racing-1.jpg"
+# ✅ URL de l'image de fond (à la racine du dépôt GitHub)
+IMAGE_URL = "https://raw.githubusercontent.com/JAFFRY-pegasus/pegasus-backend-v2/main/Horse-racing-1.jpg"
 
 # ==============================================================================
-# 1. MOTEUR SGE - LE CŒUR DE PEGASUS
+# 1. MOTEUR SGE - LE CUR DE PEGASUS
 # ==============================================================================
 
-# Base de données historique (244 quintés)
 HISTORIQUE_SGE_DATA = [
   {"id": "1", "arrivee": [11, 4, 15, 6, 12]}, {"id": "2", "arrivee": [8, 14, 5, 13, 2]},
   {"id": "3", "arrivee": [9, 3, 16, 7, 10]}, {"id": "4", "arrivee": [1, 12, 6, 14, 8]},
@@ -133,17 +130,14 @@ HISTORIQUE_SGE_DATA = [
   {"id": "243", "arrivee": [5, 16, 9, 12, 10]}, {"id": "244", "arrivee": [13, 4, 14, 6, 11]}
 ]
 
-# Oppositions verticales (règles géométriques)
 OPPOSITIONS_VERTICALES = {
     1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
     9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8
 }
 
-# Coefficients de résonance
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
 
 def calculer_poids_axes():
-    """Calcule la fréquence des axes géométriques dans l'historique"""
     frequence_axes = Counter()
     for course in HISTORIQUE_SGE_DATA:
         arr = course["arrivee"]
@@ -157,7 +151,6 @@ def calculer_poids_axes():
 POIDS_AXES_HISTORIQUE = calculer_poids_axes()
 
 def calculer_score_sge(combinaison):
-    """Calcule le score de résonance d'une combinaison"""
     score_brut = 0
     axes_touches = set()
     for i in range(len(combinaison)):
@@ -173,7 +166,6 @@ def calculer_score_sge(combinaison):
     return int(score_brut * ponderation)
 
 def generer_prono_automatique(combinaison_ref):
-    """Génère le pronostic optimisé PEGASUS"""
     valides = [n for n in combinaison_ref if 1 <= n <= 16]
     if len(valides) < 5:
         complements = [n for n in [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16] if n not in valides]
@@ -190,7 +182,6 @@ def generer_prono_automatique(combinaison_ref):
     return scores_candidats[0][1] if scores_candidats else valides[:5]
 
 def calculer_stats_chevaux():
-    """Calcule les chevaux les plus fréquents dans le top 5"""
     counter = Counter()
     total = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
@@ -200,22 +191,19 @@ def calculer_stats_chevaux():
     return [(num, count, round(count/total*100, 1)) for num, count in top3]
 
 # ==============================================================================
-# 2. INTERFACE UTILISATEUR (Basée sur votre image)
+# 2. INTERFACE UTILISATEUR
 # ==============================================================================
 
-def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
-    """Génère l'interface HTML complète"""
-    
-    # Données statiques pour la démo (à remplacer par lecture de quinte.json plus tard)
+def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message_succes=""):
     infos = {
         "hippodrome": "DEAUVILLE",
         "discipline": "Plat",
         "nom_course": "PRIX DE LA FORÊT DE LYONS",
-        "distance": "1900 m",
+        "distance": "1900",
         "partants": "16",
         "heure": "13:55",
         "date_course": "lundi 19 octobre 2026",
-        "arrivee": [4, 5, 9, 10, 11]  # Exemple d'arrivée
+        "arrivee": [4, 5, 9, 10, 11]
     }
     
     html_prono_balls = "".join([f'<div class="circle orange">{n}</div>' for n in prono_list])
@@ -227,26 +215,26 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
             saisie_nums.append(int(n))
     html_saisie_balls = "".join([f'<div class="circle blue">{n}</div>' for n in saisie_nums]) if saisie_nums else '<div class="circle blue" style="opacity:0.4;">?</div>'
     
-    # Synthèse presse (exemple)
     synthesis_nums = [13, 8, 10, 4, 16, 6, 5, 12]
     html_synthesis_balls = "".join([f'<div class="circle turquoise">{n}</div>' for n in synthesis_nums])
     
-    # Calcul taux de réussite
     reussite = 0
     if prono_list and infos["arrivee"]:
         correspondances = len(set(prono_list) & set(infos["arrivee"]))
         reussite = int((correspondances / 5) * 100)
     
-    # Stats chevaux fréquents
     stats = calculer_stats_chevaux()
     stats_html = "".join([f'<div class="stat-num">n°{num} <span style="font-size:0.8em;">({count} fois — {pct}%)</span></div>' for num, count, pct in stats])
     
-    # Calcul moyenne
     total_courses = len(HISTORIQUE_SGE_DATA)
     total_trouves = sum(1 for course in HISTORIQUE_SGE_DATA for num in course["arrivee"][:5] if num in saisie_nums)
     moyenne = round(total_trouves / total_courses, 2) if total_courses > 0 else 0
-    niveau = "Très bon" if moyenne >= 3 else "Bon" if moyenne >= 2 else "Faible"
-    couleur_niveau = "#10b981" if moyenne >= 3 else "#f59e0b" if moyenne >= 2 else "#ef4444"
+    if moyenne >= 3:
+        niveau, couleur_niveau = "Très bon", "#10b981"
+    elif moyenne >= 2:
+        niveau, couleur_niveau = "Bon", "#f59e0b"
+    else:
+        niveau, couleur_niveau = "Faible", "#ef4444"
     
     return f"""<!DOCTYPE html>
 <html lang="fr">
@@ -291,6 +279,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
         .section h2 {{ color: #f59e0b; font-size: 1.1em; margin-bottom: 20px; text-transform: uppercase; border-bottom: 2px solid rgba(245, 158, 11, 0.3); padding-bottom: 10px; }}
         
         .alert-banner {{ background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 6px; padding: 10px; margin-bottom: 20px; color: #10b981; font-size: 0.85em; }}
+        .success-banner {{ background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; border-radius: 6px; padding: 10px; margin-bottom: 20px; color: #f59e0b; font-size: 0.9em; font-weight: bold; text-align: center; }}
         
         .info-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }}
         .info-field {{ display: flex; flex-direction: column; }}
@@ -315,6 +304,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
         .circle.blue {{ background: #475569; color: white; }}
         
         .reussite-box {{ background: rgba(30, 41, 59, 0.6); border: 1px solid #475569; border-radius: 8px; padding: 15px; text-align: center; margin: 15px 0; }}
+        .reussite-box .label {{ color: #94a3b8; font-size: 0.85em; margin-bottom: 10px; }}
         .reussite-value {{ color: #14b8a6; font-size: 2em; font-weight: bold; }}
         .reussite-subtext {{ color: #64748b; font-size: 0.8em; margin-top: 5px; }}
         
@@ -333,6 +323,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
         .btn-reset {{ width: 100%; padding: 10px; background: #475569; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; }}
         
         .stat-box {{ background: rgba(30, 41, 59, 0.6); border: 1px solid #475569; border-radius: 8px; padding: 15px; text-align: center; margin: 15px 0; }}
+        .stat-box .label {{ color: #94a3b8; font-size: 0.9em; }}
         .stat-badge {{ background: #ef4444; color: white; padding: 5px 15px; border-radius: 15px; display: inline-block; margin-top: 10px; font-weight: bold; }}
         
         .stat-freq {{ background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin: 15px 0; }}
@@ -406,6 +397,8 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
                 <input type="text" id="combinaison-input" name="combinaison" value="{saisie_str}" placeholder="Ex: 13 - 6 - 5 - 12 - 11">
             </div>
             
+            {f'<div class="success-banner">{message_succes}</div>' if message_succes else ''}
+            
             <button type="submit" class="btn-submit">METTRE À JOUR & RECALCULER</button>
         </div>
     </form>
@@ -462,7 +455,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
         </div>
         
         <div class="stat-freq">
-            <div class="label">📊 À ce jour, la base de données des quintés nous indique que les chevaux les plus fréquemment présents dans le top 5 sont :</div>
+            <div class="label"> À ce jour, la base de données des quintés nous indique que les chevaux les plus fréquemment présents dans le top 5 sont :</div>
             <div class="chiffres">{stats_html}</div>
             <div class="stat-note">(Moyenne sur 220 courses — 3 chevaux ou plus = Très bon, 1 cheval = Faible)</div>
         </div>
@@ -474,7 +467,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie):
     </div>
 
     <div class="legal-footer">
-        <div class="warning">⚠️ Jouer comporte des risques : endettement, isolement, dépendance.</div>
+        <div class="warning">️ Jouer comporte des risques : endettement, isolement, dépendance.</div>
         <div class="help">Pour être aidé, appelez le <a href="tel:0974751313">09 74 75 13 13</a> (appel non surtaxé) ou visitez <a href="https://joueurs-info-service.fr" target="_blank">joueurs-info-service.fr</a></div>
         <div class="disclaimer">PEGASUS est un outil d'analyse statistique et géométrique à titre purement indicatif. Il ne garantit aucun gain. Jouez avec modération.</div>
     </div>
@@ -595,5 +588,6 @@ async def analyser(combinaison: str = Form(...), synthesis_pmu: str = Form(...))
         saisie_str=saisie_formatee,
         prono_list=prono,
         score_prono=score_prono,
-        score_saisie=score_saisie
+        score_saisie=score_saisie,
+        message_succes="✅ Analyse SGE effectuée ! Les scores et le pronostic ont été recalculés sur 244 courses."
     ))
