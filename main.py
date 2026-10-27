@@ -561,10 +561,20 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message
 # ==============================================================================
 # 3. ROUTES FASTAPI
 # ==============================================================================
+from fastapi.responses import RedirectResponse
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    saisie_defaut = "13 - 6 - 5 - 12 - 11"
+    # 1. Récupération automatique des données du Quinté+ via l'API PMU
+    donnees_pmu = obtenir_quinte_du_jour()
+    
+    # Extraction dynamique de la combinaison du jour si disponible dans l'API PMU
+    # (Adaptez 'combinaison_officielle' selon la clé exacte renvoyée par votre API)
+    saisie_defaut = "13 - 6 - 5 - 12 - 11" 
+    if donnees_pmu and donnees_pmu.get("arrivee"):
+        # Si l'arrivée est disponible dans l'API, on l'utilise comme base de calcul
+        saisie_defaut = " - ".join(map(str, donnees_pmu.get("arrivee")[:5]))
+
     nums_saisis = [int(n) for n in saisie_defaut.replace("-", " ").split()]
     prono = generer_prono_automatique(nums_saisis)
     
@@ -574,6 +584,26 @@ async def index():
         score_prono=calculer_score_sge(prono),
         score_saisie=calculer_score_sge(nums_saisis)
     ))
+
+@app.get("/actualiser")
+async def actualiser_pmu():
+    """Route déclenchée par le bouton 'Actualiser les données'.
+    Elle force la suppression du fichier temporaire pour interroger à nouveau l'API PMU.
+    """
+    print("🔄 Forçage de l'actualisation PMU demandé...")
+    import os
+    # On supprime le cache temporaire Vercel pour forcer la mise à jour en direct
+    if os.path.exists("/tmp/quinte_du_jour.json"):
+        try:
+            os.remove("/tmp/quinte_du_jour.json")
+        except Exception:
+            pass
+            
+    # On force une nouvelle extraction immédiate
+    obtenir_quinte_du_jour()
+    
+    # Redirection instantanée vers la page d'accueil avec les nouvelles données
+    return RedirectResponse(url="/", status_code=303)
 
 @app.post("/analyser", response_class=HTMLResponse)
 async def analyser(combinaison: str = Form(...), synthesis_pmu: str = Form(...)):
@@ -592,3 +622,5 @@ async def analyser(combinaison: str = Form(...), synthesis_pmu: str = Form(...))
         score_saisie=score_saisie,
         message_succes="✅ Analyse SGE effectuée ! Les scores et le pronostic ont été recalculés sur 244 courses."
     ))
+
+
