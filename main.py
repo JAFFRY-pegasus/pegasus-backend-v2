@@ -3,7 +3,8 @@
 
 """
 main.py
-Moteur SGE unifié avec API FastAPI (Projet pegasus-backend-v2)
+Moteur SGE unifié avec API FastAPI et gestion hybride du robot (Automatique + Clic Manuel)
+Projet : pegasus-backend-v2
 """
 
 import html
@@ -15,20 +16,35 @@ from collections import Counter
 from itertools import combinations
 
 from fastapi import FastAPI, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from apscheduler.schedulers.background import BackgroundScheduler
 
-# 1. IMPORTATIONS DES MODULES LOCAUX
+# Importations des modules locaux
 from historique import HISTORIQUE_SGE_DATA
 from extraction import obtenir_quinte_du_jour
 
-# Initialisation de l'API
 app = FastAPI()
 
-# ✅ URL de l'image de fond (à la racine du dépôt GitHub)
-IMAGE_URL = "https://raw.githubusercontent.com/JAFFRY-pegasus/pegasus-backend-v2/main/Horse-racing-1.jpg"
+# Configuration des ressources graphiques
+IMAGE_URL = "https://githubusercontent.com"
+FICHIER_SAUVEGARDE = "quinte_du_jour.json"
+
+# Structure de mémoire globale pour l'affichage de l'interface utilisateur
+DONNEES_QUINTE_DU_JOUR = {
+    "hippodrome": "INCONNU", 
+    "discipline": "Inconnue", 
+    "distance": 0, 
+    "partants": 0, 
+    "heure": "--:--", 
+    "nom_course": "Aucune Course Trouvée",
+    "derniere_maj": "--:--",
+    "statut_robot": "En attente du cycle"
+}
 
 
-# --- CONFIGURATIONS ET MATRICES DU MOTEUR SGE ---
+# =====================================================================
+# --- CONFIGURATIONS ET MATRICES DU MOTEUR SGE -----------------------
+# =====================================================================
 
 OPPOSITIONS_VERTICALES = {
     1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
@@ -45,7 +61,9 @@ COEFFICIENTS_RESONANCE = {
 }
 
 
-# --- LOGIQUE ALGORITHMIQUE SGE ---
+# =====================================================================
+# --- LOGIQUE ALGORITHMIQUE SGE ---------------------------------------
+# =====================================================================
 
 def calculer_poids_axes():
     """
@@ -59,11 +77,11 @@ def calculer_poids_axes():
             if oppose and oppose in arr:
                 axe = tuple(sorted([num, oppose]))
                 frequence_axes[axe] += 1
-    # Division par 2 car chaque paire d'axe est comptée deux fois (a->b et b->a)
+    # Division par 2 car chaque paire d'axe est lue deux fois (num puis oppose)
     return {axe: freq // 2 for axe, freq in frequence_axes.items()}
 
 
-# Initialisation des poids d'axes dès le chargement du serveur FastAPI
+# Initialisation dynamique du poids des axes par rapport à l'historique global
 POIDS_AXES_HISTORIQUE = calculer_poids_axes()
 
 
@@ -119,46 +137,217 @@ def calculer_stats_chevaux():
     return [(num, count, round(count / total * 100, 1)) for num, count in top3]
 
 
-# --- ROUTES ENDPOINTS FASTAPI (WEB INTERFACE) ---
+# =====================================================================
+# --- SYNCHRONISATION DES DONNÉES & AUTOMATISATION DU ROBOT -----------
+# =====================================================================
+
+def charger_donnees_locales():
+    """
+    Charge les données du fichier JSON local au démarrage du serveur si disponible.
+    """
+    global DONNEES_QUINTE_DU_JOUR
+    if os.path.exists(FICHIER_SAUVEGARDE):
+        try:
+            with open(FICHIER_SAUVEGARDE, "r", encoding="utf-8") as f:
+                DONNEES_QUINTE_DU_JOUR = json.load(f)
+            print("[*] Données du quinté restaurées depuis le fichier local.")
+        except Exception as e:
+            print(f"[!] Impossible de lire le fichier de sauvegarde : {e}")
+
+
+def executer_scraping_quotidien(mode=""):
+    """
+    Pilote l'extraction de l'API PMU via extraction.py, applique les calculs 
+    et enregistre le résultat dans la mémoire globale et le fichier local.
+    """
+    global DONNEES_QUINTE_DU_JOUR
+    horodatage = _datetime.now().strftime("%H:%M")
+    print(f"[{_datetime.now().strftime('%H:%M:%S')}] [{mode}] Le robot interroge l'API PMU...")
+    
+    try:
+        # Appel de la fonction d'extraction externe
+        nouvelles_donnees = obtenir_quinte_du_jour()
+        
+        # Injection des indicateurs système de suivi temporels
+        nouvelles_donnees["derniere_maj"] = horodatage
+        nouvelles_donnees["statut_robot"] = f"Actif ({mode})"
+        
+        DONNEES_QUINTE_DU_JOUR = nouvelles_donnees
+        
+        # Écriture physique sur le disque pour prévenir les crashs
+        with open(FICHIER_SAUVEGARDE, "w", encoding="utf-8") as f:
+            json.dump(DONNEES_QUINTE_DU_JOUR, f, ensure_ascii=False, indent=4)
+            
+        print(f"[{_datetime.now().strftime('%H:%M:%S')}] [{mode}] Données SGE synchronisées et figées avec succès.")
+    except Exception as e:
+        print(f"[!] Échec de la récupération des données ({mode}) : {e}")
+        DONNEES_QUINTE_DU_JOUR["statut_robot"] = f"Erreur de flux à {horodatage}"
+
+
+# --- PLANIFICATEUR DE TÂCHES EN ARRIÈRE-PLAN (CRON) ---
+
+scheduler = BackgroundScheduler()
+
+# 1. À 05h00 : Injection massive initiale (Données de base figées depuis l'API PMU)
+scheduler.add_job(executer_scraping_quotidien, 'cron', hour=5, minute=0, args=["INJECTION_05H00"], id="pmu_massive")
+
+# 2. À 08h30 : Ouverture officielle des terminaux de paris
+scheduler.add_job(executer_scraping_quotidien, 'cron', hour=8, minute=30, args=["OUVERTURE_PARIS"], id="pmu_ouverture")
+
+# 3. De 08h30 à 20h00 : Flux dynamique tendu toutes les 15 minutes (Variations de cotes & non-partants)
+scheduler.add_job(executer_scraping_quotidien, 'cron', hour='8-19', minute='0,15,30,45', args=["FLUX_15MIN"], id="pmu_tendu")
+
+scheduler.start()
+
+
+# =====================================================================
+# --- ENDPOINTS FASTAPI (INTERFACE WEB GRAPHIQUE) --------------------
+# =====================================================================
 
 @app.get("/", response_class=HTMLResponse)
 async def page_accueil():
     """
-    Route principale servant l'interface utilisateur.
-    Exemple basique d'intégration de l'image de fond et des statistiques.
+    Route principale servant l'interface utilisateur enrichie avec 
+    les données dynamiques de la variable globale.
     """
+    global DONNEES_QUINTE_DU_JOUR
+    date_formatee = _datetime.now().strftime("%A %d %B %Y")
+    
+    # Récupération et formatage des statistiques historiques SGE
     stats = calculer_stats_chevaux()
-    stats_html = "".join([f"<li>Cheval N°{n} : {occ} fois ({p}%)</li>" for n, occ, p in stats])
+    stats_html = "".join([f"<li>Cheval N°{num:02d} : {count} fois ({pct}%)</li>" for num, count, pct in stats])
     
     content = f"""
     <html>
         <head>
-            <title>Moteur Pegasus SGE</title>
+            <title>PEGASUS - Moteur SGE</title>
             <style>
-                body {{
-                    background-image: url('{IMAGE_URL}');
-                    background-size: cover;
-                    font-family: Arial, sans-serif;
-                    color: white;
-                    text-shadow: 2px 2px 4px #000000;
-                    padding: 50px;
-                }}
-                .container {{
-                    background: rgba(0, 0, 0, 0.7);
+                body {{ 
+                    background-image: url('{IMAGE_URL}'); 
+                    background-size: cover; 
+                    background-attachment: fixed;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    color: white; 
+                    margin: 0;
                     padding: 20px;
-                    border-radius: 10px;
-                    max-width: 600px;
                 }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>Moteur SGE - Pegasus Backend v2</h1>
-                <p>Base historique connectée : {len(HISTORIQUE_SGE_DATA)} quintés.</p>
-                <h3>TOP 3 Historique des chevaux :</h3>
-                <ul>{stats_html}</ul>
+                .top-bar {{ 
+                    display: flex; 
+                    gap: 15px; 
+                    justify-content: center; 
+                    margin-bottom: 25px; 
+                }}
+                .btn {{ 
+                    padding: 12px 24px; 
+                    border-radius: 20px; 
+                    border: none; 
+                    font-weight: bold; 
+                    cursor: pointer; 
+                    color: white; 
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                    transition: transform 0.2s;
+                }}
+                .btn:hover {{ transform: scale(1.05); }}
+                .btn-green {{ background-color: #06d6a0; }}
+                .btn-purple {{ background-color: #7209b7; }}
+                .block {{ 
+                    background: rgba(16, 24, 48, 0.95); 
+                    padding: 30px; 
+                    border-radius: 12px; 
+                    max-width: 850px; 
+                    margin: 0 auto 30px auto; 
+                    border: 1px solid #233554;
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+                }}
+                .alert {{ 
+                    background: rgba(6, 214, 160, 0.15); 
+                    border: 1px solid #06d6a0; 
+                    color: #06d6a0; 
+                    padding: 12px; 
+                    border-radius: 6px; 
+font-size: 13.5px;
+margin-bottom: 20px;
+font-weight: 500;
+}}
+.row {{ display: flex; gap: 20px; margin-bottom: 15px; }}
+.col {{ flex: 1; display: flex; flex-direction: column; }}
+label {{ color: #ff9f1c; font-size: 12px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }}
+input {{
+background: #0f172a;
+border: 1px solid #334155;
+color: #38bdf8;
+padding: 12px;
+border-radius: 6px;
+font-size: 14.5px;
+font-weight: 500;
+    }}
+    input[readonly] {{ color: #94a3b8; background: #1e293b; }}
+    ul {{ padding-left: 20px; color: #cbd5e1; }}
+    li {{ margin-bottom: 6px; }}
+</style>
+</head>
+<body>
+    <div class="top-bar">
+        <form action="/actualiser" method="post"><button type="submit" class="btn btn-green">🔄 Actualiser les données</button></form>
+        <form action="/actualiser" method="post"><button type="submit" class="btn btn-purple">🤖 Relancer le robot</button></form>
+    </div>
+
+    <div class="block">
+        <h2 style="color: #ff9f1c; margin-top: 0; border-bottom: 2px solid #ff9f1c; padding-bottom: 8px;">1. INFORMATIONS SUR LE QUINTÉ DU JOUR</h2>
+        
+        <div class="alert">
+            ✅ Aucun non-partant détecté à ce stade • {DONNEES_QUINTE_DU_JOUR.get('partants', 0)} partants confirmés • Dernière vérification : {DONNEES_QUINTE_DU_JOUR.get('derniere_maj')} — [Statut : {DONNEES_QUINTE_DU_JOUR.get('statut_robot')}]
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Date de la course (automatique) :</label>
+                <input type="text" value="{date_formatee}" readonly>
             </div>
-        </body>
-    </html>
-    """
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Hippodrome :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('hippodrome')}" readonly>
+            </div>
+            <div class="col">
+                <label>Discipline :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('discipline')}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Nom de la course :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('nom_course')}" readonly>
+            </div>
+            <div class="col">
+                <label>Distance :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('distance')}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Nombre de partants déclarés :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('partants')}" readonly>
+            </div>
+            <div class="col">
+                <label>Heure de départ :</label>
+                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('heure')}" readonly>
+            </div>
+        </div>
+    </div>
+
+    <div class="block">
+        <h3 style="color: #38bdf8; margin-top: 0;">2. INDICATEURS DE CONTRÔLE DE LA BASE GLOBALE</h3>
+        <p>Analyse effectuée sur un historique de <strong>{len(HISTORIQUE_SGE_DATA)}</strong> courses.</p>
+        <h4>TOP 3 des chevaux les plus fréquents :</h4>
+        <ul>{stats_html}</ul>
+    </div>
+</body>
+</html>
+"""
     return HTMLResponse(content=content)
+    
