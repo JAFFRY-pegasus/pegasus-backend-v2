@@ -154,35 +154,67 @@ def charger_donnees_locales():
         except Exception as e:
             print(f"[!] Impossible de lire le fichier de sauvegarde : {e}")
 
-
 def executer_scraping_quotidien(mode=""):
     """
-    Pilote l'extraction de l'API PMU via extraction.py, applique les calculs 
-    et enregistre le résultat dans la mémoire globale et le fichier local.
+    Pilote l'extraction de l'API PMU via extraction.py, convertit les clés 
+    brutes officielles du PMU vers le format Pegasus SGE, puis enregistre le résultat.
     """
     global DONNEES_QUINTE_DU_JOUR
-    horodatage = _datetime.now().strftime("%H:%M")
+    horodatage = _datetime.now().strftime("%Y-%m-%d %H:%M")
     print(f"[{_datetime.now().strftime('%H:%M:%S')}] [{mode}] Le robot interroge l'API PMU...")
     
     try:
-        # Appel de la fonction d'extraction externe
-        nouvelles_donnees = obtenir_quinte_du_jour()
+        # 1. Récupération du dictionnaire brut fourni par extraction.py
+        quinte_brut = obtenir_quinte_du_jour()
         
-        # Injection des indicateurs système de suivi temporels
+        # Sécurité : Si le robot n'a rien extrait ou si la course est indisponible
+        if not quinte_brut:
+            print(f"[-] Flux PMU indisponible ou vide ({mode}). Conservation des dernières données locales.")
+            charger_donnees_locales()
+            return
+
+        # 2. MAPPING ROBUSTE : Extraction des variables selon la structure officielle PMU
+        discipline_brute = quinte_brut.get("specialite", "Inconnue")
+        if discipline_brute == "TROT_ATTELE":
+            discipline_formatee = "Attelé"
+        elif discipline_brute == "TROT_MONTE":
+            discipline_formatee = "Monté"
+        else:
+            discipline_formatee = discipline_brute.replace("TROT_", "").capitalize()
+
+        # Récupération et conversion de l'heure de départ (Timestamp millisecondes -> HH:MM)
+        heure_depart = "--:--"
+        if quinte_brut.get("heureDepart"):
+            heure_depart = _datetime.fromtimestamp(quinte_brut.get("heureDepart") / 1000).strftime("%H:%M")
+
+        nouvelles_donnees = {
+            "hippodrome": quinte_brut.get("libelleHippodrome", "INCONNU"),
+            "discipline": discipline_formatee,
+            "distance": quinte_brut.get("distance", 0),
+            "partants": quinte_brut.get("nombrePartants") or len(quinte_brut.get("participants", [])),
+            "heure": heure_depart,
+            "nom_course": quinte_brut.get("libelle", "Aucun Nom Trouvé")
+        }
+        
+        # Sécurité : si le nombre de partants est nul ou non détecté
+        if nouvelles_donnees["partants"] == 0:
+            nouvelles_donnees["partants"] = 16  # Valeur de secours standard
+
+        # Enrichissement système de suivi
         nouvelles_donnees["derniere_maj"] = horodatage
         nouvelles_donnees["statut_robot"] = f"Actif ({mode})"
         
         DONNEES_QUINTE_DU_JOUR = nouvelles_donnees
         
-        # Écriture physique sur le disque pour prévenir les crashs
+        # 3. Enregistrement physique dans votre fichier de sauvegarde
         with open(FICHIER_SAUVEGARDE, "w", encoding="utf-8") as f:
             json.dump(DONNEES_QUINTE_DU_JOUR, f, ensure_ascii=False, indent=4)
             
-        print(f"[{_datetime.now().strftime('%H:%M:%S')}] [{mode}] Données SGE synchronisées et figées avec succès.")
+        print(f"[{_datetime.now().strftime('%H:%M:%S')}] [{mode}] Données reformatées et sauvegardées.")
+        
     except Exception as e:
-        print(f"[!] Échec de la récupération des données ({mode}) : {e}")
-        DONNEES_QUINTE_DU_JOUR["statut_robot"] = f"Erreur de flux à {horodatage}"
-
+        print(f"[!] Erreur lors du traitement des données PMU ({mode}) : {e}")
+        charger_donnees_locales()
 
 # --- PLANIFICATEUR DE TÂCHES EN ARRIÈRE-PLAN (CRON) ---
 
