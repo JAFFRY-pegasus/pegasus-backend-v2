@@ -442,15 +442,17 @@ Score du pronostic optimal : {score_optimal} pts
 ← Retour au Simulateur
 
 """
+
 return HTMLResponse(content=content)
+
 @app.post("/actualiser")
 async def clic_robot_manuel():
-"""
-Intercepte l'appel POST déclenché par l'un des boutons de l'interface.
-Force le scraping immédiat des API PMU puis redirige vers la page d'accueil.
-"""
-executer_scraping_quotidien(mode="CLIC_MANUEL_INTERFACE")
-return RedirectResponse(url="/", status_code=303)
+    """
+    Intercepte l'appel POST déclenché par l'un des boutons de l'interface.
+    Force le scraping immédiat des API PMU puis redirige vers la page d'accueil.
+    """
+    executer_scraping_quotidien(mode="CLIC_MANUEL_INTERFACE")
+    return RedirectResponse(url="/", status_code=303)
 
 =====================================================================
 
