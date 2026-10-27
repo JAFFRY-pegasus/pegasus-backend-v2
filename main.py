@@ -430,20 +430,12 @@ font-weight: bold;
 box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }}
 
+            </div>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=content)
 
-
-
-Résultats de la Simulation SGE
-Combinaison analysée : {combinaison_saisie}
-Score de résonance d'axes : {score_combinaison} pts
-Optimisation Automatique
-Meilleur pronostic calculé : {pronostic_optimal}
-Score du pronostic optimal : {score_optimal} pts
-← Retour au Simulateur
-
-"""
-
-return HTMLResponse(content=content)
 
 @app.post("/actualiser")
 async def clic_robot_manuel():
@@ -454,20 +446,17 @@ async def clic_robot_manuel():
     executer_scraping_quotidien(mode="CLIC_MANUEL_INTERFACE")
     return RedirectResponse(url="/", status_code=303)
 
-=====================================================================
 
-
---- INITIALISATION AU LANCEMENT DE L'APPLICATION --------------------
-
-
-=====================================================================
+# =====================================================================
+# --- INITIALISATION AU LANCEMENT DE L'APPLICATION --------------------
+# =====================================================================
 
 @app.on_event("startup")
 async def startup_event():
-"""
-S'exécute automatiquement lors de l'initialisation du serveur Uvicorn.
-Restaure la session précédente ou force un rafraîchissement.
-"""
-charger_donnees_locales()
-if DONNEES_QUINTE_DU_JOUR["partants"] == 0:
-executer_scraping_quotidien(mode="INITIALISATION_SERVEUR")    
+    """
+    S'exécute automatiquement lors de l'initialisation du serveur Uvicorn.
+    Restaure la session précédente ou force un rafraîchissement.
+    """
+    charger_donnees_locales()
+    if DONNEES_QUINTE_DU_JOUR["partants"] == 0:
+        executer_scraping_quotidien(mode="INITIALISATION_SERVEUR")
