@@ -199,7 +199,6 @@ scheduler.add_job(executer_scraping_quotidien, 'cron', hour='8-19', minute='0,15
 
 scheduler.start()
 
-
 # =====================================================================
 # --- ENDPOINTS FASTAPI (INTERFACE WEB GRAPHIQUE) --------------------
 # =====================================================================
@@ -250,6 +249,7 @@ async def page_accueil():
                 .btn:hover {{ transform: scale(1.05); }}
                 .btn-green {{ background-color: #06d6a0; }}
                 .btn-purple {{ background-color: #7209b7; }}
+                .btn-orange {{ background-color: #ff9f1c; margin-top: 10px; width: 100%; border-radius: 6px; }}
                 .block {{ 
                     background: rgba(16, 24, 48, 0.95); 
                     padding: 30px; 
@@ -265,89 +265,207 @@ async def page_accueil():
                     color: #06d6a0; 
                     padding: 12px; 
                     border-radius: 6px; 
-font-size: 13.5px;
-margin-bottom: 20px;
-font-weight: 500;
-}}
-.row {{ display: flex; gap: 20px; margin-bottom: 15px; }}
-.col {{ flex: 1; display: flex; flex-direction: column; }}
-label {{ color: #ff9f1c; font-size: 12px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }}
-input {{
-background: #0f172a;
-border: 1px solid #334155;
-color: #38bdf8;
-padding: 12px;
-border-radius: 6px;
-font-size: 14.5px;
-font-weight: 500;
-    }}
-    input[readonly] {{ color: #94a3b8; background: #1e293b; }}
-    ul {{ padding-left: 20px; color: #cbd5e1; }}
-    li {{ margin-bottom: 6px; }}
-</style>
-</head>
-<body>
-    <div class="top-bar">
-        <form action="/actualiser" method="post"><button type="submit" class="btn btn-green">🔄 Actualiser les données</button></form>
-        <form action="/actualiser" method="post"><button type="submit" class="btn btn-purple">🤖 Relancer le robot</button></form>
-    </div>
+                    font-size: 13.5px;
+                    margin-bottom: 20px;
+                    font-weight: 500;
+                }}
+                .row {{ display: flex; gap: 20px; margin-bottom: 15px; }}
+                .col {{ flex: 1; display: flex; flex-direction: column; }}
+                label {{ color: #ff9f1c; font-size: 12px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }}
+                input {{
+                    background: #0f172a;
+                    border: 1px solid #334155;
+                    color: #38bdf8;
+                    padding: 12px;
+                    border-radius: 6px;
+                    font-size: 14.5px;
+                    font-weight: 500;
+                }}
+                input[readonly] {{ color: #94a3b8; background: #1e293b; }}
+                .input-combo {{ text-align: center; font-size: 18px; font-weight: bold; color: #64ffda; }}
+                ul {{ padding-left: 20px; color: #cbd5e1; }}
+                li {{ margin-bottom: 6px; }}
+            </style>
+        </head>
+        <body>
+            <div class="top-bar">
+                <form action="/actualiser" method="post"><button type="submit" class="btn btn-green">🔄 Actualiser les données</button></form>
+                <form action="/actualiser" method="post"><button type="submit" class="btn btn-purple">🤖 Relancer le robot</button></form>
+            </div>
 
-    <div class="block">
-        <h2 style="color: #ff9f1c; margin-top: 0; border-bottom: 2px solid #ff9f1c; padding-bottom: 8px;">1. INFORMATIONS SUR LE QUINTÉ DU JOUR</h2>
-        
-        <div class="alert">
-            ✅ Aucun non-partant détecté à ce stade • {DONNEES_QUINTE_DU_JOUR.get('partants', 0)} partants confirmés • Dernière vérification : {DONNEES_QUINTE_DU_JOUR.get('derniere_maj')} — [Statut : {DONNEES_QUINTE_DU_JOUR.get('statut_robot')}]
-        </div>
+            <!-- 1. INFORMATIONS SUR LE QUINTÉ DU JOUR -->
+            <div class="block">
+                <h2 style="color: #ff9f1c; margin-top: 0; border-bottom: 2px solid #ff9f1c; padding-bottom: 8px;">1. INFORMATIONS SUR LE QUINTÉ DU JOUR</h2>
+                
+                <div class="alert">
+                    ✅ Aucun non-partant détecté à ce stade • {DONNEES_QUINTE_DU_JOUR.get('partants', 0)} partants confirmés • Dernière vérification : {DONNEES_QUINTE_DU_JOUR.get('derniere_maj')} — [Statut : {DONNEES_QUINTE_DU_JOUR.get('statut_robot')}]
+                </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Date de la course (automatique) :</label>
-                <input type="text" value="{date_formatee}" readonly>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Date de la course (automatique) :</label>
+                        <input type="text" value="{date_formatee}" readonly>
+                    </div>
+                </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Hippodrome :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('hippodrome')}" readonly>
-            </div>
-            <div class="col">
-                <label>Discipline :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('discipline')}" readonly>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Hippodrome :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('hippodrome')}" readonly>
+                    </div>
+                    <div class="col">
+                        <label>Discipline :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('discipline')}" readonly>
+                    </div>
+                </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Nom de la course :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('nom_course')}" readonly>
-            </div>
-            <div class="col">
-                <label>Distance :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('distance')}" readonly>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col">
+                        <label>Nom de la course :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('nom_course')}" readonly>
+                    </div>
+                    <div class="col">
+                        <label>Distance :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('distance')}" readonly>
+                    </div>
+                </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Nombre de partants déclarés :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('partants')}" readonly>
+                <div class="row">
+                    <div class="col">
+                        <label>Nombre de partants déclarés :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('partants')}" readonly>
+                    </div>
+                    <div class="col">
+                        <label>Heure de départ :</label>
+                        <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('heure')}" readonly>
+                    </div>
+                </div>
             </div>
-            <div class="col">
-                <label>Heure de départ :</label>
-                <input type="text" value="{DONNEES_QUINTE_DU_JOUR.get('heure')}" readonly>
-            </div>
-        </div>
-    </div>
 
-    <div class="block">
-        <h3 style="color: #38bdf8; margin-top: 0;">2. INDICATEURS DE CONTRÔLE DE LA BASE GLOBALE</h3>
-        <p>Analyse effectuée sur un historique de <strong>{len(HISTORIQUE_SGE_DATA)}</strong> courses.</p>
-        <h4>TOP 3 des chevaux les plus fréquents :</h4>
-        <ul>{stats_html}</ul>
-    </div>
-</body>
-</html>
-"""
+            <!-- 2. INDICATEURS DE CONTRÔLE -->
+            <div class="block">
+                <h3 style="color: #38bdf8; margin-top: 0; border-bottom: 2px solid #38bdf8; padding-bottom: 8px;">2. INDICATEURS DE CONTRÔLE DE LA BASE GLOBALE</h3>
+                <p>Analyse effectuée sur un historique de <strong>{len(HISTORIQUE_SGE_DATA)}</strong> courses.</p>
+                <h4>TOP 3 des chevaux les plus fréquents :</h4>
+                <ul>{stats_html}</ul>
+            </div>
+
+            <!-- 3. SIMULATEUR MATHÉMATIQUE SGE -->
+            <div class="block">
+                <h3 style="color: #64ffda; margin-top: 0; border-bottom: 2px solid #64ffda; padding-bottom: 8px;">3. SIMULATEUR MATHÉMATIQUE SGE</h3>
+                <p>Saisissez une combinaison de référence (5 chevaux entre 1 et 16) pour évaluer sa résonance d'axes.</p>
+                
+                <form action="/calculer-sge" method="post">
+                    <div class="row">
+                        <div class="col"><label>Ch 1</label><input type="number" name="c1" class="input-combo" min="1" max="16" required></div>
+                        <div class="col"><label>Ch 2</label><input type="number" name="c2" class="input-combo" min="1" max="16" required></div>
+                        <div class="col"><label>Ch 3</label><input type="number" name="c3" class="input-combo" min="1" max="16" required></div>
+                        <div class="col"><label>Ch 4</label><input type="number" name="c4" class="input-combo" min="1" max="16" required></div>
+                        <div class="col"><label>Ch 5</label><input type="number" name="c5" class="input-combo" min="1" max="16" required></div>
+                    </div>
+                    <button type="submit" class="btn btn-orange">🧮 Lancer l'analyse SGE</button>
+                </form>
+            </div>
+        </body>
+    </html>
+    """
     return HTMLResponse(content=content)
+
+
+@app.post("/calculer-sge", response_class=HTMLResponse)
+async def traiter_simulation_sge(
+    c1: int = Form(...),
+    c2: int = Form(...),
+    c3: int = Form(...),
+    c4: int = Form(...),
+    c5: int = Form(...),
+):
+    """
+    Intercepte les 5 chevaux saisis dans le simulateur, calcule le score SGE
+    et génère le pronostic automatique optimal associé.
+    """
+    combinaison_saisie = [c1, c2, c3, c4, c5]
     
+    # Calculs algorithmiques via vos fonctions SGE existantes
+    score_combinaison = calculer_score_sge(combinaison_saisie)
+    pronostic_optimal = generer_prono_automatique(combinaison_saisie)
+    score_optimal = calculer_score_sge(pronostic_optimal)
+    
+    content = f"""
+    <html>
+        <head>
+            <title>Résultats Analyse SGE</title>
+            <style>
+                body {{ 
+                    background-image: url('{IMAGE_URL}'); 
+                    background-size: cover; 
+                    background-attachment: fixed;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    color: white; 
+                    margin: 0;
+                    padding: 40px;
+                    text-align: center;
+                }}
+                .box {{ 
+                    background: rgba(16, 24, 48, 0.95); 
+                    padding: 40px; 
+                    border-radius: 12px; 
+                    border: 1px solid #233554; 
+
+max-width: 650px;
+margin: 40px auto;
+box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+}}
+.highlight {{ color: #64ffda; font-size: 26px; font-weight: bold; }}
+.orange {{ color: #ff9f1c; font-size: 26px; font-weight: bold; }}
+.btn-back {{
+display: inline-block;
+padding: 12px 24px;
+background: #38bdf8;
+color: white;
+border-radius: 20px;
+text-decoration: none;
+margin-top: 25px;
+font-weight: bold;
+box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}}
+
+
+
+
+Résultats de la Simulation SGE
+Combinaison analysée : {combinaison_saisie}
+Score de résonance d'axes : {score_combinaison} pts
+Optimisation Automatique
+Meilleur pronostic calculé : {pronostic_optimal}
+Score du pronostic optimal : {score_optimal} pts
+← Retour au Simulateur
+
+"""
+return HTMLResponse(content=content)
+@app.post("/actualiser")
+async def clic_robot_manuel():
+"""
+Intercepte l'appel POST déclenché par l'un des boutons de l'interface.
+Force le scraping immédiat des API PMU puis redirige vers la page d'accueil.
+"""
+executer_scraping_quotidien(mode="CLIC_MANUEL_INTERFACE")
+return RedirectResponse(url="/", status_code=303)
+
+=====================================================================
+
+
+--- INITIALISATION AU LANCEMENT DE L'APPLICATION --------------------
+
+
+=====================================================================
+
+@app.on_event("startup")
+async def startup_event():
+"""
+S'exécute automatiquement lors de l'initialisation du serveur Uvicorn.
+Restaure la session précédente ou force un rafraîchissement.
+"""
+charger_donnees_locales()
+if DONNEES_QUINTE_DU_JOUR["partants"] == 0:
+executer_scraping_quotidien(mode="INITIALISATION_SERVEUR")    
