@@ -7,6 +7,7 @@ from itertools import combinations
 from datetime import datetime as _datetime
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
+from extraction import obtenir_quinte_du_jour
 
 app = FastAPI()
 
