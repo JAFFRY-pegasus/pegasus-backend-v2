@@ -2,3 +2,4 @@
    uvicorn
    requests
    python-multipart
+   apscheduler==3.10.4
