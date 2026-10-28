@@ -81,6 +81,15 @@ def extraire_general_quinte():
 
     return donnees_generales
 
+
+# =====================================================================
+# ALIAS DE COMPATIBILITÉ POUR LE MOTEUR PRINCIPAL (main.py)
+# =====================================================================
+# Lie l'ancien nom attendu par main.py à la nouvelle logique épurée
+obtenir_quinte_du_jour = extraire_general_quinte
+# =====================================================================
+
+
 if __name__ == "__main__":
     # Test local de l'extraction
     resultat = extraire_general_quinte()
