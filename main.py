@@ -93,7 +93,7 @@ def calculer_score_sge(combinaison):
 def generer_prono_automatique(combinaison_ref):
     valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 16]
     if len(valides) < 5:
-        # CORRECTION : La liste par défaut a été réintégrée proprement sans coupure
+        # La liste par défaut est maintenant complète et fermée
         liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16]
         complements = [n for n in liste_defaut if n not in valides]
         valides = (valides + complements)[:5]
