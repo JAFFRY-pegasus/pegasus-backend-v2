@@ -16,7 +16,6 @@ from itertools import combinations
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 
 # Importations des modules locaux
 from historique import HISTORIQUE_SGE_DATA
@@ -31,7 +30,6 @@ templates = Jinja2Templates(directory="templates")
 FICHIER_SAUVEGARDE = "quinte_du_jour.json"
 
 # État global en mémoire pour les chevaux actuellement sélectionnés par l'utilisateur
-# Initialisé avec une combinaison de référence par défaut
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
 
 # Structure de mémoire globale pour l'affichage de l'interface utilisateur
@@ -95,8 +93,10 @@ def calculer_score_sge(combinaison):
 def generer_prono_automatique(combinaison_ref):
     valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 16]
     if len(valides) < 5:
-        complements = [n for n in [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16] if n not in valides]
+        liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16]
+        complements = [n for n in liste_defaut if n not in valides]
         valides = (valides + complements)[:5]
+    
     opposes = [OPPOSITIONS_VERTICALES[n] for n in valides if n in OPPOSITIONS_VERTICALES]
     candidats = list(dict.fromkeys(valides + opposes))
     
@@ -106,7 +106,11 @@ def generer_prono_automatique(combinaison_ref):
         scores_candidats.append((score, list(combo)))
     
     scores_candidats.sort(key=lambda x: x[0], reverse=True)
-    return [str(x) for x in scores_candidats[0][1]] if scores_candidats else [str(x) for x in valides[:5]]
+    
+    if scores_candidats:
+        return [str(x) for x in scores_candidats[0][1]]
+    else:
+        return [str(x) for x in valides[:5]]
 
 # =====================================================================
 # --- ROUTES DE L'APPLICATION -----------------------------------------
@@ -149,7 +153,7 @@ def dashboard(request: Request):
     jetons = {
         "presse": [n.strip() for n in info_quinte["synthese_presse"].split("-") if n.strip()],
         "pegasus": prono_pegasus,
-        "arrivee": ["4", "5", "9", "10", "11"],  # Remplacé par les vrais résultats de l'extraction si dispo
+        "arrivee": ["4", "5", "9", "10", "11"],
         "retenus": COMBINAISON_SELECTIONNEE
     }
 
@@ -184,10 +188,9 @@ def dashboard(request: Request):
 @app.post("/calculer")
 def calculer(combinaison_utilisateur: str = Form(...)):
     global COMBINAISON_SELECTIONNEE
-    # Nettoie et fragmente la chaîne reçue (ex: "13 - 6 - 5" -> ["13", "6", "5"])
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
     if extraits:
-        COMBINAISON_SELECTIONNEE = extraits[:8]  # Limite de 5 à 8 chevaux
+        COMBINAISON_SELECTIONNEE = extraits[:8]
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
@@ -209,7 +212,6 @@ def reinitialiser():
 
 @app.post("/actualiser")
 def actualiser():
-    # Ici se connectera votre fonction executer_scraping_quotidien(mode="Manuel")
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/relancer")
