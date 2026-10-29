@@ -9,12 +9,12 @@
 <body class="bg-[#0f1112] min-h-screen flex items-center justify-center p-4">
 
     <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-md mx-auto rounded-xl p-4 font-sans shadow-2xl select-none text-[13px]">
-      
+
       <!-- EN-TÊTE -->
       <div class="text-center my-4">
         <h1 class="text-2xl font-serif font-black text-[#f1a934] tracking-wide uppercase">PEGASUS QUINTÉ</h1>
         <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique d'aide au Pilotage Quinté</p>
-        
+
         <div class="bg-[#1f2225] border border-[#2d3238] rounded-lg p-2.5 my-3 text-left text-[11px] text-[#98a2b3] leading-relaxed shadow-sm">
           Ce robot de PEGASUS permet de donner des pistes d'orientation de jeux sur un historique de données géométriques fondé sur des stratégies géométriques ciblées. Les résultats ne sont en aucun cas des certitudes de gains.
         </div>
@@ -43,7 +43,7 @@
           <span class="inline-block w-2 h-2 rounded-full bg-[#2ecc71] {% if statut_robot == 'Actif' %}animate-pulse{% endif %}"></span>
           {{ message_statut }}
         </div>
-        
+
         <div class="space-y-2">
           <div>
             <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Date de la course :</label>
@@ -105,7 +105,7 @@
         </div>
       </div>
 
-      <!-- BLOC 2 : SYNTHÈSE PMU -->
+      <!-- BLOC 2 : SYNTHÈSE PMU ET PRONOSTIC -->
       <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
         <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-1.5">
           2. SYNTHÈSE PMU ET PRONOSTIC PEGASUS OPTIMISÉ POUR {{ info_quinte.nb_partants }} PARTANT(S) RÉEL(S) AU QUINTÉ
@@ -193,13 +193,13 @@
 
         <div class="grid grid-cols-4 gap-1.5 mb-3">
           {% for i in range(1, 17) %}
-          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2 rounded font-mono font-bold text-xs transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934]{% endif %}">
+          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2 rounded font-mono font-bold text-xs transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149]{% endif %}">
             {{ i }}
           </a>
           {% endfor %}
         </div>
 
-        <form action="/reinitialiser" method="POST" class="inline">
+        <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2 px-4 rounded text-[11px] transition uppercase tracking-wider shadow">
             RÉINITIALISER LA GRILLE
           </button>
