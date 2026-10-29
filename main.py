@@ -5,56 +5,128 @@
 main.py
 Moteur SGE unifié avec API FastAPI et gestion hybride du robot (Automatique + Clic Manuel)
 Projet : pegasus-backend-v2
-Version : 2.1 — Correction déploiement Render (chemins absolus, port dynamique, diagnostic)
+Version : 2.2 — Diagnostic de démarrage Render
 """
 
+import sys
 import os
 import traceback
-from collections import Counter
-from itertools import combinations
 
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
+# =====================================================================
+# DIAGNOSTIC DE DÉMARRAGE IMMÉDIAT
+# =====================================================================
+print("=" * 60, flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2", flush=True)
+print("=" * 60, flush=True)
+print(f"Python version: {sys.version}", flush=True)
+print(f"Current Working Directory: {os.getcwd()}", flush=True)
+print(f"Fichier courant: {__file__}", flush=True)
+print("=" * 60, flush=True)
 
-# ---------------------------------------------------------------------
-# IMPORTS DES MODULES LOCAUX
-# ---------------------------------------------------------------------
-from historique import HISTORIQUE_SGE_DATA
+# Vérification des fichiers critiques
+CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
+print(f"\n📂 Contenu de {CHEMIN_BASE}:", flush=True)
+try:
+    fichiers = os.listdir(CHEMIN_BASE)
+    for f in sorted(fichiers):
+        chemin_complet = os.path.join(CHEMIN_BASE, f)
+        if os.path.isdir(chemin_complet):
+            print(f"  📁 [DIR]  {f}/", flush=True)
+        else:
+            taille = os.path.getsize(chemin_complet)
+            print(f"  📄 [FILE] {f} ({taille} bytes)", flush=True)
+except Exception as e:
+    print(f"  ❌ Erreur listage: {e}", flush=True)
 
-# Import défensif : si extraction.py (ou ses dépendances) est absent ou
-# cassé sur le serveur, l'application démarre quand même au lieu de crasher.
+print("\n🔍 Vérification des fichiers critiques...", flush=True)
+
+fichiers_critiques = {
+    "main.py": os.path.join(CHEMIN_BASE, "main.py"),
+    "historique.py": os.path.join(CHEMIN_BASE, "historique.py"),
+    "extraction.py": os.path.join(CHEMIN_BASE, "extraction.py"),
+    "templates/": os.path.join(CHEMIN_BASE, "templates"),
+    "templates/index.html": os.path.join(CHEMIN_BASE, "templates", "index.html"),
+}
+
+for nom, chemin in fichiers_critiques.items():
+    existe = os.path.exists(chemin)
+    statut = "✅" if existe else "❌ MANQUANT"
+    print(f"  {statut} {nom} -> {chemin}", flush=True)
+    if not existe:
+        print(f"    ⚠️  Le fichier {nom} est ABSENT du serveur !", flush=True)
+
+print("\n" + "=" * 60, flush=True)
+print("📦 IMPORT DES DÉPENDANCES EXTERNES...", flush=True)
+print("=" * 60, flush=True)
+
+try:
+    from fastapi import FastAPI, Form, Request
+    from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+    from fastapi.templating import Jinja2Templates
+    print("✅ FastAPI importé avec succès", flush=True)
+except Exception as e:
+    print(f"❌ ERREUR import FastAPI: {e}", flush=True)
+    traceback.print_exc()
+    sys.exit(1)
+
+print("\n" + "=" * 60, flush=True)
+print("📦 IMPORT DES MODULES LOCAUX...", flush=True)
+print("=" * 60, flush=True)
+
+# Import historique.py
+print("\n1️⃣  Import de historique.py...", flush=True)
+try:
+    from historique import HISTORIQUE_SGE_DATA
+    print(f"   ✅ historique.py importé - {len(HISTORIQUE_SGE_DATA)} courses", flush=True)
+except Exception as e:
+    print(f"   ❌ ERREUR import historique.py: {e}", flush=True)
+    traceback.print_exc()
+    sys.exit(1)
+
+# Import extraction.py (optionnel mais utile)
+print("\n2️⃣  Import de extraction.py...", flush=True)
 try:
     from extraction import obtenir_quinte_du_jour
+    print("   ✅ extraction.py importé", flush=True)
     EXTRACTION_DISPONIBLE = True
     ERREUR_EXTRACTION = None
-except Exception as _e:  # noqa: BLE001
+except Exception as e:
+    print(f"   ⚠️  extraction.py non disponible: {e}", flush=True)
+    print("   ℹ️  Ce n'est pas bloquant, l'app continue sans extraction dynamique", flush=True)
     obtenir_quinte_du_jour = None
     EXTRACTION_DISPONIBLE = False
-    ERREUR_EXTRACTION = f"{type(_e).__name__}: {_e}"
+    ERREUR_EXTRACTION = f"{type(e).__name__}: {e}"
 
-# ---------------------------------------------------------------------
-# CHEMINS ABSOLUS — INDISPENSABLE SUR RENDER (le CWD peut varier)
-# ---------------------------------------------------------------------
-CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
+print("\n" + "=" * 60, flush=True)
+print("⚙️  CONFIGURATION DU SERVEUR...", flush=True)
+print("=" * 60, flush=True)
+
+# Configuration des chemins
 CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
+print(f"📁 Dossier templates: {CHEMIN_TEMPLATES}", flush=True)
+print(f"   Existe: {os.path.isdir(CHEMIN_TEMPLATES)}", flush=True)
 
+if os.path.isdir(CHEMIN_TEMPLATES):
+    contenu = os.listdir(CHEMIN_TEMPLATES)
+    print(f"   Contenu: {contenu}", flush=True)
+
+# Initialisation FastAPI
+print("\n🚀 Initialisation de l'application FastAPI...", flush=True)
 app = FastAPI(title="Pegasus Backend v2")
 
-# Configuration du dossier des templates Jinja2 (chemin absolu)
+# Configuration Jinja2
+print("🎨 Configuration Jinja2...", flush=True)
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
+print("   ✅ Templates configurés", flush=True)
 
-# Mode diagnostic : DEBUG=1 dans les variables d'environnement Render
-# affiche le traceback complet dans le navigateur en cas d'erreur.
-DEBUG = os.environ.get("DEBUG", "0") == "1"
+# Mode debug
+DEBUG = os.environ.get("DEBUG", "1") == "1"
+print(f"🐛 Mode DEBUG: {'ACTIVÉ' if DEBUG else 'désactivé'}", flush=True)
 
-# Configuration des ressources graphiques
+# Configuration des ressources
 FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
-
-# État global en mémoire pour les chevaux actuellement sélectionnés
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
 
-# Structure de mémoire globale pour l'affichage de l'interface utilisateur
 DONNEES_QUINTE_DU_JOUR = {
     "hippodrome": "DEA",
     "discipline": "Inconnue",
@@ -67,9 +139,9 @@ DONNEES_QUINTE_DU_JOUR = {
     "statut_robot": "Actif"
 }
 
-# =====================================================================
-# --- CONFIGURATIONS ET MATRICES DU MOTEUR SGE -----------------------
-# =====================================================================
+print("\n" + "=" * 60, flush=True)
+print("🧮 INITIALISATION DU MOTEUR SGE...", flush=True)
+print("=" * 60, flush=True)
 
 OPPOSITIONS_VERTICALES = {
     1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
@@ -80,22 +152,31 @@ COEFFICIENTS_RESONANCE = {
     0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0
 }
 
-# =====================================================================
-# --- LOGIQUE ALGORITHMIQUE SGE ---------------------------------------
-# =====================================================================
+print("✅ Matrices SGE configurées", flush=True)
 
-def calculer_poids_axes():
-    frequence_axes = Counter()
-    for course in HISTORIQUE_SGE_DATA:
-        arr = course["arrivee"]
-        for num in arr:
-            oppose = OPPOSITIONS_VERTICALES.get(num)
-            if oppose and oppose in arr:
-                axe = tuple(sorted([num, oppose]))
-                frequence_axes[axe] += 1
-    return {axe: freq // 2 for axe, freq in frequence_axes.items()}
+# Calcul des poids historiques
+print("\n📊 Calcul des poids historiques...", flush=True)
+try:
+    from collections import Counter
+    from itertools import combinations
+    
+    def calculer_poids_axes():
+        frequence_axes = Counter()
+        for course in HISTORIQUE_SGE_DATA:
+            arr = course["arrivee"]
+            for num in arr:
+                oppose = OPPOSITIONS_VERTICALES.get(num)
+                if oppose and oppose in arr:
+                    axe = tuple(sorted([num, oppose]))
+                    frequence_axes[axe] += 1
+        return {axe: freq // 2 for axe, freq in frequence_axes.items()}
 
-POIDS_AXES_HISTORIQUE = calculer_poids_axes()
+    POIDS_AXES_HISTORIQUE = calculer_poids_axes()
+    print(f"   ✅ {len(POIDS_AXES_HISTORIQUE)} axes historiques calculés", flush=True)
+except Exception as e:
+    print(f"   ❌ ERREUR calcul poids: {e}", flush=True)
+    traceback.print_exc()
+    sys.exit(1)
 
 def calculer_score_sge(combinaison):
     score_brut = 0
@@ -134,13 +215,12 @@ def generer_prono_automatique(combinaison_ref):
     else:
         return [str(x) for x in valides[:5]]
 
-# =====================================================================
-# --- GESTION DES ERREURS & DIAGNOSTIC --------------------------------
-# =====================================================================
+print("\n" + "=" * 60, flush=True)
+print("🌐 DÉFINITION DES ROUTES...", flush=True)
+print("=" * 60, flush=True)
 
 @app.exception_handler(Exception)
 async def erreur_non_geree(request: Request, exc: Exception):
-    """Capture TOUTES les erreurs non gérées et affiche le traceback si DEBUG=1."""
     trace = traceback.format_exc()
     if DEBUG:
         return HTMLResponse(
@@ -148,19 +228,16 @@ async def erreur_non_geree(request: Request, exc: Exception):
             status_code=500
         )
     return HTMLResponse(
-        "Internal Server Error. (Mode production : activez DEBUG=1 sur Render "
-        "ou consultez les logs pour voir le traceback.)",
+        "Internal Server Error. Activez DEBUG=1 sur Render pour voir le traceback.",
         status_code=500
     )
 
 @app.get("/health")
 def health():
-    """Route de santé : permet de vérifier que le serveur tourne."""
     return {"status": "ok", "debug": DEBUG, "nb_courses": len(HISTORIQUE_SGE_DATA)}
 
 @app.get("/debug")
 def debug():
-    """Route de diagnostic : montre ce que voit le serveur Render."""
     dossier_ok = os.path.isdir(CHEMIN_TEMPLATES)
     return JSONResponse({
         "cwd_serveur": os.getcwd(),
@@ -175,18 +252,12 @@ def debug():
         "debug_active": DEBUG,
     })
 
-# =====================================================================
-# --- ROUTES DE L'APPLICATION -----------------------------------------
-# =====================================================================
-
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     global COMBINAISON_SELECTIONNEE, DONNEES_QUINTE_DU_JOUR
 
-    # 1. Calcul automatique du pronostic Pegasus sur la base de la combinaison choisie
     prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE)
 
-    # 2. Extraction des statistiques du Top chevaux depuis l'historique
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
@@ -201,7 +272,6 @@ def dashboard(request: Request):
             "pourcentage": round((count / total_courses) * 100, 1) if total_courses else 0.0
         })
 
-    # 3. Préparation des structures attendues par index.html
     info_quinte = {
         "date": DONNEES_QUINTE_DU_JOUR.get("date", "Lundi 19 octobre 2026"),
         "hippodrome": DONNEES_QUINTE_DU_JOUR.get("hippodrome", "INCONNU"),
@@ -220,7 +290,6 @@ def dashboard(request: Request):
         "retenus": COMBINAISON_SELECTIONNEE
     }
 
-    # Calcul des scores géométriques
     combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
     score_pegasus = calculer_score_sge([int(n) for n in prono_pegasus])
     score_combinaison = calculer_score_sge(combo_int) if len(combo_int) == 5 else 0
@@ -275,16 +344,22 @@ def reinitialiser():
 
 @app.post("/actualiser")
 def actualiser():
-    # Point d'extension : si extraction.py est disponible, on pourra ici
-    # rafraîchir DONNEES_QUINTE_DU_JOUR via obtenir_quinte_du_jour().
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/relancer")
 def relancer():
     return RedirectResponse(url="/", status_code=303)
 
+print("\n" + "=" * 60, flush=True)
+print("✅ INITIALISATION TERMINÉE AVEC SUCCÈS", flush=True)
+print("=" * 60, flush=True)
+
+print("\n🚀 Démarrage du serveur uvicorn...", flush=True)
+print(f"   Port: {os.environ.get('PORT', '5000')}", flush=True)
+print(f"   Host: 0.0.0.0", flush=True)
+print("=" * 60, flush=True)
+
 if __name__ == '__main__':
     import uvicorn
-    # Render injecte la variable d'environnement PORT : toujours la respecter
     port = int(os.environ.get("PORT", 5000))
     uvicorn.run(app, host='0.0.0.0', port=port)
