@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pegasus Quinté - Dashboard</title>
-    <!-- Chargement de Tailwind CSS pour le rendu exact des styles -->
-    <script src="https://tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0f1112] min-h-screen flex items-center justify-center p-4">
 
-    <!-- CONTENEUR PRINCIPAL PEGASUS QUINTÉ -->
     <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-md mx-auto rounded-xl p-4 font-sans shadow-2xl select-none text-[13px]">
       
-      <!-- EN-TÊTE DE L'APPLICATION -->
+      <!-- EN-TÊTE -->
       <div class="text-center my-4">
         <h1 class="text-2xl font-serif font-black text-[#f1a934] tracking-wide uppercase">PEGASUS QUINTÉ</h1>
         <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique d'aide au Pilotage Quinté</p>
@@ -21,7 +19,6 @@
           Ce robot de PEGASUS permet de donner des pistes d'orientation de jeux sur un historique de données géométriques fondé sur des stratégies géométriques ciblées. Les résultats ne sont en aucun cas des certitudes de gains.
         </div>
 
-        <!-- Actions du Robot -->
         <div class="flex justify-center gap-2 mt-3">
           <form action="/actualiser" method="POST" class="inline">
             <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-[10px] font-bold py-1.5 px-3 rounded shadow uppercase tracking-wider flex items-center gap-1 transition">
@@ -36,13 +33,12 @@
         </div>
       </div>
 
-      <!-- BLOC 1 : INFORMATIONS SUR LE QUINTÉ DU JOUR -->
+      <!-- BLOC 1 : INFOS QUINTÉ -->
       <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
         <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2.5 border-b border-[#2d3238] pb-1.5">
           1. INFORMATIONS SUR LE QUINTÉ DU JOUR
         </h2>
 
-        <!-- Bandeau vert de statut -->
         <div class="bg-[#142320] border border-[#165a4c] rounded p-2 mb-3 text-[#2ecc71] font-semibold text-[11px] flex items-center gap-1.5">
           <span class="inline-block w-2 h-2 rounded-full bg-[#2ecc71] {% if statut_robot == 'Actif' %}animate-pulse{% endif %}"></span>
           {{ message_statut }}
@@ -50,7 +46,7 @@
         
         <div class="space-y-2">
           <div>
-            <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Date de la course (automatique) :</label>
+            <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Date de la course :</label>
             <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded text-[#2ecc71] font-mono font-bold text-[12px]">{{ info_quinte.date }}</div>
           </div>
 
@@ -78,7 +74,7 @@
 
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Nombre de partants déclarés :</label>
+              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Nombre de partants :</label>
               <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono">{{ info_quinte.nb_partants }}</div>
             </div>
             <div>
@@ -109,14 +105,13 @@
         </div>
       </div>
 
-      <!-- BLOC 2 : SYNTHÈSE PMU ET PRONOSTIC PEGASUS -->
+      <!-- BLOC 2 : SYNTHÈSE PMU -->
       <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
         <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-1.5">
           2. SYNTHÈSE PMU ET PRONOSTIC PEGASUS OPTIMISÉ POUR {{ info_quinte.nb_partants }} PARTANT(S) RÉEL(S) AU QUINTÉ
         </h2>
         <p class="text-[10px] text-[#98a2b3] mb-3 leading-tight">Le moteur Pegasus analyse les {{ stats.historique_courses }} dernières arrivées pour identifier les axes géométriques récurrents.</p>
 
-        <!-- Jetons ronds -->
         <div class="space-y-3">
           <div>
             <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Synthèse Presse / Favoris :</span>
@@ -146,14 +141,12 @@
           </div>
         </div>
 
-        <!-- Zone Taux de Réussite -->
         <div class="bg-[#121416] border border-[#2d3238] rounded-lg p-2 text-center my-3 shadow-inner">
           <div class="text-[9px] uppercase font-bold tracking-wider text-[#98a2b3]">Réussite du pronostic Pegasus :</div>
           <div class="text-3xl font-black text-[#2ecc71] my-0.5 font-mono">{{ stats.taux_reussite }} %</div>
           <div class="text-[9px] text-[#6c757d]">(Statistiques sur les {{ stats.nb_dernieres_courses }} dernières courses de ce niveau)</div>
         </div>
 
-        <!-- Combinaison retenue -->
         <div class="mb-3">
           <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Combinaison retenue / choisie :</span>
           <div class="flex gap-1.5 font-mono">
@@ -168,38 +161,56 @@
             <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Pondération Pronostic Pegasus</div>
             <div class="text-base font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
           </div>
+          <div class="bg-[#121416]/40 p-2 rounded border border-[#2d3238]">
+            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Pondération Combinaison</div>
+            <div class="text-base font-black text-[#3498db] font-mono">{{ stats.ponderation_combinaison }} pts</div>
+          </div>
+        </div>
+      </div>
 
-Pondération Combinaison
-{{ stats.ponderation_combinaison }} pts
+      <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
+      <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
+        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">
+          3. TEST DE VISION GÉOMÉTRIQUE (GRILLE 1-16)
+        </h2>
+        <p class="text-[10px] text-[#98a2b3] mb-3">Cliquez sur les numéros de la grille pour composer instantanément votre combinaison.</p>
 
+        <div class="bg-[#121416] border border-[#2d3238] rounded p-2 mb-3 text-center">
+          <div class="text-[10px] text-[#98a2b3] mb-1">Chevaux trouvés en moyenne dans le top 5 historique :</div>
+          <div class="text-lg font-bold text-[#f1a934] font-mono">{{ stats.moyenne_chevaux_trouves }} chevaux</div>
+          <div class="text-[10px] text-[#98a2b3]">{{ stats.niveau_performance }}</div>
+        </div>
 
-3. TEST DE VISION GÉOMÉTRIQUE (GRILLE 1-16)
+        <div class="bg-[#1a1f26] p-2 rounded border border-[#2b3542] mb-3">
+          <div class="text-[10px] text-[#98a2b3] mb-1.5">📢 À ce jour, les chevaux les plus fréquents dans le top 5 :</div>
+          <div class="space-y-1">
+            {% for top in stats.top_chevaux_frequents %}
+            <div class="text-[10px] text-gray-300">n°{{ top.numero }} (×{{ top.occurrences }} fois — {{ top.pourcentage }}%)</div>
+            {% endfor %}
+          </div>
+          <div class="text-[9px] text-[#6c757d] mt-1.5">Moyenne sur {{ stats.historique_courses }} courses</div>
+        </div>
 
-Cliquez sur les numéros de la grille pour composer instantanément votre combinaison.
-Chevaux trouvés en moyenne dans le top 5 historique :
+        <div class="grid grid-cols-4 gap-1.5 mb-3">
+          {% for i in range(1, 17) %}
+          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2 rounded font-mono font-bold text-xs transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934]{% endif %}">
+            {{ i }}
+          </a>
+          {% endfor %}
+        </div>
 
-{{ stats.moyenne_chevaux_trouves }} chevaux — {{ stats.niveau_performance }}
+        <form action="/reinitialiser" method="POST" class="inline">
+          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2 px-4 rounded text-[11px] transition uppercase tracking-wider shadow">
+            RÉINITIALISER LA GRILLE
+          </button>
+        </form>
+      </div>
 
-📢 À ce jour, les chevaux les plus fréquents avec justesse dans le top 5 sont :
-
-
-{% for top in stats.top_chevaux_frequents %}
-
-n°{{ top.numero }} (X{{ top.occurrences }} fois — {{ top.pourcentage }}%)
-
-{% endfor %}
-
-
-Moyenne sur {{ stats.historique_courses }} courses
-
-{% for i in range(1, 17) %}
-
-{{ i }}
-
-{% endfor %}
-RÉINITIALISER LA GRILLE
-
-
-⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le 09 74 75 13 13 (appel non surtaxé en France) ou consultez le site internet officiel de soutien : joueurs-info-service.fr
-
-PEGASUS est un outil d'analyse statistique et géométrique à visée purement indicative ; il ne garantit aucun gain face aux jeux de hasard.
+      <!-- FOOTER -->
+      <div class="text-center text-[9px] text-[#6c757d] mt-4 space-y-1.5">
+        <p>⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le <span class="font-bold">09 74 75 13 13</span> (appel non surtaxé) ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline" target="_blank">joueurs-info-service.fr</a></p>
+        <p class="italic">PEGASUS est un outil d'analyse statistique et géométrique à visée purement indicative ; il ne garantit aucun gain face aux jeux de hasard.</p>
+      </div>
+    </div>
+</body>
+</html>
