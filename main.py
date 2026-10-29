@@ -5,40 +5,62 @@
 main.py
 Moteur SGE unifié avec API FastAPI et gestion hybride du robot (Automatique + Clic Manuel)
 Projet : pegasus-backend-v2
+Version : 2.1 — Correction déploiement Render (chemins absolus, port dynamique, diagnostic)
 """
 
-import json
 import os
-from datetime import datetime as _datetime
+import traceback
 from collections import Counter
 from itertools import combinations
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-# Importations des modules locaux
+# ---------------------------------------------------------------------
+# IMPORTS DES MODULES LOCAUX
+# ---------------------------------------------------------------------
 from historique import HISTORIQUE_SGE_DATA
-from extraction import obtenir_quinte_du_jour
 
-app = FastAPI()
+# Import défensif : si extraction.py (ou ses dépendances) est absent ou
+# cassé sur le serveur, l'application démarre quand même au lieu de crasher.
+try:
+    from extraction import obtenir_quinte_du_jour
+    EXTRACTION_DISPONIBLE = True
+    ERREUR_EXTRACTION = None
+except Exception as _e:  # noqa: BLE001
+    obtenir_quinte_du_jour = None
+    EXTRACTION_DISPONIBLE = False
+    ERREUR_EXTRACTION = f"{type(_e).__name__}: {_e}"
 
-# Configuration du dossier des templates Jinja2
-templates = Jinja2Templates(directory="templates")
+# ---------------------------------------------------------------------
+# CHEMINS ABSOLUS — INDISPENSABLE SUR RENDER (le CWD peut varier)
+# ---------------------------------------------------------------------
+CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
+CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
+
+app = FastAPI(title="Pegasus Backend v2")
+
+# Configuration du dossier des templates Jinja2 (chemin absolu)
+templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
+
+# Mode diagnostic : DEBUG=1 dans les variables d'environnement Render
+# affiche le traceback complet dans le navigateur en cas d'erreur.
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
 # Configuration des ressources graphiques
-FICHIER_SAUVEGARDE = "quinte_du_jour.json"
+FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
 
-# État global en mémoire pour les chevaux actuellement sélectionnés par l'utilisateur
+# État global en mémoire pour les chevaux actuellement sélectionnés
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
 
 # Structure de mémoire globale pour l'affichage de l'interface utilisateur
 DONNEES_QUINTE_DU_JOUR = {
-    "hippodrome": "DEA", 
-    "discipline": "Inconnue", 
-    "distance": 1900, 
-    "nb_partants": 16, 
-    "heure_depart": "13:55", 
+    "hippodrome": "DEA",
+    "discipline": "Inconnue",
+    "distance": 1900,
+    "nb_partants": 16,
+    "heure_depart": "13:55",
     "nom_course": "PRIX DE LA FORET DE LYONS",
     "date": "Lundi 19 octobre 2026",
     "synthese_presse": "13 - 8 - 10 - 4 - 16 - 6 - 5 - 12",
@@ -93,25 +115,65 @@ def calculer_score_sge(combinaison):
 def generer_prono_automatique(combinaison_ref):
     valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 16]
     if len(valides) < 5:
-        # La liste par défaut est maintenant complète et fermée
         liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16]
         complements = [n for n in liste_defaut if n not in valides]
         valides = (valides + complements)[:5]
-    
+
     opposes = [OPPOSITIONS_VERTICALES[n] for n in valides if n in OPPOSITIONS_VERTICALES]
     candidats = list(dict.fromkeys(valides + opposes))
-    
+
     scores_candidats = []
     for combo in combinations(candidats, 5):
         score = calculer_score_sge(list(combo))
         scores_candidats.append((score, list(combo)))
-    
+
     scores_candidats.sort(key=lambda x: x[0], reverse=True)
-    
+
     if scores_candidats:
         return [str(x) for x in scores_candidats[0][1]]
     else:
         return [str(x) for x in valides[:5]]
+
+# =====================================================================
+# --- GESTION DES ERREURS & DIAGNOSTIC --------------------------------
+# =====================================================================
+
+@app.exception_handler(Exception)
+async def erreur_non_geree(request: Request, exc: Exception):
+    """Capture TOUTES les erreurs non gérées et affiche le traceback si DEBUG=1."""
+    trace = traceback.format_exc()
+    if DEBUG:
+        return HTMLResponse(
+            f"<h1>Erreur 500 — Mode DEBUG</h1><pre style='white-space:pre-wrap'>{trace}</pre>",
+            status_code=500
+        )
+    return HTMLResponse(
+        "Internal Server Error. (Mode production : activez DEBUG=1 sur Render "
+        "ou consultez les logs pour voir le traceback.)",
+        status_code=500
+    )
+
+@app.get("/health")
+def health():
+    """Route de santé : permet de vérifier que le serveur tourne."""
+    return {"status": "ok", "debug": DEBUG, "nb_courses": len(HISTORIQUE_SGE_DATA)}
+
+@app.get("/debug")
+def debug():
+    """Route de diagnostic : montre ce que voit le serveur Render."""
+    dossier_ok = os.path.isdir(CHEMIN_TEMPLATES)
+    return JSONResponse({
+        "cwd_serveur": os.getcwd(),
+        "chemin_base": CHEMIN_BASE,
+        "chemin_templates": CHEMIN_TEMPLATES,
+        "dossier_templates_existe": dossier_ok,
+        "contenu_templates": os.listdir(CHEMIN_TEMPLATES) if dossier_ok else "DOSSIER INTROUVABLE",
+        "racine_projet": os.listdir(CHEMIN_BASE),
+        "nb_courses_historique": len(HISTORIQUE_SGE_DATA),
+        "extraction_disponible": EXTRACTION_DISPONIBLE,
+        "erreur_extraction": ERREUR_EXTRACTION,
+        "debug_active": DEBUG,
+    })
 
 # =====================================================================
 # --- ROUTES DE L'APPLICATION -----------------------------------------
@@ -120,23 +182,23 @@ def generer_prono_automatique(combinaison_ref):
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     global COMBINAISON_SELECTIONNEE, DONNEES_QUINTE_DU_JOUR
-    
+
     # 1. Calcul automatique du pronostic Pegasus sur la base de la combinaison choisie
     prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE)
-    
+
     # 2. Extraction des statistiques du Top chevaux depuis l'historique
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
         for num in course["arrivee"][:5]:
             counter[num] += 1
-            
+
     top_chevaux = []
     for num, count in counter.most_common(3):
         top_chevaux.append({
             "numero": f"{num:02d}",
             "occurrences": count,
-            "pourcentage": round((count / total_courses) * 100, 1)
+            "pourcentage": round((count / total_courses) * 100, 1) if total_courses else 0.0
         })
 
     # 3. Préparation des structures attendues par index.html
@@ -213,6 +275,8 @@ def reinitialiser():
 
 @app.post("/actualiser")
 def actualiser():
+    # Point d'extension : si extraction.py est disponible, on pourra ici
+    # rafraîchir DONNEES_QUINTE_DU_JOUR via obtenir_quinte_du_jour().
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/relancer")
@@ -221,4 +285,6 @@ def relancer():
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=5000)
+    # Render injecte la variable d'environnement PORT : toujours la respecter
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host='0.0.0.0', port=port)
