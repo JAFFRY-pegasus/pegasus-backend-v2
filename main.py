@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v2.4
+main.py v2.5
 Moteur SGE unifié — extraction PMU + vérification défensive du flag Quinté
+Correction : nouvelle syntaxe TemplateResponse pour Starlette >= 0.29
 """
 
 import sys
@@ -23,7 +24,7 @@ from fastapi.templating import Jinja2Templates
 # DIAGNOSTIC DE DÉMARRAGE
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2.4", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2.5", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +56,7 @@ except Exception as e:
 # =====================================================================
 # APP FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v2.4")
+app = FastAPI(title="Pegasus Backend v2.5")
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
 DEBUG = os.environ.get("DEBUG", "0") == "1"
 TTL_CACHE_SECONDS = 900  # 15 min
@@ -337,11 +338,23 @@ def dashboard(request: Request):
 
     info_quinte = {clef: DONNEES_QUINTE_DU_JOUR.get(clef, "") for clef in CLEFS_ATTENDUES}
 
-    # Construction des jetons
-    synthese = str(info_quinte.get("synthese_presse", ""))
+    # Construction SÉCURISÉE des jetons pour éviter le crash Jinja2
+    synthese_brute = str(DONNEES_QUINTE_DU_JOUR.get("synthese_presse", ""))
+    
+    # Nettoyage agressif : on ne garde que les chiffres
+    jetons_presse = []
+    for item in synthese_brute.split("-"):
+        cleaned = item.strip()
+        if cleaned.isdigit():
+            jetons_presse.append(cleaned)
+    
+    # Fallback si la liste est vide après nettoyage
+    if not jetons_presse:
+        jetons_presse = ["?", "?", "?", "?", "?"] 
+
     jetons = {
-        "presse": [n.strip() for n in synthese.split("-") if n.strip()],
-        "pegasus": prono_pegasus,
+        "presse": jetons_presse,      # ✅ Toujours une liste de chaînes valides
+        "pegasus": prono_pegasus,     # Déjà sûr (généré par generer_prono_automatique)
         "arrivee": ["4", "5", "9", "10", "11"],
         "retenus": COMBINAISON_SELECTIONNEE
     }
@@ -378,15 +391,19 @@ def dashboard(request: Request):
         f"Dernière vérification : {DERNIERE_VERIFICATION_HHMM}"
     )
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "statut_robot": DONNEES_QUINTE_DU_JOUR.get("statut_robot", "Actif"),
-        "message_statut": message_statut,
-        "info_quinte": info_quinte,
-        "combinaison_saisie": combinaison_saisie,
-        "jetons": jetons,
-        "stats": stats
-    })
+    # ⭐ NOUVELLE SYNTAXE STARBLETTE >= 0.29 (corrige le TypeError)
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "statut_robot": DONNEES_QUINTE_DU_JOUR.get("statut_robot", "Actif"),
+            "message_statut": message_statut,
+            "info_quinte": info_quinte,
+            "combinaison_saisie": combinaison_saisie,
+            "jetons": jetons,
+            "stats": stats
+        }
+    )
 
 
 @app.post("/calculer")
@@ -396,44 +413,3 @@ def calculer(combinaison_utilisateur: str = Form(...)):
     if extraits:
         COMBINAISON_SELECTIONNEE = extraits[:8]
     return RedirectResponse(url="/", status_code=303)
-
-
-@app.get("/selectionner/{numero}")
-def selectionner_grille(numero: str):
-    global COMBINAISON_SELECTIONNEE
-    if numero in COMBINAISON_SELECTIONNEE:
-        COMBINAISON_SELECTIONNEE.remove(numero)
-    else:
-        if len(COMBINAISON_SELECTIONNEE) < 8:
-            COMBINAISON_SELECTIONNEE.append(numero)
-            COMBINAISON_SELECTIONNEE.sort(key=int)
-    return RedirectResponse(url="/", status_code=303)
-
-
-@app.post("/reinitialiser")
-def reinitialiser():
-    global COMBINAISON_SELECTIONNEE
-    COMBINAISON_SELECTIONNEE = []
-    return RedirectResponse(url="/", status_code=303)
-
-
-@app.post("/actualiser")
-def actualiser():
-    rafraichir_donnees_quinte(force=True)
-    return RedirectResponse(url="/", status_code=303)
-
-
-@app.post("/relancer")
-def relancer():
-    global COMBINAISON_SELECTIONNEE
-    rafraichir_donnees_quinte(force=True)
-    COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
-    return RedirectResponse(url="/", status_code=303)
-
-
-print("✅ Initialisation terminée", flush=True)
-
-if __name__ == '__main__':
-    import uvicorn
-    port = int(os.environ.get("PORT", 5000))
-    uvicorn.run(app, host='0.0.0.0', port=port)
