@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v2.5
-Moteur SGE unifié — extraction PMU + vérification défensive du flag Quinté
-Correction : nouvelle syntaxe TemplateResponse pour Starlette >= 0.29
+main.py v2.6
+Moteur SGE unifié — extraction PMU multi-stratégies + vérification flag Quinté
+Correction finale : routes POST + TemplateResponse Starlette récent
 """
 
 import sys
@@ -24,7 +24,7 @@ from fastapi.templating import Jinja2Templates
 # DIAGNOSTIC DE DÉMARRAGE
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2.5", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2.6", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +56,7 @@ except Exception as e:
 # =====================================================================
 # APP FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v2.5")
+app = FastAPI(title="Pegasus Backend v2.6")
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
 DEBUG = os.environ.get("DEBUG", "0") == "1"
 TTL_CACHE_SECONDS = 900  # 15 min
@@ -74,23 +74,23 @@ def _date_francaise():
 
 
 DONNEES_QUINTE_DU_JOUR = {
-    "hippodrome": "DEA",
+    "hippodrome": "EN ATTENTE",
     "discipline": "Inconnue",
-    "distance": 1900,
-    "nb_partants": 16,
-    "heure_depart": "13:55",
-    "nom_course": "PRIX DE LA FORET DE LYONS",
+    "distance": 0,
+    "nb_partants": 0,
+    "heure_depart": "--:--",
+    "nom_course": "Chargement...",
     "date": _date_francaise(),
-    "synthese_presse": "13 - 8 - 10 - 4 - 16 - 6 - 5 - 12",
+    "synthese_presse": "",
     "statut_robot": "Actif",
-    "isQuinte": True,
-    "numReunion": 1,
-    "numOrdre": 3,
+    "isQuinte": None,
+    "numReunion": None,
+    "numOrdre": None,
 }
 
 DERNIERE_VERIFICATION = 0.0
 DERNIERE_VERIFICATION_HHMM = "--:--"
-FLAG_QUINTE_VALIDE = None  # True / False / None (non vérifié)
+FLAG_QUINTE_VALIDE = None
 
 CLEFS_ATTENDUES = [
     "hippodrome", "discipline", "distance", "nb_partants",
@@ -109,23 +109,23 @@ def _fusionner(nouvelles_donnees):
     if not isinstance(nouvelles_donnees, dict):
         return False
 
-    # ⭐ VÉRIFICATION DU FLAG QUINTÉ
+    # Vérification du flag Quinté
     flag = nouvelles_donnees.get("isQuinte")
     if flag is True:
         FLAG_QUINTE_VALIDE = True
-        print("✅ Flag isQuinte=True confirmé — c'est bien le Quinté du jour", flush=True)
+        print("✅ Flag isQuinte=True confirmé", flush=True)
     elif flag is False:
         FLAG_QUINTE_VALIDE = False
-        print("⚠️ REJET: isQuinte=False — ce n'est PAS le Quinté", flush=True)
+        print("⚠️ REJET: isQuinte=False", flush=True)
         return False
     else:
         FLAG_QUINTE_VALIDE = None
-        print("⚠️ Pas de flag isQuinte détecté — confiance implicite", flush=True)
+        print("⚠️ Pas de flag isQuinte — confiance implicite", flush=True)
 
     maj = False
     for clef in CLEFS_ATTENDUES:
         valeur = nouvelles_donnees.get(clef)
-        if valeur not in (None, "", []):
+        if valeur is not None and valeur != "" and valeur != []:
             DONNEES_QUINTE_DU_JOUR[clef] = valeur
             maj = True
     return maj
@@ -160,7 +160,6 @@ def rafraichir_donnees_quinte(force=False):
         if secours and _fusionner(secours):
             source = "quinte_du_jour.json"
 
-    # Date du jour toujours à jour
     if not DONNEES_QUINTE_DU_JOUR.get("date"):
         DONNEES_QUINTE_DU_JOUR["date"] = _date_francaise()
 
@@ -313,7 +312,7 @@ def debug_extraction():
 
 
 # =====================================================================
-# ROUTES
+# ROUTES PRINCIPALES
 # =====================================================================
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
@@ -338,23 +337,19 @@ def dashboard(request: Request):
 
     info_quinte = {clef: DONNEES_QUINTE_DU_JOUR.get(clef, "") for clef in CLEFS_ATTENDUES}
 
-    # Construction SÉCURISÉE des jetons pour éviter le crash Jinja2
+    # Construction sécurisée des jetons
     synthese_brute = str(DONNEES_QUINTE_DU_JOUR.get("synthese_presse", ""))
-    
-    # Nettoyage agressif : on ne garde que les chiffres
     jetons_presse = []
     for item in synthese_brute.split("-"):
         cleaned = item.strip()
         if cleaned.isdigit():
             jetons_presse.append(cleaned)
-    
-    # Fallback si la liste est vide après nettoyage
     if not jetons_presse:
-        jetons_presse = ["?", "?", "?", "?", "?"] 
+        jetons_presse = ["?", "?", "?", "?", "?"]
 
     jetons = {
-        "presse": jetons_presse,      # ✅ Toujours une liste de chaînes valides
-        "pegasus": prono_pegasus,     # Déjà sûr (généré par generer_prono_automatique)
+        "presse": jetons_presse,
+        "pegasus": prono_pegasus,
         "arrivee": ["4", "5", "9", "10", "11"],
         "retenus": COMBINAISON_SELECTIONNEE
     }
@@ -376,22 +371,22 @@ def dashboard(request: Request):
 
     combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE)
 
-    # Message de statut avec info Quinté
+    # Message de statut
     if FLAG_QUINTE_VALIDE is True:
-        tag_quinte = " • ✅ Quinté vérifié"
+        tag_quinte = "✅ Quinté vérifié"
     elif FLAG_QUINTE_VALIDE is False:
-        tag_quinte = " • ⚠️ PAS un Quinté"
+        tag_quinte = "⚠️ PAS un Quinté"
     else:
-        tag_quinte = " • Quinté non vérifié"
+        tag_quinte = "Quinté non vérifié"
 
     code_pmu = f"R{DONNEES_QUINTE_DU_JOUR.get('numReunion', '?')}C{DONNEES_QUINTE_DU_JOUR.get('numOrdre', '?')}"
     message_statut = (
         f"{tag_quinte} • {code_pmu} • "
-        f"{info_quinte.get('nb_partants', 16)} partants confirmés • "
-        f"Dernière vérification : {DERNIERE_VERIFICATION_HHMM}"
+        f"{info_quinte.get('nb_partants', 0)} partants • "
+        f"Dernière vérif : {DERNIERE_VERIFICATION_HHMM}"
     )
 
-    # ⭐ NOUVELLE SYNTAXE STARBLETTE >= 0.29 (corrige le TypeError)
+    # ⭐ NOUVELLE SYNTAXE STARBLETTE (corrige le TypeError)
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -413,3 +408,46 @@ def calculer(combinaison_utilisateur: str = Form(...)):
     if extraits:
         COMBINAISON_SELECTIONNEE = extraits[:8]
     return RedirectResponse(url="/", status_code=303)
+
+
+@app.get("/selectionner/{numero}")
+def selectionner_grille(numero: str):
+    global COMBINAISON_SELECTIONNEE
+    if numero in COMBINAISON_SELECTIONNEE:
+        COMBINAISON_SELECTIONNEE.remove(numero)
+    else:
+        if len(COMBINAISON_SELECTIONNEE) < 8:
+            COMBINAISON_SELECTIONNEE.append(numero)
+            COMBINAISON_SELECTIONNEE.sort(key=int)
+    return RedirectResponse(url="/", status_code=303)
+
+
+@app.post("/reinitialiser")
+def reinitialiser():
+    global COMBINAISON_SELECTIONNEE
+    COMBINAISON_SELECTIONNEE = []
+    return RedirectResponse(url="/", status_code=303)
+
+
+@app.post("/actualiser")
+def actualiser():
+    print("🔄 Bouton Actualiser cliqué", flush=True)
+    rafraichir_donnees_quinte(force=True)
+    return RedirectResponse(url="/", status_code=303)
+
+
+@app.post("/relancer")
+def relancer():
+    global COMBINAISON_SELECTIONNEE
+    print("🤖 Bouton Relancer cliqué", flush=True)
+    rafraichir_donnees_quinte(force=True)
+    COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
+    return RedirectResponse(url="/", status_code=303)
+
+
+print("✅ Initialisation terminée", flush=True)
+
+if __name__ == '__main__':
+    import uvicorn
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host='0.0.0.0', port=port)
