@@ -39,11 +39,31 @@
           1. INFORMATIONS SUR LE QUINTÉ DU JOUR
         </h2>
 
-        <div class="bg-[#142320] border border-[#165a4c] rounded p-2 mb-3 text-[#2ecc71] font-semibold text-[11px] flex items-center gap-1.5">
-          <span class="inline-block w-2 h-2 rounded-full bg-[#2ecc71] {% if statut_robot == 'Actif' %}animate-pulse{% endif %}"></span>
+        <!-- Bandeau de statut dynamique -->
+        <div class="{% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}bg-[#2a1f1f] border-[#5a2a2a]{% else %}bg-[#142320] border-[#165a4c]{% endif %} border rounded p-2 mb-3 {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}text-[#fca5a5]{% else %}text-[#2ecc71]{% endif %} font-semibold text-[11px] flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}bg-[#fca5a5]{% else %}bg-[#2ecc71] animate-pulse{% endif %}"></span>
           {{ message_statut }}
         </div>
 
+        <!-- FORMULAIRE MANUEL (Affiché uniquement si API HS) -->
+        {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}
+        <div class="bg-[#2a1f1f] border border-[#5a2a2a] rounded p-3 mb-3">
+            <p class="text-[#fca5a5] text-[11px] mb-2 font-bold">⚠️ API PMU Indisponible - Saisie Manuelle Requise</p>
+            <form action="/saisie-manuelle" method="POST" class="space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" name="hippodrome" value="{{ info_quinte.hippodrome }}" placeholder="Hippodrome (ex: VINCENNES)" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
+                    <input type="text" name="nom_course" value="{{ info_quinte.nom_course }}" placeholder="Nom Course" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" name="nb_partants" value="{{ info_quinte.nb_partants }}" placeholder="Partants" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
+                    <input type="text" name="heure_depart" value="{{ info_quinte.heure_depart }}" placeholder="Heure (HH:MM)" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
+                </div>
+                <button type="submit" class="w-full bg-[#f1a934] hover:bg-[#d48c21] text-black font-bold py-1.5 rounded text-[11px] uppercase">Valider les infos manuelles</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- AFFICHAGE DES DONNÉES (Standard) -->
         <div class="space-y-2">
           <div>
             <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Date de la course :</label>
