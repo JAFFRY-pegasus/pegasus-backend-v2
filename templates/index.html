@@ -11,29 +11,39 @@
         .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb:hover { background: #999; }
    
-  /* Harmonisation du widget Boturfers avec votre thème sombre */
-  iframe[src*="boturfers"], 
-  .boturfers-widget, 
-  table[class*="boturfers"],
-  #boturfers-widget-container table {
+  /* Harmonisation du texte brut injecté par le widget Boturfers */
+  .widget-scroll,
+  .widget-scroll table {
     background-color: #121416 !important;
     color: #e3e6e8 !important;
-    border-color: #2a2d31 !important;
+    border-collapse: collapse;
+    width: 100%;
   }
 
-  #boturfers-widget-container th,
-  table[class*="boturfers"] th {
+  /* Style des lignes de titres du tableau (ex: N°, Cheval, Jockey...) */
+  .widget-scroll th {
     background-color: #0f1112 !important;
-    color: #f97316 !important; /* Orange de votre application */
+    color: #f1a934 !important; /* Jaune/Orange Pegasus */
+    font-weight: bold;
+    padding: 8px;
+    border-bottom: 2px solid #2d3238 !important;
   }
 
-  #boturfers-widget-container td,
-  table[class*="boturfers"] td {
+  /* Style des cellules (les partants, entraîneurs...) */
+  .widget-scroll td {
     background-color: #121416 !important;
     color: #e3e6e8 !important;
-    border-bottom: 1px solid #2a2d31 !important;
+    padding: 6px 8px;
+    border-bottom: 1px solid #2d3238 !important;
   }
-    
+
+  /* Sécurité pour le texte brut qui se trouverait en dehors du tableau */
+  .widget-scroll div, 
+  .widget-scroll p,
+  .widget-scroll {
+    color: #e3e6e8 !important;
+  }
+
     </style>
 </head>
 <body class="bg-[#0f1112] min-h-screen p-4 md:p-8">
@@ -71,7 +81,8 @@
             <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR
           </h3>
           
-          <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
+             <div class="bg-[#121416] rounded-lg overflow-x-auto widget-scroll border border-[#2d3238] shadow-inner w-full">
+
              <div class="min-w-[320px] w-full p-2">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
