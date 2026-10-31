@@ -10,6 +10,30 @@
         .widget-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb:hover { background: #999; }
+   
+  /* Harmonisation du widget Boturfers avec votre thème sombre */
+  iframe[src*="boturfers"], 
+  .boturfers-widget, 
+  table[class*="boturfers"],
+  #boturfers-widget-container table {
+    background-color: #121416 !important;
+    color: #e3e6e8 !important;
+    border-color: #2a2d31 !important;
+  }
+
+  #boturfers-widget-container th,
+  table[class*="boturfers"] th {
+    background-color: #0f1112 !important;
+    color: #f97316 !important; /* Orange de votre application */
+  }
+
+  #boturfers-widget-container td,
+  table[class*="boturfers"] td {
+    background-color: #121416 !important;
+    color: #e3e6e8 !important;
+    border-bottom: 1px solid #2a2d31 !important;
+  }
+    
     </style>
 </head>
 <body class="bg-[#0f1112] min-h-screen p-4 md:p-8">
