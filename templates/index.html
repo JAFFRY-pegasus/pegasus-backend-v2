@@ -44,33 +44,26 @@
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
           <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR (PARTANTS / ARRIVÉE / DEMAIN)
+            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR
           </h3>
-          
           <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
              <div class="min-w-[320px] w-full p-2">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
-          <p class="text-[9px] text-[#6c757d] mt-2 text-right italic opacity-70">Widget mis à jour automatiquement au fil de la journée</p>
         </div>
       </div>
 
-      <!-- BLOC MOTEUR PEGASUS (PRONOSTICS & GRILLE) -->
+      <!-- BLOC MOTEUR PEGASUS -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-base font-bold text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS
         </h2>
         
-        <p class="text-xs text-[#98a2b3] mb-6 leading-relaxed">
-          Le moteur analyse {{ stats.historique_courses }} courses historiques pour identifier les axes récurrents et générer un pronostic optimisé.
-        </p>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Colonne Gauche : Pronostic & Stats -->
             <div class="space-y-6">
-                <!-- Pronostic Pegasus -->
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-xs text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
                   <div class="flex flex-wrap gap-3">
@@ -80,43 +73,59 @@
                   </div>
                 </div>
 
-                <!-- Score & Stats -->
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-[10px] text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
                       <div class="text-3xl font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-[10px] text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite Hist.</div>
+                      <div class="text-[10px] text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
                       <div class="text-3xl font-black text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
                   </div>
                 </div>
             </div>
 
-            <!-- Colonne Droite : Saisie & Combinaison -->
+            <!-- Colonne Droite : VOTRE NOUVEAU SYSTÈME DE SAISIE -->
             <div class="space-y-6">
-                <!-- Saisie Combinaison Utilisateur (CORRIGÉE) -->
-                <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-                    <label class="text-xs text-[#60a5fa] block mb-3 font-bold uppercase">💡 Votre combinaison (5 à 8 chevaux) :</label>
-                    <form action="/calculer" method="POST" class="flex gap-3">
+                
+                <!-- Conteneur principal de l'encart réorganisé (Adapté au thème Pegasus) -->
+                <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
+                  
+                  <label class="text-[#4ba3e3] font-bold text-sm uppercase block mb-3">
+                    💡 Votre combinaison (5 à 8 chevaux) :
+                  </label>
+
+                  <!-- Formulaire englobant pour envoyer les données au serveur -->
+                  <form action="/calculer" method="POST" class="flex flex-col gap-3">
+                      
+                      <!-- Input de saisie -->
                       <input 
                         type="text" 
-                        id="combinaison-input"
-                        name="combinaison_utilisateur" 
-                        value="{{ combinaison_saisie }}" 
-                        placeholder="Ex: 6-9-11-7-1-4" 
-                        maxlength="23"
-                        class="flex-1 bg-[#121416] border border-[#3b82f6] p-3 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner text-base"
+                        id="combinaison-input" 
+                        name="combinaison_utilisateur"
+                        value="{{ combinaison_saisie }}"
+                        placeholder="Ex: 13 - 6 - 5 - 12 - 11" 
+                        class="w-full p-3 text-lg font-bold text-center border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition"
                         autocomplete="off"
-                      >
-                      <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-3 px-6 rounded text-xs transition uppercase tracking-wider shadow-md whitespace-nowrap">
-                          Calculer
+                      />
+
+                      <!-- Message d'avertissement masqué par défaut -->
+                      <div id="warning-msg" class="text-[#ff4d4d] text-xs font-bold hidden transition-all duration-300 text-center">
+                        ⚠️ Ne pas dépasser 8 numéros
+                      </div>
+
+                      <span class="text-[#7a8292] text-xs text-center -mt-1">
+                        Saisissez les numéros, les tirets s'insèrent automatiquement.
+                      </span>
+
+                      <!-- Bouton "Calculer" (Type submit pour envoyer le formulaire) -->
+                      <button type="submit" id="btn-calculer" class="w-full p-3 text-base font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
+                        Calculer
                       </button>
-                    </form>
-                    <p class="text-[9px] text-[#6c757d] mt-2 text-center opacity-70">Saisissez les numéros, les tirets s'insèrent automatiquement (max 8 chevaux)</p>
+                  </form>
                 </div>
 
-                <!-- Combinaison Retenue -->
+                <!-- Combinaison Retenue (Affichage) -->
                 <div>
                   <span class="text-xs text-[#98a2b3] block mb-3 font-medium uppercase">Combinaison retenue :</span>
                   <div class="flex gap-2 font-mono flex-wrap bg-[#121416]/30 p-3 rounded border border-[#2d3238] min-h-[50px] items-center">
@@ -130,7 +139,6 @@
                   </div>
                 </div>
             </div>
-
         </div>
       </div>
 
@@ -139,8 +147,6 @@
         <h2 class="text-base font-bold text-[#f1a934] uppercase tracking-widest mb-4">
           🎯 SÉLECTION RAPIDE (GRILLE 1-16)
         </h2>
-        <p class="text-xs text-[#98a2b3] mb-6">Cliquez sur un numéro pour l'ajouter ou le retirer de votre combinaison.</p>
-
         <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-3 mb-6">
           {% for i in range(1, 17) %}
           <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-110 shadow-[0_0_15px_rgba(241,169,52,0.3)]{% endif %}">
@@ -148,7 +154,6 @@
           </a>
           {% endfor %}
         </div>
-
         <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-xs transition uppercase tracking-wider shadow-lg">
             🗑️ Réinitialiser la sélection
@@ -158,99 +163,76 @@
 
       <!-- FOOTER -->
       <div class="text-center text-[10px] text-[#6c757d] mt-8 space-y-3 pb-6 border-t border-[#2d3238] pt-6">
-        <p>⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le <span class="font-bold text-[#98a2b3]">09 74 75 13 13</span> (appel non surtaxé) ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline hover:text-[#3b82f6]" target="_blank">joueurs-info-service.fr</a></p>
-        <p class="italic opacity-70">PEGASUS est un outil d'analyse statistique et géométrique à visée purement indicative ; il ne garantit aucun gain face aux jeux de hasard.</p>
+        <p>⚠️ Jouer comporte des risques. Pour être aidé, appelez le <span class="font-bold text-[#98a2b3]">09 74 75 13 13</span> ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline" target="_blank">joueurs-info-service.fr</a></p>
       </div>
     </div>
 
-    <!-- SCRIPT AUTO-FORMATAGE CORRIGÉ -->
+    <!-- VOTRE SCRIPT DE FORMATAGE (Intégré et sécurisé) -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
+        const warning = document.getElementById('warning-msg');
         if (!input) return;
-        
-        let isDeleting = false;
-        
-        // Détecter la suppression
-        input.addEventListener('keydown', function(e) {
-            isDeleting = (e.key === 'Backspace' || e.key === 'Delete');
-        });
-        
+
         input.addEventListener('input', function(e) {
-            let value = this.value;
-            
-            // Vérifier si l'utilisateur a déjà mis des tirets
-            let hasDashes = value.includes('-');
-            
-            let numbers = [];
-            
-            if (hasDashes) {
-                // L'utilisateur contrôle la saisie : respecter ses tirets
-                let parts = value.split(/[^0-9]+/).filter(p => p.length > 0);
-                for (let part of parts) {
-                    let num = parseInt(part);
-                    if (num >= 1 && num <= 16 && numbers.length < 8) {
-                        numbers.push(num);
-                    }
-                }
-            } else {
-                // Auto-formatage : chaque chiffre = un numéro (1-9)
-                let digits = value.replace(/[^0-9]/g, '');
-                for (let i = 0; i < digits.length && numbers.length < 8; i++) {
-                    let num = parseInt(digits[i]);
-                    if (num >= 1 && num <= 9) {
-                        numbers.push(num);
-                    }
-                }
+          let value = e.target.value;
+          
+          // 1. Extraire uniquement les suites de chiffres
+          let numbers = value.match(/\d+/g) || [];
+          let validatedNumbers = [];
+          let showWarning = false;
+
+          for (let i = 0; i < numbers.length; i++) {
+            let numStr = numbers[i];
+            let num = parseInt(numStr, 10);
+
+            if (isNaN(num) || num === 0) continue;
+
+            // Si le nombre dépasse 20, on conserve uniquement le premier chiffre
+            if (num > 20) {
+              numStr = numStr.substring(0, 1);
+              num = parseInt(numStr, 10);
             }
-            
-            // Formater avec des tirets
-            let formatted = numbers.join('-');
-            
-            // Sauvegarder l'ancienne longueur
-            const oldLength = this.value.length;
-            
-            // Mettre à jour la valeur
-            this.value = formatted;
-            
-            // Positionner le curseur APRÈS le dernier numéro saisi
-            if (isDeleting) {
-                // En mode suppression, ajuster la position
-                const diff = oldLength - formatted.length;
-                const cursorPos = Math.max(0, this.selectionStart - diff);
-                this.setSelectionRange(cursorPos, cursorPos);
-            } else {
-                // En mode saisie, curseur à la fin (après le dernier numéro)
-                this.setSelectionRange(formatted.length, formatted.length);
+
+            // Gestion de la limite stricte de 8 numéros
+            if (validatedNumbers.length >= 8) {
+              showWarning = true;
+              break; 
             }
-            
-            isDeleting = false;
+
+            validatedNumbers.push(numStr);
+          }
+
+          // 2. Gestion de l'affichage de l'avertissement
+          if (warning) {
+              warning.style.display = showWarning ? 'block' : 'none';
+          }
+
+          // 3. Reconstruction de la chaîne avec les tirets automatiques " - "
+          if (validatedNumbers.length > 0) {
+            let result = validatedNumbers.join(' - ');
+
+            let lastNum = validatedNumbers[validatedNumbers.length - 1];
+            if (lastNum.length === 2 && !value.endsWith(' ') && !value.endsWith('-') && validatedNumbers.length < 8) {
+              result += ' - ';
+            }
+
+            e.target.value = result;
+          else {
+            e.target.value = '';
+          }
         });
-        
-        // Empêcher les caractères non numériques (sauf tiret)
-        input.addEventListener('keypress', function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/[0-9\-]/.test(char)) {
-                e.preventDefault();
-            }
-        });
-        
-        // Gérer le collage
-        input.addEventListener('paste', function(e) {
+
+        // Empêcher la saisie de caractères non numériques si la limite est atteinte
+        input.addEventListener('keydown', function(e) {
+          let numbers = input.value.match(/\d+/g) || [];
+          if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+            return;
+          }
+          if (numbers.length >= 8 && /\d/.test(e.key)) {
+            if (warning) warning.style.display = 'block';
             e.preventDefault();
-            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            const parts = pastedText.split(/[^0-9]+/).filter(p => p.length > 0);
-            
-            let numbers = [];
-            for (let part of parts) {
-                let num = parseInt(part);
-                if (num >= 1 && num <= 16 && numbers.length < 8) {
-                    numbers.push(num);
-                }
-            }
-            
-            this.value = numbers.join('-');
-            this.setSelectionRange(this.value.length, this.value.length);
+          }
         });
     });
     </script>
