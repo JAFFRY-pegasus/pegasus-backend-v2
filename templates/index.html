@@ -13,211 +13,118 @@
       <!-- EN-TÊTE -->
       <div class="text-center my-4">
         <h1 class="text-2xl font-serif font-black text-[#f1a934] tracking-wide uppercase">PEGASUS QUINTÉ</h1>
-        <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique d'aide au Pilotage Quinté</p>
+        <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique & Données Officielles</p>
 
         <div class="bg-[#1f2225] border border-[#2d3238] rounded-lg p-2.5 my-3 text-left text-[11px] text-[#98a2b3] leading-relaxed shadow-sm">
-          Ce robot de PEGASUS permet de donner des pistes d'orientation de jeux sur un historique de données géométriques fondé sur des stratégies géométriques ciblées. Les résultats ne sont en aucun cas des certitudes de gains.
+          Ce robot combine l'analyse géométrique PEGASUS avec les données officielles en temps réel. Les résultats ne sont en aucun cas des certitudes de gains.
         </div>
 
         <div class="flex justify-center gap-2 mt-3">
           <form action="/actualiser" method="POST" class="inline">
             <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-[10px] font-bold py-1.5 px-3 rounded shadow uppercase tracking-wider flex items-center gap-1 transition">
-              <span>🔄</span> Actualiser les données
+              <span>🔄</span> Actualiser
             </button>
           </form>
           <form action="/relancer" method="POST" class="inline">
             <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-[10px] font-bold py-1.5 px-3 rounded shadow uppercase tracking-wider flex items-center gap-1 transition">
-              <span>🤖</span> Relancer le robot
+              <span>🤖</span> Relancer Robot
             </button>
           </form>
         </div>
       </div>
 
-      <!-- BLOC 1 : INFOS QUINTÉ -->
-      <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
-        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2.5 border-b border-[#2d3238] pb-1.5">
-          1. INFORMATIONS SUR LE QUINTÉ DU JOUR
-        </h2>
-
-        <!-- Bandeau de statut dynamique -->
-        <div class="{% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}bg-[#2a1f1f] border-[#5a2a2a]{% else %}bg-[#142320] border-[#165a4c]{% endif %} border rounded p-2 mb-3 {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}text-[#fca5a5]{% else %}text-[#2ecc71]{% endif %} font-semibold text-[11px] flex items-center gap-1.5">
-          <span class="inline-block w-2 h-2 rounded-full {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}bg-[#fca5a5]{% else %}bg-[#2ecc71] animate-pulse{% endif %}"></span>
-          {{ message_statut }}
+      <!-- BLOC WIDGETS BOTURFERS (CARTES BLANCHES ISOLÉES) -->
+      <div class="space-y-4 mb-6">
+        
+        <!-- Widget 1 : PARTANTS & INFOS COURSE -->
+        <div class="bg-[#1f2225] rounded-lg p-3 border border-[#2d3238] shadow-md">
+          <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">📋 LISTE DES PARTANTS</h3>
+          <!-- Conteneur blanc isolé avec bordure subtile -->
+          <div class="bg-white rounded-lg overflow-hidden shadow-inner border border-gray-200 min-h-[200px]">
+             <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=partant&rxcx=quinte"></script>
+          </div>
         </div>
 
-        <!-- FORMULAIRE MANUEL (Affiché uniquement si API HS) -->
-        {% if info_quinte.statut_robot == 'Mode Manuel' or info_quinte.statut_robot == 'Données Manuelles' %}
-        <div class="bg-[#2a1f1f] border border-[#5a2a2a] rounded p-3 mb-3">
-            <p class="text-[#fca5a5] text-[11px] mb-2 font-bold">⚠️ API PMU Indisponible - Saisie Manuelle Requise</p>
-            <form action="/saisie-manuelle" method="POST" class="space-y-2">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" name="hippodrome" value="{{ info_quinte.hippodrome }}" placeholder="Hippodrome (ex: VINCENNES)" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
-                    <input type="text" name="nom_course" value="{{ info_quinte.nom_course }}" placeholder="Nom Course" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" name="nb_partants" value="{{ info_quinte.nb_partants }}" placeholder="Partants" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
-                    <input type="text" name="heure_depart" value="{{ info_quinte.heure_depart }}" placeholder="Heure (HH:MM)" class="bg-[#121416] border border-[#3a4149] p-1.5 rounded text-white text-[11px] w-full">
-                </div>
-                <button type="submit" class="w-full bg-[#f1a934] hover:bg-[#d48c21] text-black font-bold py-1.5 rounded text-[11px] uppercase">Valider les infos manuelles</button>
-            </form>
+        <!-- Widget 2 : ARRIVÉE / RÉSULTATS -->
+        <div class="bg-[#1f2225] rounded-lg p-3 border border-[#2d3238] shadow-md">
+           <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">🏁 ARRIVÉE OFFICIELLE</h3>
+           <!-- Conteneur blanc isolé avec bordure subtile -->
+           <div class="bg-white rounded-lg overflow-hidden shadow-inner border border-gray-200 min-h-[100px]">
+             <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=arrivee&rxcx=quinte"></script>
+           </div>
         </div>
-        {% endif %}
 
-        <!-- AFFICHAGE DES DONNÉES (Standard) -->
-        <div class="space-y-2">
-          <div>
-            <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Date de la course :</label>
-            <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded text-[#2ecc71] font-mono font-bold text-[12px]">{{ info_quinte.date }}</div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Hippodrome :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono font-bold">{{ info_quinte.hippodrome }}</div>
-            </div>
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Discipline :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded text-[#98a2b3]">{{ info_quinte.discipline }}</div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Nom de la course :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-semibold truncate text-[11px]">{{ info_quinte.nom_course }}</div>
-            </div>
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Distance :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono">{{ info_quinte.distance }}m</div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Nombre de partants :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono">{{ info_quinte.nb_partants }}</div>
-            </div>
-            <div>
-              <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Heure de départ :</label>
-              <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono text-[#f1a934] font-bold">{{ info_quinte.heure_depart }}</div>
-            </div>
-          </div>
-
-          <div class="pt-1.5 border-t border-[#2d3238]/60">
-            <label class="text-[#98a2b3] text-[10px] block mb-0.5 font-medium">Synthèse Presse / Favoris :</label>
-            <div class="bg-[#121416] border border-[#2d3238] p-1.5 rounded font-mono tracking-wider text-gray-300">
-              {{ info_quinte.synthese_presse }}
-            </div>
-          </div>
-
-          <div class="bg-[#1a1f26] p-2 rounded border border-[#2b3542] text-[10px] text-[#60a5fa] leading-normal">
-            💡 <span class="font-medium">Inscrivez ici la combinaison de votre choix de 5 à 8 chevaux, elle générera automatiquement la combinaison optimisée de PEGASUS !</span>
-          </div>
-
-          <form action="/calculer" method="POST">
-            <div class="flex gap-2">
-              <input type="text" name="combinaison_utilisateur" value="{{ combinaison_saisie }}" class="w-full bg-[#121416] border border-[#3b82f6] p-2 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-inner">
-              <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-2 px-4 rounded text-[11px] transition uppercase tracking-wider shadow-md whitespace-nowrap">
-                Calculer
-              </button>
-            </div>
-          </form>
-        </div>
       </div>
 
-      <!-- BLOC 2 : SYNTHÈSE PMU ET PRONOSTIC -->
+      <!-- BLOC MOTEUR PEGASUS (PRONOSTICS & GRILLE) -->
       <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
-        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-1.5">
-          2. SYNTHÈSE PMU ET PRONOSTIC PEGASUS OPTIMISÉ POUR {{ info_quinte.nb_partants }} PARTANT(S) RÉEL(S) AU QUINTÉ
+        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2.5 border-b border-[#2d3238] pb-1.5">
+          ANALYSE GÉOMÉTRIQUE PEGASUS
         </h2>
-        <p class="text-[10px] text-[#98a2b3] mb-3 leading-tight">Le moteur Pegasus analyse les {{ stats.historique_courses }} dernières arrivées pour identifier les axes géométriques récurrents.</p>
+        
+        <p class="text-[10px] text-[#98a2b3] mb-3 leading-tight">
+          Le moteur analyse {{ stats.historique_courses }} courses historiques pour identifier les axes récurrents.
+        </p>
 
-        <div class="space-y-3">
-          <div>
-            <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Synthèse Presse / Favoris :</span>
-            <div class="flex flex-wrap gap-1">
-              {% for cheval in jetons.presse %}
-              <span class="w-6 h-6 {% if loop.first %}bg-[#16a085]{% else %}bg-[#1abc9c]{% endif %} text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm">{{ cheval }}</span>
-              {% endfor %}
-            </div>
-          </div>
-
-          <div>
-            <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Pronostic Pegasus calculé automatiquement :</span>
-            <div class="flex flex-wrap gap-1">
-              {% for cheval in jetons.pegasus %}
-              <span class="w-6 h-6 bg-[#e67e22] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-sm border border-[#f39c12]">{{ cheval }}</span>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-[#121416] border border-[#2d3238] rounded-lg p-2 text-center my-3 shadow-inner">
-          <div class="text-[9px] uppercase font-bold tracking-wider text-[#98a2b3]">Réussite du pronostic Pegasus :</div>
-          <div class="text-3xl font-black text-[#2ecc71] my-0.5 font-mono">{{ stats.taux_reussite }} %</div>
-          <div class="text-[9px] text-[#6c757d]">(Statistiques sur les {{ stats.nb_dernieres_courses }} dernières courses de ce niveau)</div>
-        </div>
-
-        <div class="mb-3">
-          <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Combinaison retenue / choisie :</span>
-          <div class="flex gap-1.5 font-mono">
-            {% for cheval in jetons.retenus %}
-            <span class="px-2.5 py-0.5 bg-[#2d3238] text-white rounded font-bold text-xs border border-[#3a4149]">{{ cheval }}</span>
+        <!-- Pronostic Pegasus -->
+        <div class="mb-4">
+          <span class="text-[10px] text-[#98a2b3] block mb-1.5 font-medium">Pronostic Pegasus calculé :</span>
+          <div class="flex flex-wrap gap-1.5">
+            {% for cheval in jetons.pegasus %}
+            <span class="w-7 h-7 bg-[#e67e22] text-white text-[12px] font-bold rounded-full flex items-center justify-center shadow-sm border border-[#f39c12]">{{ cheval }}</span>
             {% endfor %}
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 mt-3 text-center border-t border-[#2d3238] pt-3">
-          <div class="bg-[#121416]/40 p-2 rounded border border-[#2d3238]">
-            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Pondération Pronostic Pegasus</div>
-            <div class="text-base font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
+        <!-- Score & Stats -->
+        <div class="grid grid-cols-2 gap-2 mb-4">
+          <div class="bg-[#121416]/60 p-2 rounded border border-[#2d3238] text-center">
+            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Score Pegasus</div>
+            <div class="text-lg font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
           </div>
-          <div class="bg-[#121416]/40 p-2 rounded border border-[#2d3238]">
-            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Pondération Combinaison</div>
-            <div class="text-base font-black text-[#3498db] font-mono">{{ stats.ponderation_combinaison }} pts</div>
+          <div class="bg-[#121416]/60 p-2 rounded border border-[#2d3238] text-center">
+            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Taux Réussite</div>
+            <div class="text-lg font-black text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
           </div>
         </div>
-      </div>
 
-      <!-- BLOC 2.5 : ARRIVÉE OFFICIELLE (WIDGET BOTURFERS) -->
-      <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
-        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">
-          ARRIVÉE OFFICIELLE DU QUINTÉ
-        </h2>
-        <p class="text-[10px] text-[#98a2b3] mb-3">Résultats en temps réel via Boturfers.</p>
-        
-        <!-- Conteneur centré pour le widget externe -->
-        <div class="bg-[#ffffff] rounded overflow-hidden min-h-[100px] flex items-center justify-center">
-            <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=arrivee&rxcx=quinte"></script>
+        <!-- Saisie Combinaison Utilisateur -->
+        <div class="bg-[#1a1f26] p-2.5 rounded border border-[#2b3542] mb-3">
+            <label class="text-[10px] text-[#60a5fa] block mb-1.5 font-bold">💡 VOTRE COMBINAISON (5 à 8 chevaux) :</label>
+            <form action="/calculer" method="POST" class="flex gap-2">
+              <input type="text" name="combinaison_utilisateur" value="{{ combinaison_saisie }}" placeholder="Ex: 4-5-9-12-15" class="flex-1 bg-[#121416] border border-[#3b82f6] p-2 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-inner text-sm">
+              <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-2 px-4 rounded text-[10px] transition uppercase tracking-wider shadow-md whitespace-nowrap">
+                Calculer
+              </button>
+            </form>
         </div>
+
+        <!-- Combinaison Retenue -->
+        <div class="mb-4">
+          <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Combinaison retenue :</span>
+          <div class="flex gap-1.5 font-mono flex-wrap">
+            {% if jetons.retenus %}
+                {% for cheval in jetons.retenus %}
+                <span class="px-2.5 py-0.5 bg-[#2d3238] text-white rounded font-bold text-xs border border-[#3a4149]">{{ cheval }}</span>
+                {% endfor %}
+            {% else %}
+                <span class="text-[#6c757d] text-xs italic">Aucune sélection...</span>
+            {% endif %}
+          </div>
+        </div>
+
       </div>
 
       <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
       <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
         <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">
-          3. TEST DE VISION GÉOMÉTRIQUE (GRILLE 1-16)
+          SÉLECTION RAPIDE (GRILLE 1-16)
         </h2>
-        <p class="text-[10px] text-[#98a2b3] mb-3">Cliquez sur les numéros de la grille pour composer instantanément votre combinaison.</p>
-
-        <div class="bg-[#121416] border border-[#2d3238] rounded p-2 mb-3 text-center">
-          <div class="text-[10px] text-[#98a2b3] mb-1">Chevaux trouvés en moyenne dans le top 5 historique :</div>
-          <div class="text-lg font-bold text-[#f1a934] font-mono">{{ stats.moyenne_chevaux_trouves }} chevaux</div>
-          <div class="text-[10px] text-[#98a2b3]">{{ stats.niveau_performance }}</div>
-        </div>
-
-        <div class="bg-[#1a1f26] p-2 rounded border border-[#2b3542] mb-3">
-          <div class="text-[10px] text-[#98a2b3] mb-1.5">📢 À ce jour, les chevaux les plus fréquents dans le top 5 :</div>
-          <div class="space-y-1">
-            {% for top in stats.top_chevaux_frequents %}
-            <div class="text-[10px] text-gray-300">n°{{ top.numero }} (×{{ top.occurrences }} fois — {{ top.pourcentage }}%)</div>
-            {% endfor %}
-          </div>
-          <div class="text-[9px] text-[#6c757d] mt-1.5">Moyenne sur {{ stats.historique_courses }} courses</div>
-        </div>
+        <p class="text-[10px] text-[#98a2b3] mb-3">Cliquez pour ajouter/retirer un cheval de votre combinaison.</p>
 
         <div class="grid grid-cols-4 gap-1.5 mb-3">
           {% for i in range(1, 17) %}
-          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2 rounded font-mono font-bold text-xs transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149]{% endif %}">
+          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2.5 rounded font-mono font-bold text-sm transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934]{% endif %}">
             {{ i }}
           </a>
           {% endfor %}
@@ -225,15 +132,15 @@
 
         <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2 px-4 rounded text-[11px] transition uppercase tracking-wider shadow">
-            RÉINITIALISER LA GRILLE
+            RÉINITIALISER LA SÉLECTION
           </button>
         </form>
       </div>
 
       <!-- FOOTER -->
-      <div class="text-center text-[9px] text-[#6c757d] mt-4 space-y-1.5">
-        <p>⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le <span class="font-bold">09 74 75 13 13</span> (appel non surtaxé) ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline" target="_blank">joueurs-info-service.fr</a></p>
-        <p class="italic">PEGASUS est un outil d'analyse statistique et géométrique à visée purement indicative ; il ne garantit aucun gain face aux jeux de hasard.</p>
+      <div class="text-center text-[9px] text-[#6c757d] mt-4 space-y-1.5 pb-2">
+        <p>⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le <span class="font-bold">09 74 75 13 13</span> ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline" target="_blank">joueurs-info-service.fr</a></p>
+        <p class="italic">PEGASUS est un outil d'analyse indicative ; il ne garantit aucun gain.</p>
       </div>
     </div>
 </body>
