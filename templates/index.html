@@ -8,48 +8,56 @@
 </head>
 <body class="bg-[#0f1112] min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-md mx-auto rounded-xl p-4 font-sans shadow-2xl select-none text-[13px]">
+    <!-- CONTENEUR PRINCIPAL ÉLARGI (max-w-3xl au lieu de max-w-md) -->
+    <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-3xl mx-auto rounded-xl p-6 font-sans shadow-2xl select-none text-[13px]">
 
       <!-- EN-TÊTE -->
       <div class="text-center my-4">
-        <h1 class="text-2xl font-serif font-black text-[#f1a934] tracking-wide uppercase">PEGASUS QUINTÉ</h1>
-        <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique & Données Officielles</p>
+        <h1 class="text-3xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-1">PEGASUS QUINTÉ</h1>
+        <p class="text-[11px] font-medium text-[#adb5bd] italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
 
-        <div class="bg-[#1f2225] border border-[#2d3238] rounded-lg p-2.5 my-3 text-left text-[11px] text-[#98a2b3] leading-relaxed shadow-sm">
-          Ce robot combine l'analyse géométrique PEGASUS avec les données officielles en temps réel. Les résultats ne sont en aucun cas des certitudes de gains.
+        <div class="bg-[#1f2225] border border-[#2d3238] rounded-lg p-3 my-4 text-left text-[11px] text-[#98a2b3] leading-relaxed shadow-sm">
+          Ce robot combine l'analyse géométrique PEGASUS avec les données officielles Boturfers. Les résultats sont indicatifs et ne garantissent aucun gain.
         </div>
 
-        <div class="flex justify-center gap-2 mt-3">
+        <div class="flex justify-center gap-3 mt-4">
           <form action="/actualiser" method="POST" class="inline">
-            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-[10px] font-bold py-1.5 px-3 rounded shadow uppercase tracking-wider flex items-center gap-1 transition">
+            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-[10px] font-bold py-2 px-4 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
               <span>🔄</span> Actualiser
             </button>
           </form>
           <form action="/relancer" method="POST" class="inline">
-            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-[10px] font-bold py-1.5 px-3 rounded shadow uppercase tracking-wider flex items-center gap-1 transition">
+            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-[10px] font-bold py-2 px-4 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
               <span>🤖</span> Relancer Robot
             </button>
           </form>
         </div>
       </div>
 
-      <!-- BLOC WIDGETS BOTURFERS (CARTES BLANCHES ISOLÉES) -->
-      <div class="space-y-4 mb-6">
+      <!-- BLOC WIDGETS BOTURFERS (SCROLLABLE & LARGE) -->
+      <div class="space-y-5 mb-8">
         
         <!-- Widget 1 : PARTANTS & INFOS COURSE -->
-        <div class="bg-[#1f2225] rounded-lg p-3 border border-[#2d3238] shadow-md">
-          <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">📋 LISTE DES PARTANTS</h3>
-          <!-- Conteneur blanc isolé avec bordure subtile -->
-          <div class="bg-white rounded-lg overflow-hidden shadow-inner border border-gray-200 min-h-[200px]">
+        <div class="bg-[#1f2225] rounded-lg p-4 border border-[#2d3238] shadow-md">
+          <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span class="text-base">📋</span> LISTE DES PARTANTS OFFICIELLE
+          </h3>
+          
+          <!-- Conteneur blanc avec scroll horizontal et largeur min garantie -->
+          <div class="bg-white rounded-lg overflow-x-auto shadow-inner border border-gray-200 min-h-[400px] w-full" style="min-width: 600px;">
              <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=partant&rxcx=quinte"></script>
           </div>
+          <p class="text-[9px] text-[#6c757d] mt-2 text-right">↔️ Faites défiler horizontalement si nécessaire</p>
         </div>
 
         <!-- Widget 2 : ARRIVÉE / RÉSULTATS -->
-        <div class="bg-[#1f2225] rounded-lg p-3 border border-[#2d3238] shadow-md">
-           <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">🏁 ARRIVÉE OFFICIELLE</h3>
-           <!-- Conteneur blanc isolé avec bordure subtile -->
-           <div class="bg-white rounded-lg overflow-hidden shadow-inner border border-gray-200 min-h-[100px]">
+        <div class="bg-[#1f2225] rounded-lg p-4 border border-[#2d3238] shadow-md">
+           <h3 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-3 flex items-center gap-2">
+             <span class="text-base">🏁</span> ARRIVÉE & RAPPORTS OFFICIELS
+           </h3>
+           
+           <!-- Conteneur blanc avec scroll horizontal -->
+           <div class="bg-white rounded-lg overflow-x-auto shadow-inner border border-gray-200 min-h-[250px] w-full" style="min-width: 600px;">
              <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=arrivee&rxcx=quinte"></script>
            </div>
         </div>
@@ -57,91 +65,40 @@
       </div>
 
       <!-- BLOC MOTEUR PEGASUS (PRONOSTICS & GRILLE) -->
-      <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
-        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2.5 border-b border-[#2d3238] pb-1.5">
-          ANALYSE GÉOMÉTRIQUE PEGASUS
+      <div class="bg-[#1f2225] rounded-lg p-4 mb-6 border border-[#2d3238] shadow-md">
+        <h2 class="text-sm font-bold text-[#f1a934] uppercase tracking-wider mb-3 border-b border-[#2d3238] pb-2">
+          🔮 ANALYSE GÉOMÉTRIQUE PEGASUS
         </h2>
         
-        <p class="text-[10px] text-[#98a2b3] mb-3 leading-tight">
-          Le moteur analyse {{ stats.historique_courses }} courses historiques pour identifier les axes récurrents.
+        <p class="text-[10px] text-[#98a2b3] mb-4 leading-tight">
+          Le moteur analyse {{ stats.historique_courses }} courses historiques pour identifier les axes récurrents et générer un pronostic optimisé.
         </p>
 
         <!-- Pronostic Pegasus -->
-        <div class="mb-4">
-          <span class="text-[10px] text-[#98a2b3] block mb-1.5 font-medium">Pronostic Pegasus calculé :</span>
-          <div class="flex flex-wrap gap-1.5">
+        <div class="mb-5 bg-[#121416]/50 p-3 rounded border border-[#2d3238]">
+          <span class="text-[10px] text-[#98a2b3] block mb-2 font-medium uppercase">Pronostic Pegasus calculé :</span>
+          <div class="flex flex-wrap gap-2">
             {% for cheval in jetons.pegasus %}
-            <span class="w-7 h-7 bg-[#e67e22] text-white text-[12px] font-bold rounded-full flex items-center justify-center shadow-sm border border-[#f39c12]">{{ cheval }}</span>
+            <span class="w-8 h-8 bg-[#e67e22] text-white text-[13px] font-bold rounded-full flex items-center justify-center shadow-sm border-2 border-[#f39c12]">{{ cheval }}</span>
             {% endfor %}
           </div>
         </div>
 
         <!-- Score & Stats -->
-        <div class="grid grid-cols-2 gap-2 mb-4">
-          <div class="bg-[#121416]/60 p-2 rounded border border-[#2d3238] text-center">
-            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Score Pegasus</div>
-            <div class="text-lg font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="bg-[#121416]/60 p-3 rounded border border-[#2d3238] text-center">
+            <div class="text-[9px] text-[#98a2b3] font-medium mb-1 uppercase">Score Pegasus</div>
+            <div class="text-2xl font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
           </div>
-          <div class="bg-[#121416]/60 p-2 rounded border border-[#2d3238] text-center">
-            <div class="text-[9px] text-[#98a2b3] font-medium mb-0.5">Taux Réussite</div>
-            <div class="text-lg font-black text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
+          <div class="bg-[#121416]/60 p-3 rounded border border-[#2d3238] text-center">
+            <div class="text-[9px] text-[#98a2b3] font-medium mb-1 uppercase">Taux Réussite Hist.</div>
+            <div class="text-2xl font-black text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
           </div>
         </div>
 
         <!-- Saisie Combinaison Utilisateur -->
-        <div class="bg-[#1a1f26] p-2.5 rounded border border-[#2b3542] mb-3">
-            <label class="text-[10px] text-[#60a5fa] block mb-1.5 font-bold">💡 VOTRE COMBINAISON (5 à 8 chevaux) :</label>
+        <div class="bg-[#1a1f26] p-3 rounded border border-[#2b3542] mb-4">
+            <label class="text-[10px] text-[#60a5fa] block mb-2 font-bold uppercase">💡 Votre combinaison (5 à 8 chevaux) :</label>
             <form action="/calculer" method="POST" class="flex gap-2">
-              <input type="text" name="combinaison_utilisateur" value="{{ combinaison_saisie }}" placeholder="Ex: 4-5-9-12-15" class="flex-1 bg-[#121416] border border-[#3b82f6] p-2 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-inner text-sm">
-              <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-2 px-4 rounded text-[10px] transition uppercase tracking-wider shadow-md whitespace-nowrap">
-                Calculer
-              </button>
-            </form>
-        </div>
-
-        <!-- Combinaison Retenue -->
-        <div class="mb-4">
-          <span class="text-[10px] text-[#98a2b3] block mb-1 font-medium">Combinaison retenue :</span>
-          <div class="flex gap-1.5 font-mono flex-wrap">
-            {% if jetons.retenus %}
-                {% for cheval in jetons.retenus %}
-                <span class="px-2.5 py-0.5 bg-[#2d3238] text-white rounded font-bold text-xs border border-[#3a4149]">{{ cheval }}</span>
-                {% endfor %}
-            {% else %}
-                <span class="text-[#6c757d] text-xs italic">Aucune sélection...</span>
-            {% endif %}
-          </div>
-        </div>
-
-      </div>
-
-      <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
-      <div class="bg-[#1f2225] rounded-lg p-3.5 mb-4 border border-[#2d3238] shadow-md">
-        <h2 class="text-xs font-bold text-[#f1a934] uppercase tracking-wider mb-2">
-          SÉLECTION RAPIDE (GRILLE 1-16)
-        </h2>
-        <p class="text-[10px] text-[#98a2b3] mb-3">Cliquez pour ajouter/retirer un cheval de votre combinaison.</p>
-
-        <div class="grid grid-cols-4 gap-1.5 mb-3">
-          {% for i in range(1, 17) %}
-          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-2.5 rounded font-mono font-bold text-sm transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934]{% endif %}">
-            {{ i }}
-          </a>
-          {% endfor %}
-        </div>
-
-        <form action="/reinitialiser" method="POST">
-          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-2 px-4 rounded text-[11px] transition uppercase tracking-wider shadow">
-            RÉINITIALISER LA SÉLECTION
-          </button>
-        </form>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="text-center text-[9px] text-[#6c757d] mt-4 space-y-1.5 pb-2">
-        <p>⚠️ Jouer comporte des risques : endettement, isolement, dépendance. Pour être aidé, appelez le <span class="font-bold">09 74 75 13 13</span> ou consultez <a href="https://www.joueurs-info-service.gouv.fr" class="text-[#60a5fa] underline" target="_blank">joueurs-info-service.fr</a></p>
-        <p class="italic">PEGASUS est un outil d'analyse indicative ; il ne garantit aucun gain.</p>
-      </div>
-    </div>
-</body>
-</html>
+              <input type="text" name="combinaison_utilisateur" value="{{ combinaison_saisie }}" placeholder="Ex: 4-5-9-12-15" class="flex-1 bg-[#121416] border border-[#3b82f6] p-2.5 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner text-sm">
+              <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-2 px
