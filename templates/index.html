@@ -44,7 +44,7 @@
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
           <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-            <span class="text-xl"></span> INFORMATIONS QUINTÉ DU JOUR
+            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR
           </h3>
           
           <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
@@ -99,7 +99,7 @@
                 </div>
             </div>
 
-            <!-- Colonne Droite : Système de saisie -->
+            <!-- Colonne Droite : Système de saisie CORRIGÉ -->
             <div class="space-y-6">
                 
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
@@ -110,22 +110,24 @@
 
                   <form action="/calculer" method="POST" class="flex flex-col gap-3">
                       
+                      <!-- Input CORRIGÉ : text-left au lieu de text-center -->
                       <input 
                         type="text" 
                         id="combinaison-input" 
                         name="combinaison_utilisateur"
                         value="{{ combinaison_saisie }}"
-                        placeholder="Ex: 13 - 6 - 5 - 12 - 11" 
-                        class="w-full p-3 text-lg font-bold text-center border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition"
+                        placeholder="Ex: 13-6-5-12-11-7-1-4" 
+                        maxlength="23"
+                        class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
                         autocomplete="off"
                       />
 
-                      <div id="warning-msg" class="text-[#ff4d4d] text-xs font-bold hidden transition-all duration-300 text-center">
-                        ⚠️ Ne pas dépasser 8 numéros
+                      <div id="warning-msg" class="text-[#ff4d4d] text-xs font-bold hidden transition-all duration-300 text-center mt-1">
+                        ⚠️ Maximum 8 numéros atteints
                       </div>
 
                       <span class="text-[#7a8292] text-xs text-center -mt-1">
-                        Saisissez les numéros, les tirets s'insèrent automatiquement.
+                        Saisissez les numéros (1-16), les tirets s'insèrent automatiquement
                       </span>
 
                       <button type="submit" id="btn-calculer" class="w-full p-3 text-base font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
@@ -175,63 +177,62 @@
       </div>
     </div>
 
-    <!-- SCRIPT DE FORMATAGE -->
+    <!-- SCRIPT SIMPLIFIÉ ET CORRIGÉ -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
         const warning = document.getElementById('warning-msg');
         if (!input) return;
+        
+        console.log('✅ Script de saisie chargé');
 
         input.addEventListener('input', function(e) {
-          let value = e.target.value;
-          let numbers = value.match(/\d+/g) || [];
-          let validatedNumbers = [];
-          let showWarning = false;
-
-          for (let i = 0; i < numbers.length; i++) {
-            let numStr = numbers[i];
-            let num = parseInt(numStr, 10);
-
-            if (isNaN(num) || num === 0) continue;
-
-            if (num > 20) {
-              numStr = numStr.substring(0, 1);
-              num = parseInt(numStr, 10);
+            // Extraire tous les chiffres
+            let digits = this.value.replace(/[^0-9]/g, '');
+            
+            // Construire le tableau de numéros (max 8)
+            let numbers = [];
+            let i = 0;
+            
+            while (i < digits.length && numbers.length < 8) {
+                // Essayer de prendre 2 chiffres pour les nombres 10-16
+                if (i + 1 < digits.length) {
+                    let twoDigits = parseInt(digits.substring(i, i + 2));
+                    if (twoDigits >= 10 && twoDigits <= 16) {
+                        numbers.push(twoDigits);
+                        i += 2;
+                        continue;
+                    }
+                }
+                // Sinon prendre 1 chiffre (1-9)
+                let oneDigit = parseInt(digits[i]);
+                if (oneDigit >= 1 && oneDigit <= 9) {
+                    numbers.push(oneDigit);
+                }
+                i++;
             }
-
-            if (validatedNumbers.length >= 8) {
-              showWarning = true;
-              break; 
+            
+            // Formater avec des tirets
+            let formatted = numbers.join('-');
+            this.value = formatted;
+            
+            // Afficher/masquer l'avertissement
+            if (warning) {
+                warning.style.display = numbers.length >= 8 ? 'block' : 'none';
             }
-
-            validatedNumbers.push(numStr);
-          }
-
-          if (warning) {
-              warning.style.display = showWarning ? 'block' : 'none';
-          }
-
-          if (validatedNumbers.length > 0) {
-            let result = validatedNumbers.join(' - ');
-            let lastNum = validatedNumbers[validatedNumbers.length - 1];
-            if (lastNum.length === 2 && !value.endsWith(' ') && !value.endsWith('-') && validatedNumbers.length < 8) {
-              result += ' - ';
-            }
-            e.target.value = result;
-          } else {
-            e.target.value = '';
-          }
+            
+            // Curseur TOUJOURS à la fin (à gauche visuellement car text-left)
+            this.setSelectionRange(formatted.length, formatted.length);
+            
+            console.log('📝 Formaté:', formatted, '| Chevaux:', numbers.length);
         });
-
-        input.addEventListener('keydown', function(e) {
-          let numbers = input.value.match(/\d+/g) || [];
-          if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-            return;
-          }
-          if (numbers.length >= 8 && /\d/.test(e.key)) {
-            if (warning) warning.style.display = 'block';
-            e.preventDefault();
-          }
+        
+        // Empêcher les caractères non numériques
+        input.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char)) {
+                e.preventDefault();
+            }
         });
     });
     </script>
