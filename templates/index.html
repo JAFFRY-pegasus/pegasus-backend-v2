@@ -44,12 +44,26 @@
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
           <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR
+            <span class="text-xl"></span> INFORMATIONS QUINTÉ DU JOUR
           </h3>
+          
           <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
              <div class="min-w-[320px] w-full p-2">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
+          </div>
+
+          <!-- NOTE EXPLICATIVE SOUS LE WIDGET -->
+          <div class="mt-4 p-3 bg-[#121416]/50 rounded border border-[#2d3238]">
+            <p class="text-xs text-[#98a2b3] leading-relaxed">
+              <span class="font-semibold text-[#adb5bd]">📊 Légende des rapports :</span>
+              <span class="block mt-1">
+                • Tableau de gauche : <span class="text-[#f1a934] font-semibold">Rapports du réseau physique PMU</span> (gains perçus en point de vente)
+              </span>
+              <span class="block">
+                • Tableau de droite : <span class="text-[#1abc9c] font-semibold">Rapports des paris en ligne</span> (gains perçus sur internet)
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -85,20 +99,17 @@
                 </div>
             </div>
 
-            <!-- Colonne Droite : VOTRE NOUVEAU SYSTÈME DE SAISIE -->
+            <!-- Colonne Droite : Système de saisie -->
             <div class="space-y-6">
                 
-                <!-- Conteneur principal de l'encart réorganisé (Adapté au thème Pegasus) -->
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
                   
                   <label class="text-[#4ba3e3] font-bold text-sm uppercase block mb-3">
                     💡 Votre combinaison (5 à 8 chevaux) :
                   </label>
 
-                  <!-- Formulaire englobant pour envoyer les données au serveur -->
                   <form action="/calculer" method="POST" class="flex flex-col gap-3">
                       
-                      <!-- Input de saisie -->
                       <input 
                         type="text" 
                         id="combinaison-input" 
@@ -109,7 +120,6 @@
                         autocomplete="off"
                       />
 
-                      <!-- Message d'avertissement masqué par défaut -->
                       <div id="warning-msg" class="text-[#ff4d4d] text-xs font-bold hidden transition-all duration-300 text-center">
                         ⚠️ Ne pas dépasser 8 numéros
                       </div>
@@ -118,14 +128,12 @@
                         Saisissez les numéros, les tirets s'insèrent automatiquement.
                       </span>
 
-                      <!-- Bouton "Calculer" (Type submit pour envoyer le formulaire) -->
                       <button type="submit" id="btn-calculer" class="w-full p-3 text-base font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
                       </button>
                   </form>
                 </div>
 
-                <!-- Combinaison Retenue (Affichage) -->
                 <div>
                   <span class="text-xs text-[#98a2b3] block mb-3 font-medium uppercase">Combinaison retenue :</span>
                   <div class="flex gap-2 font-mono flex-wrap bg-[#121416]/30 p-3 rounded border border-[#2d3238] min-h-[50px] items-center">
@@ -145,7 +153,7 @@
       <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-base font-bold text-[#f1a934] uppercase tracking-widest mb-4">
-          🎯 SÉLECTION RAPIDE (GRILLE 1-16)
+           SÉLECTION RAPIDE (GRILLE 1-16)
         </h2>
         <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-3 mb-6">
           {% for i in range(1, 17) %}
@@ -156,7 +164,7 @@
         </div>
         <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-xs transition uppercase tracking-wider shadow-lg">
-            🗑️ Réinitialiser la sélection
+            ️ Réinitialiser la sélection
           </button>
         </form>
       </div>
@@ -167,7 +175,7 @@
       </div>
     </div>
 
-    <!-- VOTRE SCRIPT DE FORMATAGE (Intégré et sécurisé) -->
+    <!-- SCRIPT DE FORMATAGE -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
@@ -176,8 +184,6 @@
 
         input.addEventListener('input', function(e) {
           let value = e.target.value;
-          
-          // 1. Extraire uniquement les suites de chiffres
           let numbers = value.match(/\d+/g) || [];
           let validatedNumbers = [];
           let showWarning = false;
@@ -188,13 +194,11 @@
 
             if (isNaN(num) || num === 0) continue;
 
-            // Si le nombre dépasse 20, on conserve uniquement le premier chiffre
             if (num > 20) {
               numStr = numStr.substring(0, 1);
               num = parseInt(numStr, 10);
             }
 
-            // Gestion de la limite stricte de 8 numéros
             if (validatedNumbers.length >= 8) {
               showWarning = true;
               break; 
@@ -203,27 +207,22 @@
             validatedNumbers.push(numStr);
           }
 
-          // 2. Gestion de l'affichage de l'avertissement
           if (warning) {
               warning.style.display = showWarning ? 'block' : 'none';
           }
 
-          // 3. Reconstruction de la chaîne avec les tirets automatiques " - "
           if (validatedNumbers.length > 0) {
             let result = validatedNumbers.join(' - ');
-
             let lastNum = validatedNumbers[validatedNumbers.length - 1];
             if (lastNum.length === 2 && !value.endsWith(' ') && !value.endsWith('-') && validatedNumbers.length < 8) {
               result += ' - ';
             }
-
             e.target.value = result;
-          else {
+          } else {
             e.target.value = '';
           }
         });
 
-        // Empêcher la saisie de caractères non numériques si la limite est atteinte
         input.addEventListener('keydown', function(e) {
           let numbers = input.value.match(/\d+/g) || [];
           if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
