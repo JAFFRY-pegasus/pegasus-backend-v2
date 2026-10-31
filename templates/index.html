@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pegasus Quinté - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Style personnalisé pour la barre de défilement du widget si nécessaire */
+        .widget-scroll::-webkit-scrollbar { height: 6px; }
+        .widget-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+        .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        .widget-scroll::-webkit-scrollbar-thumb:hover { background: #999; }
+    </style>
 </head>
 <body class="bg-[#0f1112] min-h-screen p-4 md:p-8">
 
-    <!-- CONTENEUR PRINCIPAL CENTRÉ -->
+    <!-- CONTENEUR PRINCIPAL -->
     <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none text-[13px] border border-[#2d3238]">
 
-      <!-- EN-TÊTE -->
+      <!-- EN-TÊTE PEGASUS -->
       <div class="text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-2">PEGASUS QUINTÉ</h1>
         <p class="text-sm font-medium text-[#adb5bd] italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
@@ -34,38 +41,22 @@
         </div>
       </div>
 
-      <!-- BLOC WIDGETS BOTURFERS (SCROLL ISOLÉ) -->
-      <div class="space-y-8 mb-10">
-        
-        <!-- Widget 1 : PARTANTS (TABLEAU COMPLET 950px) -->
+      <!-- BLOC WIDGET UNIQUE ÉVOLUTIF BOTURFERS -->
+      <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
           <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-            <span class="text-xl">📋</span> LISTE DES PARTANTS OFFICIELLE
+            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR (PARTANTS / ARRIVÉE / DEMAIN)
           </h3>
           
-          <!-- Conteneur de scroll horizontal isolé -->
-          <div class="w-full overflow-x-auto bg-white rounded shadow-inner border border-gray-300 custom-scrollbar">
-             <!-- Largeur fixe forcée pour garantir toutes les colonnes -->
-             <div style="min-width: 950px; width: 950px;">
-                <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=partant&rxcx=quinte"></script>
+          <!-- Conteneur blanc pour le widget avec scroll horizontal sécurisé -->
+          <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
+             <!-- Le widget s'adapte ici. On lui donne de l'espace mais on protège la page -->
+             <div class="min-w-[320px] w-full p-2">
+                <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
-          <p class="text-[9px] text-[#6c757d] mt-2 text-right italic opacity-70">↔️ Faites défiler horizontalement pour voir toutes les cotes</p>
+          <p class="text-[9px] text-[#6c757d] mt-2 text-right italic opacity-70">Widget mis à jour automatiquement au fil de la journée</p>
         </div>
-
-        <!-- Widget 2 : ARRIVÉE (MÊME TRAITEMENT) -->
-        <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
-           <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-             <span class="text-xl">🏁</span> ARRIVÉE & RAPPORTS OFFICIELS
-           </h3>
-           
-           <div class="w-full overflow-x-auto bg-white rounded shadow-inner border border-gray-300 custom-scrollbar">
-             <div style="min-width: 950px; width: 950px;">
-               <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget1.php?cat=arrivee&rxcx=quinte"></script>
-             </div>
-           </div>
-        </div>
-
       </div>
 
       <!-- BLOC MOTEUR PEGASUS (PRONOSTICS & GRILLE) -->
@@ -165,22 +156,5 @@
       </div>
     </div>
 
-    <!-- Style personnalisé pour la barre de défilement (optionnel mais plus joli) -->
-    <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888; 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555; 
-        }
-    </style>
 </body>
 </html>
