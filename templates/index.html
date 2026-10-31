@@ -6,7 +6,6 @@
     <title>Pegasus Quinté - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Style personnalisé pour la barre de défilement du widget si nécessaire */
         .widget-scroll::-webkit-scrollbar { height: 6px; }
         .widget-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -48,9 +47,7 @@
             <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR (PARTANTS / ARRIVÉE / DEMAIN)
           </h3>
           
-          <!-- Conteneur blanc pour le widget avec scroll horizontal sécurisé -->
           <div class="bg-white rounded-lg overflow-x-auto widget-scroll border border-gray-300 shadow-inner w-full">
-             <!-- Le widget s'adapte ici. On lui donne de l'espace mais on protège la page -->
              <div class="min-w-[320px] w-full p-2">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
@@ -98,15 +95,25 @@
 
             <!-- Colonne Droite : Saisie & Combinaison -->
             <div class="space-y-6">
-                <!-- Saisie Combinaison Utilisateur -->
+                <!-- Saisie Combinaison Utilisateur (AVEC AUTO-FORMATAGE) -->
                 <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
                     <label class="text-xs text-[#60a5fa] block mb-3 font-bold uppercase">💡 Votre combinaison (5 à 8 chevaux) :</label>
                     <form action="/calculer" method="POST" class="flex gap-3">
-                      <input type="text" name="combinaison_utilisateur" value="{{ combinaison_saisie }}" placeholder="Ex: 4-5-9-12-15" class="flex-1 bg-[#121416] border border-[#3b82f6] p-3 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner text-base">
+                      <input 
+                        type="text" 
+                        id="combinaison-input"
+                        name="combinaison_utilisateur" 
+                        value="{{ combinaison_saisie }}" 
+                        placeholder="Ex: 6-9-11-7-1-4" 
+                        maxlength="23"
+                        class="flex-1 bg-[#121416] border border-[#3b82f6] p-3 rounded font-mono font-bold tracking-widest text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner text-base"
+                        autocomplete="off"
+                      >
                       <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white font-extrabold py-3 px-6 rounded text-xs transition uppercase tracking-wider shadow-md whitespace-nowrap">
                           Calculer
                       </button>
                     </form>
+                    <p class="text-[9px] text-[#6c757d] mt-2 text-center opacity-70">Saisissez les numéros, les tirets s'insèrent automatiquement</p>
                 </div>
 
                 <!-- Combinaison Retenue -->
@@ -155,6 +162,113 @@
         <p class="italic opacity-70">PEGASUS est un outil d'analyse statistique et géométrique à visée purement indicative ; il ne garantit aucun gain face aux jeux de hasard.</p>
       </div>
     </div>
+
+    <!-- SCRIPT AUTO-FORMATAGE DE LA COMBINAISON -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('combinaison-input');
+        
+        if (!input) return;
+        
+        input.addEventListener('input', function(e) {
+            // Récupérer la valeur actuelle
+            let value = this.value;
+            
+            // Sauvegarder la position du curseur
+            const cursorPos = this.selectionStart;
+            
+            // Supprimer tout sauf les chiffres
+            let digits = value.replace(/[^0-9]/g, '');
+            
+            // Limiter à 8 numéros (max 2 chiffres par numéro = 16 chiffres)
+            if (digits.length > 16) {
+                digits = digits.substring(0, 16);
+            }
+            
+            // Reconstruire avec des tirets
+            let formatted = '';
+            let numCount = 0;
+            let i = 0;
+            
+            while (i < digits.length && numCount < 8) {
+                // Prendre 1 ou 2 chiffres pour former un numéro
+                let num = '';
+                if (i + 1 < digits.length) {
+                    // Vérifier si les 2 prochains chiffres forment un nombre <= 16
+                    let twoDigits = digits.substring(i, i + 2);
+                    if (parseInt(twoDigits) <= 16 && parseInt(twoDigits) > 0) {
+                        num = twoDigits;
+                        i += 2;
+                    } else {
+                        num = digits[i];
+                        i += 1;
+                    }
+                } else {
+                    num = digits[i];
+                    i += 1;
+                }
+                
+                // Ajouter le numéro
+                if (numCount > 0) {
+                    formatted += '-';
+                }
+                formatted += num;
+                numCount++;
+            }
+            
+            // Mettre à jour la valeur
+            this.value = formatted;
+            
+            // Ajuster la position du curseur
+            const newCursorPos = Math.min(cursorPos, formatted.length);
+            this.setSelectionRange(newCursorPos, newCursorPos);
+        });
+        
+        // Empêcher la saisie de caractères non numériques
+        input.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Gérer le collage (paste)
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = pastedText.replace(/[^0-9]/g, '').substring(0, 16);
+            
+            let formatted = '';
+            let numCount = 0;
+            let i = 0;
+            
+            while (i < digits.length && numCount < 8) {
+                let num = '';
+                if (i + 1 < digits.length) {
+                    let twoDigits = digits.substring(i, i + 2);
+                    if (parseInt(twoDigits) <= 16 && parseInt(twoDigits) > 0) {
+                        num = twoDigits;
+                        i += 2;
+                    } else {
+                        num = digits[i];
+                        i += 1;
+                    }
+                } else {
+                    num = digits[i];
+                    i += 1;
+                }
+                
+                if (numCount > 0) {
+                    formatted += '-';
+                }
+                formatted += num;
+                numCount++;
+            }
+            
+            this.value = formatted;
+        });
+    });
+    </script>
 
 </body>
 </html>
