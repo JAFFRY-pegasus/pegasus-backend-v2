@@ -95,7 +95,7 @@
 
             <!-- Colonne Droite : Saisie & Combinaison -->
             <div class="space-y-6">
-                <!-- Saisie Combinaison Utilisateur (AVEC AUTO-FORMATAGE) -->
+                <!-- Saisie Combinaison Utilisateur (CORRIGÉE) -->
                 <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
                     <label class="text-xs text-[#60a5fa] block mb-3 font-bold uppercase">💡 Votre combinaison (5 à 8 chevaux) :</label>
                     <form action="/calculer" method="POST" class="flex gap-3">
@@ -113,7 +113,7 @@
                           Calculer
                       </button>
                     </form>
-                    <p class="text-[9px] text-[#6c757d] mt-2 text-center opacity-70">Saisissez les numéros, les tirets s'insèrent automatiquement</p>
+                    <p class="text-[9px] text-[#6c757d] mt-2 text-center opacity-70">Saisissez les numéros, les tirets s'insèrent automatiquement (max 8 chevaux)</p>
                 </div>
 
                 <!-- Combinaison Retenue -->
@@ -163,109 +163,94 @@
       </div>
     </div>
 
-    <!-- SCRIPT AUTO-FORMATAGE DE LA COMBINAISON -->
+    <!-- SCRIPT AUTO-FORMATAGE CORRIGÉ -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
-        
         if (!input) return;
         
+        let isDeleting = false;
+        
+        // Détecter la suppression
+        input.addEventListener('keydown', function(e) {
+            isDeleting = (e.key === 'Backspace' || e.key === 'Delete');
+        });
+        
         input.addEventListener('input', function(e) {
-            // Récupérer la valeur actuelle
             let value = this.value;
             
-            // Sauvegarder la position du curseur
-            const cursorPos = this.selectionStart;
+            // Vérifier si l'utilisateur a déjà mis des tirets
+            let hasDashes = value.includes('-');
             
-            // Supprimer tout sauf les chiffres
-            let digits = value.replace(/[^0-9]/g, '');
+            let numbers = [];
             
-            // Limiter à 8 numéros (max 2 chiffres par numéro = 16 chiffres)
-            if (digits.length > 16) {
-                digits = digits.substring(0, 16);
-            }
-            
-            // Reconstruire avec des tirets
-            let formatted = '';
-            let numCount = 0;
-            let i = 0;
-            
-            while (i < digits.length && numCount < 8) {
-                // Prendre 1 ou 2 chiffres pour former un numéro
-                let num = '';
-                if (i + 1 < digits.length) {
-                    // Vérifier si les 2 prochains chiffres forment un nombre <= 16
-                    let twoDigits = digits.substring(i, i + 2);
-                    if (parseInt(twoDigits) <= 16 && parseInt(twoDigits) > 0) {
-                        num = twoDigits;
-                        i += 2;
-                    } else {
-                        num = digits[i];
-                        i += 1;
+            if (hasDashes) {
+                // L'utilisateur contrôle la saisie : respecter ses tirets
+                let parts = value.split(/[^0-9]+/).filter(p => p.length > 0);
+                for (let part of parts) {
+                    let num = parseInt(part);
+                    if (num >= 1 && num <= 16 && numbers.length < 8) {
+                        numbers.push(num);
                     }
-                } else {
-                    num = digits[i];
-                    i += 1;
                 }
-                
-                // Ajouter le numéro
-                if (numCount > 0) {
-                    formatted += '-';
+            } else {
+                // Auto-formatage : chaque chiffre = un numéro (1-9)
+                let digits = value.replace(/[^0-9]/g, '');
+                for (let i = 0; i < digits.length && numbers.length < 8; i++) {
+                    let num = parseInt(digits[i]);
+                    if (num >= 1 && num <= 9) {
+                        numbers.push(num);
+                    }
                 }
-                formatted += num;
-                numCount++;
             }
+            
+            // Formater avec des tirets
+            let formatted = numbers.join('-');
+            
+            // Sauvegarder l'ancienne longueur
+            const oldLength = this.value.length;
             
             // Mettre à jour la valeur
             this.value = formatted;
             
-            // Ajuster la position du curseur
-            const newCursorPos = Math.min(cursorPos, formatted.length);
-            this.setSelectionRange(newCursorPos, newCursorPos);
+            // Positionner le curseur APRÈS le dernier numéro saisi
+            if (isDeleting) {
+                // En mode suppression, ajuster la position
+                const diff = oldLength - formatted.length;
+                const cursorPos = Math.max(0, this.selectionStart - diff);
+                this.setSelectionRange(cursorPos, cursorPos);
+            } else {
+                // En mode saisie, curseur à la fin (après le dernier numéro)
+                this.setSelectionRange(formatted.length, formatted.length);
+            }
+            
+            isDeleting = false;
         });
         
-        // Empêcher la saisie de caractères non numériques
+        // Empêcher les caractères non numériques (sauf tiret)
         input.addEventListener('keypress', function(e) {
             const char = String.fromCharCode(e.which);
-            if (!/[0-9]/.test(char)) {
+            if (!/[0-9\-]/.test(char)) {
                 e.preventDefault();
             }
         });
         
-        // Gérer le collage (paste)
+        // Gérer le collage
         input.addEventListener('paste', function(e) {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            const digits = pastedText.replace(/[^0-9]/g, '').substring(0, 16);
+            const parts = pastedText.split(/[^0-9]+/).filter(p => p.length > 0);
             
-            let formatted = '';
-            let numCount = 0;
-            let i = 0;
-            
-            while (i < digits.length && numCount < 8) {
-                let num = '';
-                if (i + 1 < digits.length) {
-                    let twoDigits = digits.substring(i, i + 2);
-                    if (parseInt(twoDigits) <= 16 && parseInt(twoDigits) > 0) {
-                        num = twoDigits;
-                        i += 2;
-                    } else {
-                        num = digits[i];
-                        i += 1;
-                    }
-                } else {
-                    num = digits[i];
-                    i += 1;
+            let numbers = [];
+            for (let part of parts) {
+                let num = parseInt(part);
+                if (num >= 1 && num <= 16 && numbers.length < 8) {
+                    numbers.push(num);
                 }
-                
-                if (numCount > 0) {
-                    formatted += '-';
-                }
-                formatted += num;
-                numCount++;
             }
             
-            this.value = formatted;
+            this.value = numbers.join('-');
+            this.setSelectionRange(this.value.length, this.value.length);
         });
     });
     </script>
