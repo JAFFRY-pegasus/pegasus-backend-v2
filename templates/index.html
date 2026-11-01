@@ -10,40 +10,11 @@
         .widget-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         .widget-scroll::-webkit-scrollbar-thumb:hover { background: #999; }
-   
-  /* Harmonisation du texte brut injecté par le widget Boturfers */
-  .widget-scroll,
-  .widget-scroll table {
-    background-color: #121416 !important;
-    color: #e3e6e8 !important;
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  /* Style des lignes de titres du tableau (ex: N°, Cheval, Jockey...) */
-  .widget-scroll th {
-    background-color: #0f1112 !important;
-    color: #f1a934 !important; /* Jaune/Orange Pegasus */
-    font-weight: bold;
-    padding: 8px;
-    border-bottom: 2px solid #2d3238 !important;
-  }
-
-  /* Style des cellules (les partants, entraîneurs...) */
-  .widget-scroll td {
-    background-color: #121416 !important;
-    color: #e3e6e8 !important;
-    padding: 6px 8px;
-    border-bottom: 1px solid #2d3238 !important;
-  }
-
-  /* Sécurité pour le texte brut qui se trouverait en dehors du tableau */
-  .widget-scroll div, 
-  .widget-scroll p,
-  .widget-scroll {
-    color: #e3e6e8 !important;
-  }
-
+        
+        /* Homogénéisation des polices */
+        .text-chiffre { font-size: 2rem; font-weight: 900; } /* 32px - comme Score Pegasus */
+        .text-alpha { font-size: 0.75rem; font-weight: 600; } /* 12px - comme Informations Quinté */
+        .text-alpha-sm { font-size: 0.6875rem; font-weight: 500; } /* 11px pour textes secondaires */
     </style>
 </head>
 <body class="bg-[#0f1112] min-h-screen p-4 md:p-8">
@@ -74,30 +45,31 @@
         </div>
       </div>
 
-      <!-- BLOC WIDGET UNIQUE ÉVOLUTIF BOTURFERS -->
+      <!-- BLOC WIDGET BOTURFERS -->
       <div class="mb-10">
-        <div class="bg-[#1f2225] rounded-xl p-6 border border-[#2d3238] shadow-lg">
-          <h3 class="text-sm font-bold text-[#f1a934] uppercase tracking-widest mb-4 flex items-center gap-3 border-b border-[#2d3238] pb-3">
-            <span class="text-xl">🐎</span> INFORMATIONS QUINTÉ DU JOUR
-          </h3>
+        <div class="bg-[#1f2225] rounded-xl p-1 border border-[#2d3238] shadow-lg">
           
-             <div class="bg-[#121416] rounded-lg overflow-x-auto widget-scroll border border-[#2d3238] shadow-inner w-full">
-
-             <div class="min-w-[320px] w-full p-2">
+          <!-- En-tête sombre au-dessus du widget -->
+          <div class="bg-[#1f2225] rounded-t-lg p-4 border-b border-[#2d3238]">
+            <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
+              <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
+            </h3>
+            <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
+          </div>
+          
+          <!-- Conteneur blanc pour le widget (scrollable si nécessaire) -->
+          <div class="bg-white rounded-b-lg overflow-x-auto widget-scroll w-full">
+             <div class="min-w-[320px] w-full p-3">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
 
-          <!-- NOTE EXPLICATIVE SOUS LE WIDGET -->
-          <div class="mt-4 p-3 bg-[#121416]/50 rounded border border-[#2d3238]">
-            <p class="text-xs text-[#98a2b3] leading-relaxed">
-              <span class="font-semibold text-[#adb5bd]">📊 Légende des rapports :</span>
-              <span class="block mt-1">
-                • Tableau de gauche : <span class="text-[#f1a934] font-semibold">Rapports du réseau physique PMU</span> (gains perçus en point de vente)
-              </span>
-              <span class="block">
-                • Tableau de droite : <span class="text-[#1abc9c] font-semibold">Rapports des paris en ligne</span> (gains perçus sur internet)
-              </span>
+          <!-- Note explicative sous le widget -->
+          <div class="mt-3 p-3 bg-[#121416]/50 rounded-lg mx-3 mb-3 border border-[#2d3238]">
+            <p class="text-alpha-sm text-[#98a2b3] leading-relaxed">
+              <span class="font-semibold text-[#adb5bd] block mb-1"> Légende des rapports :</span>
+              <span class="block">• Gauche : <span class="text-[#f1a934] font-semibold">Rapports PMU (points de vente)</span></span>
+              <span class="block">• Droite : <span class="text-[#1abc9c] font-semibold">Rapports Paris en ligne</span></span>
             </p>
           </div>
         </div>
@@ -105,7 +77,7 @@
 
       <!-- BLOC MOTEUR PEGASUS -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
-        <h2 class="text-base font-bold text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
+        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS
         </h2>
         
@@ -114,7 +86,7 @@
             <!-- Colonne Gauche : Pronostic & Stats -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-                  <span class="text-xs text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
+                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
                   <div class="flex flex-wrap gap-3">
                       {% for cheval in jetons.pegasus %}
                       <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
@@ -124,28 +96,27 @@
 
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-[10px] text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
-                      <div class="text-3xl font-black text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
+                      <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
+                      <div class="text-chiffre text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-[10px] text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
-                      <div class="text-3xl font-black text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
+                      <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
+                      <div class="text-chiffre text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
                   </div>
                 </div>
             </div>
 
-            <!-- Colonne Droite : Système de saisie CORRIGÉ -->
+            <!-- Colonne Droite : Système de saisie -->
             <div class="space-y-6">
                 
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
                   
-                  <label class="text-[#4ba3e3] font-bold text-sm uppercase block mb-3">
+                  <label class="text-alpha text-[#4ba3e3] uppercase block mb-3">
                     💡 Votre combinaison (5 à 8 chevaux) :
                   </label>
 
                   <form action="/calculer" method="POST" class="flex flex-col gap-3">
                       
-                      <!-- Input CORRIGÉ : text-left au lieu de text-center -->
                       <input 
                         type="text" 
                         id="combinaison-input" 
@@ -161,7 +132,7 @@
                         ⚠️ Maximum 8 numéros atteints
                       </div>
 
-                      <span class="text-[#7a8292] text-xs text-center -mt-1">
+                      <span class="text-alpha-sm text-[#7a8292] text-center -mt-1 block">
                         Saisissez les numéros (1-16), les tirets s'insèrent automatiquement
                       </span>
 
@@ -172,7 +143,7 @@
                 </div>
 
                 <div>
-                  <span class="text-xs text-[#98a2b3] block mb-3 font-medium uppercase">Combinaison retenue :</span>
+                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase">Combinaison retenue :</span>
                   <div class="flex gap-2 font-mono flex-wrap bg-[#121416]/30 p-3 rounded border border-[#2d3238] min-h-[50px] items-center">
                       {% if jetons.retenus %}
                           {% for cheval in jetons.retenus %}
@@ -189,7 +160,7 @@
 
       <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
-        <h2 class="text-base font-bold text-[#f1a934] uppercase tracking-widest mb-4">
+        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4">
            SÉLECTION RAPIDE (GRILLE 1-16)
         </h2>
         <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-3 mb-6">
@@ -212,25 +183,19 @@
       </div>
     </div>
 
-    <!-- SCRIPT SIMPLIFIÉ ET CORRIGÉ -->
+    <!-- SCRIPT DE SAISIE AUTO-FORMATÉE -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
         const warning = document.getElementById('warning-msg');
         if (!input) return;
-        
-        console.log('✅ Script de saisie chargé');
 
         input.addEventListener('input', function(e) {
-            // Extraire tous les chiffres
             let digits = this.value.replace(/[^0-9]/g, '');
-            
-            // Construire le tableau de numéros (max 8)
             let numbers = [];
             let i = 0;
             
             while (i < digits.length && numbers.length < 8) {
-                // Essayer de prendre 2 chiffres pour les nombres 10-16
                 if (i + 1 < digits.length) {
                     let twoDigits = parseInt(digits.substring(i, i + 2));
                     if (twoDigits >= 10 && twoDigits <= 16) {
@@ -239,7 +204,6 @@
                         continue;
                     }
                 }
-                // Sinon prendre 1 chiffre (1-9)
                 let oneDigit = parseInt(digits[i]);
                 if (oneDigit >= 1 && oneDigit <= 9) {
                     numbers.push(oneDigit);
@@ -247,22 +211,16 @@
                 i++;
             }
             
-            // Formater avec des tirets
             let formatted = numbers.join('-');
             this.value = formatted;
             
-            // Afficher/masquer l'avertissement
             if (warning) {
                 warning.style.display = numbers.length >= 8 ? 'block' : 'none';
             }
             
-            // Curseur TOUJOURS à la fin (à gauche visuellement car text-left)
             this.setSelectionRange(formatted.length, formatted.length);
-            
-            console.log('📝 Formaté:', formatted, '| Chevaux:', numbers.length);
         });
         
-        // Empêcher les caractères non numériques
         input.addEventListener('keypress', function(e) {
             const char = String.fromCharCode(e.which);
             if (!/[0-9]/.test(char)) {
