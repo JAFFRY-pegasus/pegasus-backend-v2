@@ -35,12 +35,16 @@
         }
         
         /* ===== HARMONISATION COULEURS WIDGET BOTURFERS ===== */
+        /* Fond du widget : même gris que le cadre "DONNÉES OFFICIELLES" */
         .widget-dark,
         .widget-dark > div,
-        .widget-dark table {
-            background-color: #2a2d30 !important;
+        .widget-dark table,
+        .widget-dark tr,
+        .widget-dark tbody {
+            background-color: #1f2225 !important;
         }
         
+        /* En-têtes des tableaux : gris moyen avec texte blanc */
         .widget-dark th,
         .widget-dark thead td {
             background-color: #8a8d90 !important;
@@ -48,6 +52,7 @@
             font-weight: bold !important;
         }
         
+        /* Lignes de données : alternance sombre */
         .widget-dark td {
             background-color: #1a1d20 !important;
             color: #e3e6e8 !important;
@@ -58,11 +63,14 @@
             background-color: #25282b !important;
         }
         
+        /* Titres du widget (Arrivée du Quinté, Rapports PMU) : BLEU comme "votre combinaison" */
         .widget-dark h2,
         .widget-dark h3,
-        .widget-dark .title {
-            color: #f1a934 !important;
-            background-color: #2a2d30 !important;
+        .widget-dark .title,
+        .widget-dark b,
+        .widget-dark strong {
+            color: #4ba3e3 !important;
+            background-color: transparent !important;
         }
         
         /* ===== POLICES HOMOGÈNES ===== */
@@ -249,7 +257,7 @@
             let numbers = [];
             let i = 0;
             
-            // ✅ MODIFIÉ : Accepte les numéros de 1 à 20 (au lieu de 16)
+            // ✅ MODIFIÉ : Accepte les numéros de 1 à 20
             while (i < digits.length && numbers.length < 8) {
                 if (i + 1 < digits.length) {
                     let twoDigits = parseInt(digits.substring(i, i + 2));
