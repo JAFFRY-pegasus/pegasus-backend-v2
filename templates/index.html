@@ -34,19 +34,50 @@
             border-radius: 8px;
         }
         
+        /* ===== HARMONISATION COULEURS WIDGET BOTURFERS ===== */
+        .widget-dark,
+        .widget-dark > div,
+        .widget-dark table {
+            background-color: #2a2d30 !important;
+        }
+        
+        .widget-dark th,
+        .widget-dark thead td {
+            background-color: #8a8d90 !important;
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+        
+        .widget-dark td {
+            background-color: #1a1d20 !important;
+            color: #e3e6e8 !important;
+            border-color: #3a3d40 !important;
+        }
+        
+        .widget-dark tr:nth-child(even) td {
+            background-color: #25282b !important;
+        }
+        
+        .widget-dark h2,
+        .widget-dark h3,
+        .widget-dark .title {
+            color: #f1a934 !important;
+            background-color: #2a2d30 !important;
+        }
+        
         /* ===== POLICES HOMOGÈNES ===== */
         .text-chiffre { 
-            font-size: 1.875rem; /* 30px */
+            font-size: 1.875rem;
             font-weight: 900; 
             font-family: 'Courier New', monospace;
         }
         .text-alpha { 
-            font-size: 0.75rem; /* 12px */
+            font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 0.05em;
         }
         .text-alpha-sm { 
-            font-size: 0.6875rem; /* 11px */
+            font-size: 0.6875rem;
             font-weight: 500;
         }
     </style>
@@ -158,7 +189,7 @@
                         ⚠️ Maximum 8 numéros atteints
                       </div>
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
-                        Saisissez les numéros (1-16), les tirets s'insèrent automatiquement
+                        Saisissez les numéros (1-20), les tirets s'insèrent automatiquement
                       </span>
                       <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
@@ -217,10 +248,13 @@
             let digits = this.value.replace(/[^0-9]/g, '');
             let numbers = [];
             let i = 0;
+            
+            // ✅ MODIFIÉ : Accepte les numéros de 1 à 20 (au lieu de 16)
             while (i < digits.length && numbers.length < 8) {
                 if (i + 1 < digits.length) {
                     let twoDigits = parseInt(digits.substring(i, i + 2));
-                    if (twoDigits >= 10 && twoDigits <= 16) {
+                    // ✅ Limite étendue à 20
+                    if (twoDigits >= 10 && twoDigits <= 20) {
                         numbers.push(twoDigits);
                         i += 2;
                         continue;
@@ -232,11 +266,14 @@
                 }
                 i++;
             }
+            
             let formatted = numbers.join('-');
             this.value = formatted;
+            
             if (warning) warning.style.display = numbers.length >= 8 ? 'block' : 'none';
             this.setSelectionRange(formatted.length, formatted.length);
         });
+        
         input.addEventListener('keypress', function(e) {
             if (!/[0-9]/.test(String.fromCharCode(e.which))) e.preventDefault();
         });
