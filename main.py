@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v2.7
-Moteur SGE unifié avec mode manuel de secours (fallback)
-Compatible Starlette récent + Gestion échec API PMU
+main.py v3.0
+Moteur SGE unifié + Mode manuel + Fichiers statiques (image de fond)
+Compatible FastAPI + Jinja2 + APScheduler
 """
 
 import sys
@@ -18,25 +18,30 @@ from itertools import combinations
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # =====================================================================
-# CONFIGURATION & IMPORTS
+# CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V2.7", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.0", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
 CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
+CHEMIN_STATIC = os.path.join(CHEMIN_BASE, "static")
 FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
 
+# =====================================================================
+# IMPORTS DES MODULES
+# =====================================================================
 try:
     from historique import HISTORIQUE_SGE_DATA
     print(f"✅ historique.py importé — {len(HISTORIQUE_SGE_DATA)} courses", flush=True)
 except Exception as e:
     print(f"❌ ERREUR historique.py: {e}", flush=True)
-    sys.exit(1)
+    HISTORIQUE_SGE_DATA = []
 
 try:
     from extraction import obtenir_quinte_du_jour
@@ -49,11 +54,25 @@ except Exception as e:
     EXTRACTION_DISPONIBLE = False
     ERREUR_EXTRACTION = f"{type(e).__name__}: {e}"
 
-app = FastAPI(title="Pegasus Backend v2.7")
+# =====================================================================
+# APPLICATION FASTAPI + STATIC FILES
+# =====================================================================
+app = FastAPI(title="Pegasus Backend v3.0")
+
+# ✅ CRITIQUE : Servir les fichiers statiques (image de fond)
+if os.path.isdir(CHEMIN_STATIC):
+    app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
+    print(f"✅ Dossier static monté sur /static ({CHEMIN_STATIC})", flush=True)
+else:
+    print(f"⚠️ Dossier static introuvable : {CHEMIN_STATIC}", flush=True)
+
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
 DEBUG = os.environ.get("DEBUG", "0") == "1"
 TTL_CACHE_SECONDS = 900
 
+# =====================================================================
+# CONSTANTES DU MOTEUR SGE
+# =====================================================================
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
 
 _JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
@@ -64,6 +83,15 @@ def _date_francaise():
     d = _datetime.now()
     return f"{_JOURS[d.weekday()].capitalize()} {d.day} {_MOIS[d.month - 1]} {d.year}"
 
+OPPOSITIONS_VERTICALES = {
+    1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
+    9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8
+}
+COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
+
+# =====================================================================
+# DONNÉES GLOBALES DU QUINTÉ DU JOUR
+# =====================================================================
 DONNEES_QUINTE_DU_JOUR = {
     "hippodrome": "EN ATTENTE",
     "discipline": "Inconnue",
@@ -120,7 +148,6 @@ def rafraichir_donnees_quinte(force=False):
     
     maintenant = time.time()
     if not force and (maintenant - DERNIERE_VERIFICATION) < TTL_CACHE_SECONDS:
-        # Si on est déjà en mode manuel, on ne réessaie pas l'API à chaque chargement
         if DONNEES_QUINTE_DU_JOUR.get("mode_manuel"):
             return DONNEES_QUINTE_DU_JOUR
         return DONNEES_QUINTE_DU_JOUR
@@ -160,7 +187,9 @@ def rafraichir_donnees_quinte(force=False):
     print(f"🔄 Actualisation terminée (source: {source})", flush=True)
     return DONNEES_QUINTE_DU_JOUR
 
-# Scheduler auto
+# =====================================================================
+# SCHEDULER AUTOMATIQUE
+# =====================================================================
 SCHEDULER_ACTIF = False
 try:
     from apscheduler.schedulers.background import BackgroundScheduler
@@ -168,22 +197,17 @@ try:
     scheduler.add_job(lambda: rafraichir_donnees_quinte(force=True), "interval", minutes=30)
     scheduler.start()
     SCHEDULER_ACTIF = True
+    print("✅ Scheduler APScheduler actif (rafraîchissement toutes les 30 min)", flush=True)
 except Exception as e:
     print(f"ℹ️ Scheduler inactif: {e}", flush=True)
 
 # =====================================================================
-# MOTEUR SGE (Inchangé)
+# MOTEUR SGE
 # =====================================================================
-OPPOSITIONS_VERTICALES = {
-    1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
-    9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8
-}
-COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
-
 def calculer_poids_axes():
     frequence_axes = Counter()
     for course in HISTORIQUE_SGE_DATA:
-        arr = course["arrivee"]
+        arr = course.get("arrivee", [])
         for num in arr:
             oppose = OPPOSITIONS_VERTICALES.get(num)
             if oppose and oppose in arr:
@@ -237,12 +261,21 @@ async def erreur_non_geree(request: Request, exc: Exception):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "debug": DEBUG, "nb_courses": len(HISTORIQUE_SGE_DATA)}
+    return {
+        "status": "ok", 
+        "debug": DEBUG, 
+        "nb_courses": len(HISTORIQUE_SGE_DATA),
+        "scheduler_actif": SCHEDULER_ACTIF,
+        "extraction_disponible": EXTRACTION_DISPONIBLE
+    }
 
 @app.get("/debug-extraction")
 def debug_extraction():
     if not EXTRACTION_DISPONIBLE:
-        return JSONResponse({"extraction_disponible": False, "erreur": ERREUR_EXTRACTION})
+        return JSONResponse({
+            "extraction_disponible": False, 
+            "erreur": ERREUR_EXTRACTION
+        })
     try:
         debut = time.time()
         resultat = obtenir_quinte_du_jour()
@@ -265,18 +298,21 @@ def dashboard(request: Request):
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
-        for num in course["arrivee"][:5]:
+        for num in course.get("arrivee", [])[:5]:
             counter[num] += 1
 
-    top_chevaux = [{"numero": f"{n:02d}", "occurrences": c, 
-                    "pourcentage": round((c/total_courses)*100, 1)} 
-                   for n, c in counter.most_common(3)]
+    top_chevaux = [
+        {"numero": f"{n:02d}", "occurrences": c, 
+         "pourcentage": round((c/total_courses)*100, 1) if total_courses > 0 else 0} 
+        for n, c in counter.most_common(3)
+    ]
 
     info_quinte = {k: DONNEES_QUINTE_DU_JOUR.get(k, "") for k in CLEFS_ATTENDUES}
     
     synthese_brute = str(DONNEES_QUINTE_DU_JOUR.get("synthese_presse", ""))
     jetons_presse = [x.strip() for x in synthese_brute.split("-") if x.strip().isdigit()]
-    if not jetons_presse: jetons_presse = ["?", "?", "?", "?", "?"]
+    if not jetons_presse: 
+        jetons_presse = ["?", "?", "?", "?", "?"]
 
     jetons = {
         "presse": jetons_presse,
@@ -290,10 +326,14 @@ def dashboard(request: Request):
     score_combinaison = calculer_score_sge(combo_int) if len(combo_int) == 5 else 0
 
     stats = {
-        "historique_courses": total_courses, "taux_reussite": 20,
-        "nb_dernieres_courses": 5, "ponderation_pegasus": score_pegasus,
-        "ponderation_combinaison": score_combinaison, "moyenne_chevaux_trouves": "0.00",
-        "niveau_performance": "Faible", "top_chevaux_frequents": top_chevaux
+        "historique_courses": total_courses, 
+        "taux_reussite": 20,
+        "nb_dernieres_courses": 5, 
+        "ponderation_pegasus": score_pegasus,
+        "ponderation_combinaison": score_combinaison, 
+        "moyenne_chevaux_trouves": "0.00",
+        "niveau_performance": "Faible", 
+        "top_chevaux_frequents": top_chevaux
     }
 
     combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE)
@@ -303,15 +343,19 @@ def dashboard(request: Request):
                  "Quinté non vérifié"
     
     code_pmu = f"R{DONNEES_QUINTE_DU_JOUR.get('numReunion','?')}C{DONNEES_QUINTE_DU_JOUR.get('numOrdre','?')}"
-    message_statut = f"{tag_quinte} • {code_pmu} • {info_quinte.get('nb_partants',0)} partants • Vérif: {DERNIERE_VERIFICATION_HHMM}"
+    nb_partants = info_quinte.get('nb_partants', 0)
+    message_statut = f"{tag_quinte} • {code_pmu} • {nb_partants} partants • Vérif: {DERNIERE_VERIFICATION_HHMM}"
 
     return templates.TemplateResponse(
-        request=request, name="index.html", context={
+        request=request, 
+        name="index.html", 
+        context={
             "statut_robot": DONNEES_QUINTE_DU_JOUR.get("statut_robot", "Actif"),
             "message_statut": message_statut,
             "info_quinte": info_quinte,
             "combinaison_saisie": combinaison_saisie,
-            "jetons": jetons, "stats": stats
+            "jetons": jetons, 
+            "stats": stats
         }
     )
 
@@ -319,7 +363,8 @@ def dashboard(request: Request):
 def calculer(combinaison_utilisateur: str = Form(...)):
     global COMBINAISON_SELECTIONNEE
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
-    if extraits: COMBINAISON_SELECTIONNEE = extraits[:8]
+    if extraits: 
+        COMBINAISON_SELECTIONNEE = extraits[:8]  # ✅ Limite à 8 chevaux
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
@@ -340,7 +385,6 @@ def reinitialiser():
 
 @app.post("/actualiser")
 def actualiser():
-    # Force la réactivation du mode auto si possible
     DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
     rafraichir_donnees_quinte(force=True)
     return RedirectResponse(url="/", status_code=303)
@@ -373,19 +417,20 @@ def saisie_manuelle(
         "distance": distance,
         "statut_robot": "Données Manuelles",
         "mode_manuel": True,
-        "isQuinte": True, # On considère que c'est le quinté puisque l'utilisateur le dit
+        "isQuinte": True,
         "numReunion": 1,
         "numOrdre": 5
     })
-    # Sauvegarde pour persistance entre redémarrages
     try:
         with open(FICHIER_SAUVEGARDE, 'w', encoding='utf-8') as f:
             json.dump(DONNEES_QUINTE_DU_JOUR, f, ensure_ascii=False)
     except Exception:
         pass
-        
     return RedirectResponse(url="/", status_code=303)
 
+# =====================================================================
+# LANCEMENT
+# =====================================================================
 print("✅ Initialisation terminée", flush=True)
 
 if __name__ == '__main__':
