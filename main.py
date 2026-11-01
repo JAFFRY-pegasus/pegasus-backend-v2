@@ -55,7 +55,7 @@ except Exception as e:
     ERREUR_EXTRACTION = f"{type(e).__name__}: {e}"
 
 # =====================================================================
-# APPLICATION FASTAPI + STATIC FILES
+# APPLICATION FASTAPI + STATIC FILES (CRITIQUE POUR L'IMAGE)
 # =====================================================================
 app = FastAPI(title="Pegasus Backend v3.0")
 
@@ -64,7 +64,7 @@ if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
     print(f"✅ Dossier static monté sur /static ({CHEMIN_STATIC})", flush=True)
 else:
-    print(f"⚠️ Dossier static introuvable : {CHEMIN_STATIC}", flush=True)
+    print(f"⚠️ Dossier static introuvable : {CHEMIN_STATIC}. Créez-le pour l'image de fond.", flush=True)
 
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
 DEBUG = os.environ.get("DEBUG", "0") == "1"
