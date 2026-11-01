@@ -6,39 +6,70 @@
     <title>Pegasus Quinté - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Scrollbar personnalisée */
         .widget-scroll::-webkit-scrollbar { height: 6px; }
-        .widget-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
-        .widget-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        .widget-scroll::-webkit-scrollbar-thumb:hover { background: #999; }
+        .widget-scroll::-webkit-scrollbar-track { background: #1f2225; border-radius: 3px; }
+        .widget-scroll::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
+        .widget-scroll::-webkit-scrollbar-thumb:hover { background: #718096; }
         
-        /* Homogénéisation des polices */
-        .text-chiffre { font-size: 2rem; font-weight: 900; } /* 32px - comme Score Pegasus */
-        .text-alpha { font-size: 0.75rem; font-weight: 600; } /* 12px - comme Informations Quinté */
-        .text-alpha-sm { font-size: 0.6875rem; font-weight: 500; } /* 11px pour textes secondaires */
+        /* ===== IMAGE DE FOND PEGASUS ===== */
+        body.bg-pegasus {
+            background-image: url('/static/Horse-racing-1.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        
+        /* Overlay sombre semi-transparent sur le conteneur principal */
+        .overlay-sombre {
+            background-color: rgba(15, 17, 18, 0.94);
+            backdrop-filter: blur(3px);
+        }
+        
+        /* ===== HOMOGÉNÉISATION DES POLICES ===== */
+        .text-chiffre { 
+            font-size: 1.875rem; /* 30px - comme Score Pegasus */
+            font-weight: 900; 
+            font-family: 'Courier New', monospace;
+        }
+        
+        .text-alpha { 
+            font-size: 0.75rem; /* 12px - comme Informations Quinté */
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        
+        .text-alpha-sm { 
+            font-size: 0.6875rem; /* 11px */
+            font-weight: 500;
+        }
     </style>
 </head>
-<body class="bg-[#0f1112] min-h-screen p-4 md:p-8">
 
-    <!-- CONTENEUR PRINCIPAL -->
-    <div class="bg-[#121416] text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none text-[13px] border border-[#2d3238]">
+<!-- ===== BODY AVEC CLASSE bg-pegasus POUR L'IMAGE DE FOND ===== -->
+<body class="bg-pegasus min-h-screen p-4 md:p-8">
+
+    <!-- CONTENEUR PRINCIPAL AVEC OVERLAY SOMBRE -->
+    <div class="overlay-sombre text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none text-[13px] border border-[#2d3238]">
 
       <!-- EN-TÊTE PEGASUS -->
       <div class="text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-2">PEGASUS QUINTÉ</h1>
-        <p class="text-sm font-medium text-[#adb5bd] italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
+        <p class="text-alpha text-[#adb5bd] italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
 
-        <div class="bg-[#1f2225] border border-[#2d3238] rounded-lg p-4 my-6 text-left text-xs text-[#98a2b3] leading-relaxed shadow-sm max-w-3xl mx-auto">
+        <div class="bg-[#1f2225]/80 border border-[#2d3238] rounded-lg p-4 my-6 text-left text-alpha-sm text-[#98a2b3] leading-relaxed shadow-sm max-w-3xl mx-auto">
           Ce robot combine l'analyse géométrique PEGASUS avec les données officielles Boturfers. Les résultats sont indicatifs et ne garantissent aucun gain.
         </div>
 
         <div class="flex justify-center gap-4 mt-4 flex-wrap">
           <form action="/actualiser" method="POST" class="inline">
-            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-xs font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
+            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
               <span>🔄</span> Actualiser
             </button>
           </form>
           <form action="/relancer" method="POST" class="inline">
-            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-xs font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
+            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
               <span>🤖</span> Relancer Robot
             </button>
           </form>
@@ -47,27 +78,27 @@
 
       <!-- BLOC WIDGET BOTURFERS -->
       <div class="mb-10">
-        <div class="bg-[#1f2225] rounded-xl p-1 border border-[#2d3238] shadow-lg">
+        <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
           
-          <!-- En-tête sombre au-dessus du widget -->
-          <div class="bg-[#1f2225] rounded-t-lg p-4 border-b border-[#2d3238]">
+          <!-- En-tête sombre -->
+          <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
             <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
               <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
             </h3>
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
           
-          <!-- Conteneur blanc pour le widget (scrollable si nécessaire) -->
-          <div class="bg-white rounded-b-lg overflow-x-auto widget-scroll w-full">
+          <!-- Conteneur du widget avec scroll -->
+          <div class="bg-white overflow-x-auto widget-scroll w-full">
              <div class="min-w-[320px] w-full p-3">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
 
-          <!-- Note explicative sous le widget -->
-          <div class="mt-3 p-3 bg-[#121416]/50 rounded-lg mx-3 mb-3 border border-[#2d3238]">
+          <!-- Note explicative -->
+          <div class="p-3 bg-[#121416]/80 mx-3 mb-3 rounded border border-[#2d3238]">
             <p class="text-alpha-sm text-[#98a2b3] leading-relaxed">
-              <span class="font-semibold text-[#adb5bd] block mb-1"> Légende des rapports :</span>
+              <span class="font-semibold text-[#adb5bd] block mb-1">📊 Légende des rapports :</span>
               <span class="block">• Gauche : <span class="text-[#f1a934] font-semibold">Rapports PMU (points de vente)</span></span>
               <span class="block">• Droite : <span class="text-[#1abc9c] font-semibold">Rapports Paris en ligne</span></span>
             </p>
@@ -83,7 +114,7 @@
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <!-- Colonne Gauche : Pronostic & Stats -->
+            <!-- Colonne Gauche -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
@@ -97,26 +128,23 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
-                      <div class="text-chiffre text-[#f1a934] font-mono">{{ stats.ponderation_pegasus }} pts</div>
+                      <div class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
-                      <div class="text-chiffre text-[#2ecc71] font-mono">{{ stats.taux_reussite }} %</div>
+                      <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
                   </div>
                 </div>
             </div>
 
-            <!-- Colonne Droite : Système de saisie -->
+            <!-- Colonne Droite -->
             <div class="space-y-6">
-                
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
-                  
                   <label class="text-alpha text-[#4ba3e3] uppercase block mb-3">
                     💡 Votre combinaison (5 à 8 chevaux) :
                   </label>
 
                   <form action="/calculer" method="POST" class="flex flex-col gap-3">
-                      
                       <input 
                         type="text" 
                         id="combinaison-input" 
@@ -128,15 +156,15 @@
                         autocomplete="off"
                       />
 
-                      <div id="warning-msg" class="text-[#ff4d4d] text-xs font-bold hidden transition-all duration-300 text-center mt-1">
+                      <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden transition-all duration-300 text-center mt-1">
                         ⚠️ Maximum 8 numéros atteints
                       </div>
 
-                      <span class="text-alpha-sm text-[#7a8292] text-center -mt-1 block">
+                      <span class="text-alpha-sm text-[#7a8292] text-center block">
                         Saisissez les numéros (1-16), les tirets s'insèrent automatiquement
                       </span>
 
-                      <button type="submit" id="btn-calculer" class="w-full p-3 text-base font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
+                      <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
                       </button>
                   </form>
@@ -158,7 +186,7 @@
         </div>
       </div>
 
-      <!-- BLOC 3 : GRILLE GÉOMÉTRIQUE -->
+      <!-- BLOC GRILLE GÉOMÉTRIQUE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4">
            SÉLECTION RAPIDE (GRILLE 1-16)
@@ -171,8 +199,8 @@
           {% endfor %}
         </div>
         <form action="/reinitialiser" method="POST">
-          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-xs transition uppercase tracking-wider shadow-lg">
-            ️ Réinitialiser la sélection
+          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-alpha transition uppercase tracking-wider shadow-lg">
+            🗑️ Réinitialiser la sélection
           </button>
         </form>
       </div>
