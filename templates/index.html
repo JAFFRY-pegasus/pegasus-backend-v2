@@ -6,40 +6,45 @@
     <title>Pegasus Quinté - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Scrollbar personnalisée */
+        /* Scrollbar */
         .widget-scroll::-webkit-scrollbar { height: 6px; }
-        .widget-scroll::-webkit-scrollbar-track { background: #1f2225; border-radius: 3px; }
+        .widget-scroll::-webkit-scrollbar-track { background: #1f2225; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
-        .widget-scroll::-webkit-scrollbar-thumb:hover { background: #718096; }
         
-        /* ===== IMAGE DE FOND PEGASUS ===== */
+        /* ===== IMAGE DE FOND ===== */
         body.bg-pegasus {
             background-image: url('/static/Horse-racing-1.jpg');
             background-size: cover;
-            background-position: center center;
+            background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
         
-        /* Overlay sombre semi-transparent sur le conteneur principal */
+        /* Overlay sombre */
         .overlay-sombre {
             background-color: rgba(15, 17, 18, 0.94);
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(2px);
         }
         
-        /* ===== HOMOGÉNÉISATION DES POLICES ===== */
+        /* ===== WIDGET SOMBRE (Filtre CSS) ===== */
+        .widget-dark {
+            filter: invert(0.92) hue-rotate(180deg) brightness(1.05) contrast(1.1);
+            background-color: #1a1d20;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        /* ===== POLICES HOMOGÈNES ===== */
         .text-chiffre { 
-            font-size: 1.875rem; /* 30px - comme Score Pegasus */
+            font-size: 1.875rem; /* 30px */
             font-weight: 900; 
             font-family: 'Courier New', monospace;
         }
-        
         .text-alpha { 
-            font-size: 0.75rem; /* 12px - comme Informations Quinté */
+            font-size: 0.75rem; /* 12px */
             font-weight: 600;
             letter-spacing: 0.05em;
         }
-        
         .text-alpha-sm { 
             font-size: 0.6875rem; /* 11px */
             font-weight: 500;
@@ -47,13 +52,12 @@
     </style>
 </head>
 
-<!-- ===== BODY AVEC CLASSE bg-pegasus POUR L'IMAGE DE FOND ===== -->
 <body class="bg-pegasus min-h-screen p-4 md:p-8">
 
-    <!-- CONTENEUR PRINCIPAL AVEC OVERLAY SOMBRE -->
-    <div class="overlay-sombre text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none text-[13px] border border-[#2d3238]">
+    <!-- CONTENEUR PRINCIPAL -->
+    <div class="overlay-sombre text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none border border-[#2d3238]">
 
-      <!-- EN-TÊTE PEGASUS -->
+      <!-- EN-TÊTE -->
       <div class="text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-2">PEGASUS QUINTÉ</h1>
         <p class="text-alpha text-[#adb5bd] italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
@@ -64,23 +68,22 @@
 
         <div class="flex justify-center gap-4 mt-4 flex-wrap">
           <form action="/actualiser" method="POST" class="inline">
-            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
-              <span>🔄</span> Actualiser
+            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
+              🔄 Actualiser
             </button>
           </form>
           <form action="/relancer" method="POST" class="inline">
-            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition transform hover:scale-105">
-              <span>🤖</span> Relancer Robot
+            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
+              🤖 Relancer Robot
             </button>
           </form>
         </div>
       </div>
 
-      <!-- BLOC WIDGET BOTURFERS -->
+      <!-- BLOC WIDGET BOTURFERS SOMBRE -->
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
           
-          <!-- En-tête sombre -->
           <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
             <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
               <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
@@ -88,14 +91,14 @@
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
           
-          <!-- Conteneur du widget avec scroll -->
-          <div class="bg-white overflow-x-auto widget-scroll w-full">
-             <div class="min-w-[320px] w-full p-3">
+          <!-- Widget avec filtre sombre -->
+          <div class="overflow-x-auto widget-scroll w-full p-4">
+             <div class="widget-dark min-w-[320px] w-full">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
 
-          <!-- Note explicative -->
+          <!-- Légende -->
           <div class="p-3 bg-[#121416]/80 mx-3 mb-3 rounded border border-[#2d3238]">
             <p class="text-alpha-sm text-[#98a2b3] leading-relaxed">
               <span class="font-semibold text-[#adb5bd] block mb-1">📊 Légende des rapports :</span>
@@ -113,8 +116,6 @@
         </h2>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Colonne Gauche -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
@@ -137,13 +138,11 @@
                 </div>
             </div>
 
-            <!-- Colonne Droite -->
             <div class="space-y-6">
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
                   <label class="text-alpha text-[#4ba3e3] uppercase block mb-3">
                     💡 Votre combinaison (5 à 8 chevaux) :
                   </label>
-
                   <form action="/calculer" method="POST" class="flex flex-col gap-3">
                       <input 
                         type="text" 
@@ -155,15 +154,12 @@
                         class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
                         autocomplete="off"
                       />
-
-                      <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden transition-all duration-300 text-center mt-1">
+                      <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center mt-1">
                         ⚠️ Maximum 8 numéros atteints
                       </div>
-
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
                         Saisissez les numéros (1-16), les tirets s'insèrent automatiquement
                       </span>
-
                       <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
                       </button>
@@ -186,14 +182,14 @@
         </div>
       </div>
 
-      <!-- BLOC GRILLE GÉOMÉTRIQUE -->
+      <!-- GRILLE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4">
            SÉLECTION RAPIDE (GRILLE 1-16)
         </h2>
         <div class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-3 mb-6">
           {% for i in range(1, 17) %}
-          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-110 shadow-[0_0_15px_rgba(241,169,52,0.3)]{% endif %}">
+          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-110{% endif %}">
             {{ i }}
           </a>
           {% endfor %}
@@ -211,7 +207,6 @@
       </div>
     </div>
 
-    <!-- SCRIPT DE SAISIE AUTO-FORMATÉE -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
@@ -222,7 +217,6 @@
             let digits = this.value.replace(/[^0-9]/g, '');
             let numbers = [];
             let i = 0;
-            
             while (i < digits.length && numbers.length < 8) {
                 if (i + 1 < digits.length) {
                     let twoDigits = parseInt(digits.substring(i, i + 2));
@@ -238,25 +232,15 @@
                 }
                 i++;
             }
-            
             let formatted = numbers.join('-');
             this.value = formatted;
-            
-            if (warning) {
-                warning.style.display = numbers.length >= 8 ? 'block' : 'none';
-            }
-            
+            if (warning) warning.style.display = numbers.length >= 8 ? 'block' : 'none';
             this.setSelectionRange(formatted.length, formatted.length);
         });
-        
         input.addEventListener('keypress', function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/[0-9]/.test(char)) {
-                e.preventDefault();
-            }
+            if (!/[0-9]/.test(String.fromCharCode(e.which))) e.preventDefault();
         });
     });
     </script>
-
 </body>
 </html>
