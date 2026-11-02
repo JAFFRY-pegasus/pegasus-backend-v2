@@ -85,7 +85,7 @@
           
           <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
             <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
-              <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
+              <span class="text-xl"></span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
             </h3>
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
@@ -157,7 +157,7 @@
                         ⚠️ Maximum 8 numéros atteints
                       </div>
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
-                        Saisissez les numéros (1-20) séparés par des tirets
+                        Saisissez les numéros (1-20), les tirets s'insèrent automatiquement
                       </span>
                       <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
@@ -195,7 +195,7 @@
         </div>
         <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-alpha transition uppercase tracking-wider shadow-lg">
-            🗑️ Réinitialiser la sélection
+            ️ Réinitialiser la sélection
           </button>
         </form>
       </div>
@@ -207,51 +207,84 @@
     </div>
 
     <script>
-    // ===== SCRIPT 1 : SAISIE COMBINAISON (VERSION CORRIGÉE) =====
+    // ===== SCRIPT 1 : SAISIE COMBINAISON AVEC TIRETS AUTOMATIQUES =====
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
         const warning = document.getElementById('warning-msg');
         if (!input) return;
-
-        input.addEventListener('input', function(e) {
-            // Extraire uniquement les chiffres et tirets
-            let value = this.value.replace(/[^0-9\-]/g, '');
-            
-            // Séparer par les tirets
-            let parts = value.split('-').filter(p => p.length > 0);
-            
-            // Valider chaque numéro (1-20)
-            let validNumbers = [];
-            for (let part of parts) {
-                let num = parseInt(part);
-                if (num >= 1 && num <= 20 && validNumbers.length < 8) {
-                    validNumbers.push(num);
-                }
-            }
-            
-            // Reformater avec des tirets
-            let formatted = validNumbers.join('-');
-            this.value = formatted;
-            
-            // Afficher l'avertissement si limite atteinte
-            if (warning) {
-                warning.style.display = validNumbers.length >= 8 ? 'block' : 'none';
-            }
-            
-            // Curseur à la fin
-            this.setSelectionRange(formatted.length, formatted.length);
-        });
         
-        // Empêcher les caractères non numériques (sauf tiret)
-        input.addEventListener('keypress', function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/[0-9\-]/.test(char)) {
+        // Stocker les numéros en mémoire
+        let numbers = [];
+        
+        // Intercepter chaque touche
+        input.addEventListener('keydown', function(e) {
+            // Backspace : supprimer le dernier numéro
+            if (e.key === 'Backspace') {
+                if (numbers.length > 0) {
+                    numbers.pop();
+                    updateDisplay();
+                }
+                e.preventDefault();
+                return;
+            }
+            
+            // Chiffres 0-9
+            if (e.key >= '0' && e.key <= '9') {
+                if (numbers.length >= 8) {
+                    if (warning) warning.style.display = 'block';
+                    return;
+                }
+                
+                // Si le dernier numéro a déjà 2 chiffres, en créer un nouveau
+                if (numbers.length > 0 && numbers[numbers.length - 1].length >= 2) {
+                    numbers.push(e.key);
+                } else if (numbers.length === 0) {
+                    numbers.push(e.key);
+                } else {
+                    // Ajouter au dernier numéro
+                    numbers[numbers.length - 1] += e.key;
+                }
+                
+                updateDisplay();
+                e.preventDefault();
+            }
+            
+            // Tiret : forcer la séparation
+            if (e.key === '-') {
+                if (numbers.length > 0 && numbers.length < 8) {
+                    numbers.push('');
+                }
+                updateDisplay();
                 e.preventDefault();
             }
         });
+        
+        function updateDisplay() {
+            // Filtrer les numéros valides (1-20)
+            let validNumbers = [];
+            for (let num of numbers) {
+                if (num.length > 0) {
+                    let n = parseInt(num);
+                    if (n >= 1 && n <= 20) {
+                        validNumbers.push(n);
+                    }
+                }
+            }
+            
+            // Limiter à 8
+            validNumbers = validNumbers.slice(0, 8);
+            
+            // Mettre à jour l'affichage AVEC TIRETS AUTOMATIQUES
+            input.value = validNumbers.join('-');
+            
+            // Avertissement
+            if (warning) {
+                warning.style.display = validNumbers.length >= 8 ? 'block' : 'none';
+            }
+        }
     });
 
-    // ===== SCRIPT 2 : MODIFICATION DES STYLES DU WIDGET (SANS DÉLAI) =====
+    // ===== SCRIPT 2 : MODIFICATION DES STYLES DU WIDGET =====
     document.addEventListener('DOMContentLoaded', function() {
         const widgetContainer = document.getElementById('widget-container');
         if (!widgetContainer) return;
@@ -266,7 +299,7 @@
             subtree: true
         });
         
-        // Appliquer les styles immédiatement et après chaque changement
+        // Appliquer les styles
         function applyWidgetStyles() {
             const allElements = widgetContainer.querySelectorAll('*');
             allElements.forEach(function(el) {
