@@ -6,12 +6,10 @@
     <title>Pegasus Quinté - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Scrollbar */
         .widget-scroll::-webkit-scrollbar { height: 6px; }
         .widget-scroll::-webkit-scrollbar-track { background: #1f2225; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
         
-        /* ===== IMAGE DE FOND ===== */
         body.bg-pegasus {
             background-image: url('/static/Horse-racing-1.jpg');
             background-size: cover;
@@ -20,20 +18,17 @@
             background-repeat: no-repeat;
         }
         
-        /* Overlay sombre */
         .overlay-sombre {
             background-color: rgba(15, 17, 18, 0.94);
             backdrop-filter: blur(2px);
         }
         
-        /* ===== WIDGET SOMBRE ===== */
         .widget-dark {
             background-color: #1f2225;
             padding: 12px;
             border-radius: 8px;
         }
         
-        /* ===== POLICES HOMOGÈNES ===== */
         .text-chiffre { 
             font-size: 1.875rem;
             font-weight: 900; 
@@ -53,7 +48,6 @@
 
 <body class="bg-pegasus min-h-screen p-4 md:p-8">
 
-    <!-- CONTENEUR PRINCIPAL -->
     <div class="overlay-sombre text-[#e3e6e8] w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none border border-[#2d3238]">
 
       <!-- EN-TÊTE -->
@@ -79,7 +73,7 @@
         </div>
       </div>
 
-      <!-- BLOC WIDGET BOTURFERS (CORRIGÉ) -->
+      <!-- BLOC WIDGET BOTURFERS -->
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
           
@@ -90,14 +84,12 @@
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
           
-          <!-- Widget avec l'URL CORRECTE et sans div parasite -->
           <div class="overflow-x-auto widget-scroll w-full p-4">
              <div id="widget-container" class="widget-dark min-w-[320px] w-full">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
 
-          <!-- Légende -->
           <div class="p-3 bg-[#121416]/80 mx-3 mb-3 rounded border border-[#2d3238]">
             <p class="text-alpha-sm text-[#98a2b3] leading-relaxed">
               <span class="font-semibold text-[#adb5bd] block mb-1">📊 Légende des rapports :</span>
@@ -148,13 +140,13 @@
                         id="combinaison-input" 
                         name="combinaison_utilisateur"
                         value="{{ combinaison_saisie }}"
-                        placeholder="Ex: 1-11-5-12" 
+                        placeholder="Tapez 13651211..." 
                         maxlength="30"
                         class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
                         autocomplete="off"
                       />
                       <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center mt-1">
-                        ⚠️ Maximum 8 numéros atteints
+                        ️ Maximum 8 numéros atteints
                       </div>
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
                         Saisissez les numéros (1-20). Les tirets s'insèrent automatiquement.
@@ -206,57 +198,120 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPTS ===== -->
+    <!-- ===== SCRIPT DE SAISIE AUTOMATIQUE ===== -->
     <script>
-    // 1. SAISIE COMBINAISON (Logique par blocs optimisée pour 1-20)
     document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
+        
+        let buffer = "";
+        let numbers = [];
 
-        inputField.addEventListener('input', function(e) {
-            let blocks = e.target.value.split(/[- ]+/);
-            let numbers = [];
+        inputField.addEventListener('keydown', function(e) {
+            // Touches de navigation
+            if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                if (e.key === 'Backspace') {
+                    if (buffer.length > 0) {
+                        buffer = buffer.slice(0, -1);
+                    } else if (numbers.length > 0) {
+                        numbers.pop();
+                    }
+                    updateDisplay();
+                    e.preventDefault();
+                }
+                return;
+            }
 
-            for (let block of blocks) {
-                let cleanBlock = block.replace(/[^0-9]/g, '');
-                if (!cleanBlock) continue;
+            // Chiffres uniquement
+            if (e.key >= '0' && e.key <= '9') {
+                if (numbers.length >= 8 && buffer === "") {
+                    e.preventDefault();
+                    return;
+                }
 
-                let num = parseInt(cleanBlock, 10);
+                buffer += e.key;
 
-                if (num > 20 && cleanBlock.length === 2) {
-                    let firstDigit = parseInt(cleanBlock[0], 10);
-                    let secondDigit = parseInt(cleanBlock[1], 10);
-                    if (firstDigit >= 1 && firstDigit <= 9 && numbers.length < 8) numbers.push(firstDigit);
-                    if (secondDigit >= 1 && secondDigit <= 9 && numbers.length < 8) numbers.push(secondDigit);
-                } 
-                else if (num >= 1 && num <= 20) {
-                    if (numbers.length < 8) {
+                // Auto-séparation après 2 chiffres
+                if (buffer.length === 2) {
+                    let num = parseInt(buffer);
+                    if (num >= 1 && num <= 20) {
                         numbers.push(num);
+                        buffer = "";
+                    } else {
+                        // Numéro invalide (ex: 25), on garde le premier chiffre
+                        let firstDigit = parseInt(buffer[0]);
+                        if (firstDigit >= 1 && firstDigit <= 9 && numbers.length < 8) {
+                            numbers.push(firstDigit);
+                        }
+                        buffer = e.key;
                     }
                 }
+                
+                updateDisplay();
+                e.preventDefault();
             }
+        });
 
-            let endsWithDash = e.target.value.endsWith('-') || e.target.value.endsWith(' ');
+        function updateDisplay() {
+            let displayArray = [...numbers];
+            if (buffer.length > 0) {
+                displayArray.push(buffer);
+            }
             
-            if (numbers.length > 0) {
-                e.target.value = numbers.join('-') + (endsWithDash && numbers.length < 8 ? '-' : '');
-            } else {
-                e.target.value = '';
-            }
-
-            if (numbers.length >= 8) {
+            inputField.value = displayArray.join('-');
+            
+            if (numbers.length >= 8 && buffer === "") {
                 warningMsg.classList.remove('hidden');
             } else {
                 warningMsg.classList.add('hidden');
             }
             
+            // Curseur toujours à la fin
             setTimeout(() => {
                 inputField.setSelectionRange(inputField.value.length, inputField.value.length);
             }, 0);
-        });
+        }
+    });
 
-        inputField.addEventListener('keyup', function(e) {
-            if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') return;
-            
-            let val = e.target.value;
-            let parts = val.split('-
+    // ===== STYLES DU WIDGET =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const widgetContainer = document.getElementById('widget-container');
+        if (!widgetContainer) return;
+        
+        const observer = new MutationObserver(function() {
+            applyWidgetStyles();
+        });
+        
+        observer.observe(widgetContainer, { childList: true, subtree: true });
+        
+        function applyWidgetStyles() {
+            const allElements = widgetContainer.querySelectorAll('*');
+            allElements.forEach(function(el) {
+                const tagName = el.tagName.toLowerCase();
+                if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
+                    el.style.backgroundColor = '#1f2225';
+                }
+                if (tagName === 'th' || (tagName === 'td' && el.parentElement.tagName.toLowerCase() === 'thead')) {
+                    el.style.backgroundColor = '#8a8d90';
+                    el.style.color = '#ffffff';
+                    el.style.fontWeight = 'bold';
+                }
+                if (tagName === 'td') {
+                    el.style.backgroundColor = '#1a1d20';
+                    el.style.color = '#e3e6e8';
+                    el.style.borderColor = '#3a3d40';
+                }
+                if (tagName === 'h2' || tagName === 'h3' || tagName === 'b' || tagName === 'strong') {
+                    el.style.color = '#4ba3e3';
+                    el.style.backgroundColor = 'transparent';
+                }
+            });
+        }
+        
+        setTimeout(applyWidgetStyles, 100);
+        setTimeout(applyWidgetStyles, 500);
+        setTimeout(applyWidgetStyles, 1000);
+    });
+    </script>
+</body>
+</html>
