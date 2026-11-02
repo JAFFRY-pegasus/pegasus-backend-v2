@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      <!-- BLOC WIDGET BOTURFERS -->
+      <!-- BLOC WIDGET BOTURFERS (CORRIGÉ) -->
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
           
@@ -90,17 +90,14 @@
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
           
-    <!-- Widget -->
-<div class="overflow-x-auto widget-scroll w-full p-4">
-   <div id="widget-container" class="widget-dark min-w-[320px] w-full text-white">
-      <div class="text-white">
-         <script type="text/javascript" src="https://boturfers.fr"></script>
-      </div>
-   </div>
-</div>
+          <!-- Widget avec l'URL CORRECTE et sans div parasite -->
+          <div class="overflow-x-auto widget-scroll w-full p-4">
+             <div id="widget-container" class="widget-dark min-w-[320px] w-full">
+                <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
+             </div>
+          </div>
 
-
-            <!-- Légende -->
+          <!-- Légende -->
           <div class="p-3 bg-[#121416]/80 mx-3 mb-3 rounded border border-[#2d3238]">
             <p class="text-alpha-sm text-[#98a2b3] leading-relaxed">
               <span class="font-semibold text-[#adb5bd] block mb-1">📊 Légende des rapports :</span>
@@ -209,26 +206,23 @@
       </div>
     </div>
 
-    <!-- ===== VOTRE SCRIPT OPTIMISÉ ===== -->
+    <!-- ===== SCRIPTS ===== -->
     <script>
+    // 1. SAISIE COMBINAISON (Logique par blocs optimisée pour 1-20)
     document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
 
         inputField.addEventListener('input', function(e) {
-            // 1. On sépare la saisie actuelle par les tirets ou espaces existants
             let blocks = e.target.value.split(/[- ]+/);
             let numbers = [];
 
             for (let block of blocks) {
-                // Ne garder que les chiffres de chaque bloc
                 let cleanBlock = block.replace(/[^0-9]/g, '');
                 if (!cleanBlock) continue;
 
                 let num = parseInt(cleanBlock, 10);
 
-                // OPTIMISATION : Si > 20, on sépare proprement pour ne pas perdre de chiffre
-                // Ex: "25" devient "2" puis "5" au lieu de jeter le "5"
                 if (num > 20 && cleanBlock.length === 2) {
                     let firstDigit = parseInt(cleanBlock[0], 10);
                     let secondDigit = parseInt(cleanBlock[1], 10);
@@ -242,83 +236,27 @@
                 }
             }
 
-            // 2. Gestion de la saisie en cours (si l'utilisateur est en train de taper un tiret à la fin)
             let endsWithDash = e.target.value.endsWith('-') || e.target.value.endsWith(' ');
             
-            // 3. Reconstruction de la chaîne de texte
             if (numbers.length > 0) {
                 e.target.value = numbers.join('-') + (endsWithDash && numbers.length < 8 ? '-' : '');
             } else {
                 e.target.value = '';
             }
 
-            // 4. Gestion de l'affichage du message d'alerte (Max 8)
             if (numbers.length >= 8) {
                 warningMsg.classList.remove('hidden');
             } else {
                 warningMsg.classList.add('hidden');
             }
             
-            // Maintenir le curseur à la fin pour éviter les sauts
             setTimeout(() => {
                 inputField.setSelectionRange(inputField.value.length, inputField.value.length);
             }, 0);
         });
 
-        // Ajoute automatiquement un tiret dès qu'un nombre à 2 chiffres est complété
         inputField.addEventListener('keyup', function(e) {
             if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') return;
             
             let val = e.target.value;
-            let parts = val.split('-');
-            let lastPart = parts[parts.length - 1];
-            
-            // Si le dernier bloc fait déjà 2 caractères et qu'on n'a pas atteint la limite, on met un tiret
-            if (lastPart.length === 2 && parts.length < 8) {
-                e.target.value = val + '-';
-            }
-        });
-    });
-
-    // ===== STYLES DU WIDGET (Inchangé) =====
-    document.addEventListener('DOMContentLoaded', function() {
-        const widgetContainer = document.getElementById('widget-container');
-        if (!widgetContainer) return;
-        
-        const observer = new MutationObserver(function() {
-            applyWidgetStyles();
-        });
-        
-        observer.observe(widgetContainer, { childList: true, subtree: true });
-        
-        function applyWidgetStyles() {
-            const allElements = widgetContainer.querySelectorAll('*');
-            allElements.forEach(function(el) {
-                const tagName = el.tagName.toLowerCase();
-                if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
-                    el.style.backgroundColor = '#1f2225';
-                }
-                if (tagName === 'th' || (tagName === 'td' && el.parentElement.tagName.toLowerCase() === 'thead')) {
-                    el.style.backgroundColor = '#8a8d90';
-                    el.style.color = '#ffffff';
-                    el.style.fontWeight = 'bold';
-                }
-                if (tagName === 'td') {
-                    el.style.backgroundColor = '#1a1d20';
-                    el.style.color = '#e3e6e8';
-                    el.style.borderColor = '#3a3d40';
-                }
-                if (tagName === 'h2' || tagName === 'h3' || tagName === 'b' || tagName === 'strong') {
-                    el.style.color = '#4ba3e3';
-                    el.style.backgroundColor = 'transparent';
-                }
-            });
-        }
-        
-        setTimeout(applyWidgetStyles, 100);
-        setTimeout(applyWidgetStyles, 500);
-        setTimeout(applyWidgetStyles, 1000);
-    });
-    </script>
-</body>
-</html>
+            let parts = val.split('-
