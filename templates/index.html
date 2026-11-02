@@ -148,7 +148,7 @@
                         id="combinaison-input" 
                         name="combinaison_utilisateur"
                         value="{{ combinaison_saisie }}"
-                        placeholder="Ex: 13-6-5-12-11-7-1-4" 
+                        placeholder="Ex: 1-11-5-12" 
                         maxlength="30"
                         class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
                         autocomplete="off"
@@ -157,7 +157,7 @@
                         ⚠️ Maximum 8 numéros atteints
                       </div>
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
-                        Saisissez les numéros (1-20), les tirets s'insèrent automatiquement
+                        Saisissez les numéros (1-20). Les tirets s'insèrent automatiquement.
                       </span>
                       <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
@@ -206,48 +206,78 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPTS (Seule partie modifiée pour la logique) ===== -->
+    <!-- ===== VOTRE SCRIPT OPTIMISÉ ===== -->
     <script>
-    // 1. SAISIE COMBINAISON (Votre script validé)
     document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
 
         inputField.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^0-9]/g, '');
+            // 1. On sépare la saisie actuelle par les tirets ou espaces existants
+            let blocks = e.target.value.split(/[- ]+/);
             let numbers = [];
-            
-            while (value.length > 0 && numbers.length < 8) {
-                let firstDigit = value.charAt(0);
-                
-                if ((firstDigit === '1' || firstDigit === '2') && value.length > 1) {
-                    let potentialTwoDigits = parseInt(value.substring(0, 2), 10);
-                    
-                    if (potentialTwoDigits >= 1 && potentialTwoDigits <= 20) {
-                        numbers.push(potentialTwoDigits);
-                        value = value.substring(2);
-                        continue;
+
+            for (let block of blocks) {
+                // Ne garder que les chiffres de chaque bloc
+                let cleanBlock = block.replace(/[^0-9]/g, '');
+                if (!cleanBlock) continue;
+
+                let num = parseInt(cleanBlock, 10);
+
+                // OPTIMISATION : Si > 20, on sépare proprement pour ne pas perdre de chiffre
+                // Ex: "25" devient "2" puis "5" au lieu de jeter le "5"
+                if (num > 20 && cleanBlock.length === 2) {
+                    let firstDigit = parseInt(cleanBlock[0], 10);
+                    let secondDigit = parseInt(cleanBlock[1], 10);
+                    if (firstDigit >= 1 && firstDigit <= 9 && numbers.length < 8) numbers.push(firstDigit);
+                    if (secondDigit >= 1 && secondDigit <= 9 && numbers.length < 8) numbers.push(secondDigit);
+                } 
+                else if (num >= 1 && num <= 20) {
+                    if (numbers.length < 8) {
+                        numbers.push(num);
                     }
                 }
-                
-                let singleDigit = parseInt(firstDigit, 10);
-                if (singleDigit >= 1 && singleDigit <= 9) {
-                    numbers.push(singleDigit);
-                }
-                value = value.substring(1);
             }
-            
-            e.target.value = numbers.join('-');
 
+            // 2. Gestion de la saisie en cours (si l'utilisateur est en train de taper un tiret à la fin)
+            let endsWithDash = e.target.value.endsWith('-') || e.target.value.endsWith(' ');
+            
+            // 3. Reconstruction de la chaîne de texte
+            if (numbers.length > 0) {
+                e.target.value = numbers.join('-') + (endsWithDash && numbers.length < 8 ? '-' : '');
+            } else {
+                e.target.value = '';
+            }
+
+            // 4. Gestion de l'affichage du message d'alerte (Max 8)
             if (numbers.length >= 8) {
                 warningMsg.classList.remove('hidden');
             } else {
                 warningMsg.classList.add('hidden');
             }
+            
+            // Maintenir le curseur à la fin pour éviter les sauts
+            setTimeout(() => {
+                inputField.setSelectionRange(inputField.value.length, inputField.value.length);
+            }, 0);
+        });
+
+        // Ajoute automatiquement un tiret dès qu'un nombre à 2 chiffres est complété
+        inputField.addEventListener('keyup', function(e) {
+            if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') return;
+            
+            let val = e.target.value;
+            let parts = val.split('-');
+            let lastPart = parts[parts.length - 1];
+            
+            // Si le dernier bloc fait déjà 2 caractères et qu'on n'a pas atteint la limite, on met un tiret
+            if (lastPart.length === 2 && parts.length < 8) {
+                e.target.value = val + '-';
+            }
         });
     });
 
-    // 2. STYLES DU WIDGET (Pour forcer le fond sombre et les titres bleus)
+    // ===== STYLES DU WIDGET (Inchangé) =====
     document.addEventListener('DOMContentLoaded', function() {
         const widgetContainer = document.getElementById('widget-container');
         if (!widgetContainer) return;
@@ -262,7 +292,6 @@
             const allElements = widgetContainer.querySelectorAll('*');
             allElements.forEach(function(el) {
                 const tagName = el.tagName.toLowerCase();
-                
                 if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
                     el.style.backgroundColor = '#1f2225';
                 }
