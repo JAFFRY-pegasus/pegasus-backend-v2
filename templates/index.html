@@ -85,7 +85,7 @@
           
           <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
             <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
-              <span class="text-xl"></span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
+              <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
             </h3>
             <p class="text-alpha-sm text-[#98a2b3] mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
@@ -195,7 +195,7 @@
         </div>
         <form action="/reinitialiser" method="POST">
           <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-alpha transition uppercase tracking-wider shadow-lg">
-            ️ Réinitialiser la sélection
+            🗑️ Réinitialiser la sélection
           </button>
         </form>
       </div>
@@ -206,125 +206,76 @@
       </div>
     </div>
 
+    <!-- ===== SCRIPTS (Seule partie modifiée pour la logique) ===== -->
     <script>
-    // ===== SCRIPT 1 : SAISIE COMBINAISON AVEC TIRETS AUTOMATIQUES =====
-    document.addEventListener('DOMContentLoaded', function() {
-        const input = document.getElementById('combinaison-input');
-        const warning = document.getElementById('warning-msg');
-        if (!input) return;
-        
-        // Stocker les numéros en mémoire
-        let numbers = [];
-        
-        // Intercepter chaque touche
-        input.addEventListener('keydown', function(e) {
-            // Backspace : supprimer le dernier numéro
-            if (e.key === 'Backspace') {
-                if (numbers.length > 0) {
-                    numbers.pop();
-                    updateDisplay();
-                }
-                e.preventDefault();
-                return;
-            }
+    // 1. SAISIE COMBINAISON (Votre script validé)
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputField = document.getElementById('combinaison-input');
+        const warningMsg = document.getElementById('warning-msg');
+
+        inputField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            let numbers = [];
             
-            // Chiffres 0-9
-            if (e.key >= '0' && e.key <= '9') {
-                if (numbers.length >= 8) {
-                    if (warning) warning.style.display = 'block';
-                    return;
-                }
+            while (value.length > 0 && numbers.length < 8) {
+                let firstDigit = value.charAt(0);
                 
-                // Si le dernier numéro a déjà 2 chiffres, en créer un nouveau
-                if (numbers.length > 0 && numbers[numbers.length - 1].length >= 2) {
-                    numbers.push(e.key);
-                } else if (numbers.length === 0) {
-                    numbers.push(e.key);
-                } else {
-                    // Ajouter au dernier numéro
-                    numbers[numbers.length - 1] += e.key;
-                }
-                
-                updateDisplay();
-                e.preventDefault();
-            }
-            
-            // Tiret : forcer la séparation
-            if (e.key === '-') {
-                if (numbers.length > 0 && numbers.length < 8) {
-                    numbers.push('');
-                }
-                updateDisplay();
-                e.preventDefault();
-            }
-        });
-        
-        function updateDisplay() {
-            // Filtrer les numéros valides (1-20)
-            let validNumbers = [];
-            for (let num of numbers) {
-                if (num.length > 0) {
-                    let n = parseInt(num);
-                    if (n >= 1 && n <= 20) {
-                        validNumbers.push(n);
+                if ((firstDigit === '1' || firstDigit === '2') && value.length > 1) {
+                    let potentialTwoDigits = parseInt(value.substring(0, 2), 10);
+                    
+                    if (potentialTwoDigits >= 1 && potentialTwoDigits <= 20) {
+                        numbers.push(potentialTwoDigits);
+                        value = value.substring(2);
+                        continue;
                     }
                 }
+                
+                let singleDigit = parseInt(firstDigit, 10);
+                if (singleDigit >= 1 && singleDigit <= 9) {
+                    numbers.push(singleDigit);
+                }
+                value = value.substring(1);
             }
             
-            // Limiter à 8
-            validNumbers = validNumbers.slice(0, 8);
-            
-            // Mettre à jour l'affichage AVEC TIRETS AUTOMATIQUES
-            input.value = validNumbers.join('-');
-            
-            // Avertissement
-            if (warning) {
-                warning.style.display = validNumbers.length >= 8 ? 'block' : 'none';
+            e.target.value = numbers.join('-');
+
+            if (numbers.length >= 8) {
+                warningMsg.classList.remove('hidden');
+            } else {
+                warningMsg.classList.add('hidden');
             }
-        }
+        });
     });
 
-    // ===== SCRIPT 2 : MODIFICATION DES STYLES DU WIDGET =====
+    // 2. STYLES DU WIDGET (Pour forcer le fond sombre et les titres bleus)
     document.addEventListener('DOMContentLoaded', function() {
         const widgetContainer = document.getElementById('widget-container');
         if (!widgetContainer) return;
         
-        // Observer les changements dans le widget
-        const observer = new MutationObserver(function(mutations) {
+        const observer = new MutationObserver(function() {
             applyWidgetStyles();
         });
         
-        observer.observe(widgetContainer, {
-            childList: true,
-            subtree: true
-        });
+        observer.observe(widgetContainer, { childList: true, subtree: true });
         
-        // Appliquer les styles
         function applyWidgetStyles() {
             const allElements = widgetContainer.querySelectorAll('*');
             allElements.forEach(function(el) {
                 const tagName = el.tagName.toLowerCase();
                 
-                // Tables et divs : fond gris foncé #1f2225
                 if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
                     el.style.backgroundColor = '#1f2225';
                 }
-                
-                // En-têtes de tableaux : gris moyen #8a8d90
                 if (tagName === 'th' || (tagName === 'td' && el.parentElement.tagName.toLowerCase() === 'thead')) {
                     el.style.backgroundColor = '#8a8d90';
                     el.style.color = '#ffffff';
                     el.style.fontWeight = 'bold';
                 }
-                
-                // Cellules de données : fond sombre
                 if (tagName === 'td') {
                     el.style.backgroundColor = '#1a1d20';
                     el.style.color = '#e3e6e8';
                     el.style.borderColor = '#3a3d40';
                 }
-                
-                // Titres : bleu #4ba3e3
                 if (tagName === 'h2' || tagName === 'h3' || tagName === 'b' || tagName === 'strong') {
                     el.style.color = '#4ba3e3';
                     el.style.backgroundColor = 'transparent';
@@ -332,7 +283,6 @@
             });
         }
         
-        // Appliquer immédiatement
         setTimeout(applyWidgetStyles, 100);
         setTimeout(applyWidgetStyles, 500);
         setTimeout(applyWidgetStyles, 1000);
