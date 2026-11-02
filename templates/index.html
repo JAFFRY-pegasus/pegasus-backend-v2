@@ -34,45 +34,6 @@
             border-radius: 8px;
         }
         
-        /* ===== HARMONISATION COULEURS WIDGET BOTURFERS ===== */
-        /* Fond du widget : même gris que le cadre "DONNÉES OFFICIELLES" */
-        .widget-dark,
-        .widget-dark > div,
-        .widget-dark table,
-        .widget-dark tr,
-        .widget-dark tbody {
-            background-color: #1f2225 !important;
-        }
-        
-        /* En-têtes des tableaux : gris moyen avec texte blanc */
-        .widget-dark th,
-        .widget-dark thead td {
-            background-color: #8a8d90 !important;
-            color: #ffffff !important;
-            font-weight: bold !important;
-        }
-        
-        /* Lignes de données : alternance sombre */
-        .widget-dark td {
-            background-color: #1a1d20 !important;
-            color: #e3e6e8 !important;
-            border-color: #3a3d40 !important;
-        }
-        
-        .widget-dark tr:nth-child(even) td {
-            background-color: #25282b !important;
-        }
-        
-        /* Titres du widget (Arrivée du Quinté, Rapports PMU) : BLEU comme "votre combinaison" */
-        .widget-dark h2,
-        .widget-dark h3,
-        .widget-dark .title,
-        .widget-dark b,
-        .widget-dark strong {
-            color: #4ba3e3 !important;
-            background-color: transparent !important;
-        }
-        
         /* ===== POLICES HOMOGÈNES ===== */
         .text-chiffre { 
             font-size: 1.875rem;
@@ -132,7 +93,7 @@
           
           <!-- Widget avec filtre sombre -->
           <div class="overflow-x-auto widget-scroll w-full p-4">
-             <div class="widget-dark min-w-[320px] w-full">
+             <div id="widget-container" class="widget-dark min-w-[320px] w-full">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
@@ -247,6 +208,7 @@
     </div>
 
     <script>
+    // ===== SCRIPT 1 : SAISIE COMBINAISON 1-20 =====
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('combinaison-input');
         const warning = document.getElementById('warning-msg');
@@ -257,11 +219,9 @@
             let numbers = [];
             let i = 0;
             
-            // ✅ MODIFIÉ : Accepte les numéros de 1 à 20
             while (i < digits.length && numbers.length < 8) {
                 if (i + 1 < digits.length) {
                     let twoDigits = parseInt(digits.substring(i, i + 2));
-                    // ✅ Limite étendue à 20
                     if (twoDigits >= 10 && twoDigits <= 20) {
                         numbers.push(twoDigits);
                         i += 2;
@@ -285,6 +245,53 @@
         input.addEventListener('keypress', function(e) {
             if (!/[0-9]/.test(String.fromCharCode(e.which))) e.preventDefault();
         });
+    });
+
+    // ===== SCRIPT 2 : MODIFICATION DES STYLES DU WIDGET BOTURFERS =====
+    document.addEventListener('DOMContentLoaded', function() {
+        // Attendre que le widget soit chargé (3 secondes)
+        setTimeout(function() {
+            const widgetContainer = document.getElementById('widget-container');
+            if (!widgetContainer) return;
+            
+            console.log('🎨 Application des styles au widget Boturfers...');
+            
+            // Modifier le fond du widget
+            widgetContainer.style.backgroundColor = '#1f2225';
+            
+            // Parcourir tous les éléments du widget
+            const allElements = widgetContainer.querySelectorAll('*');
+            allElements.forEach(function(el) {
+                const tagName = el.tagName.toLowerCase();
+                
+                // Tables et divs : fond gris foncé #1f2225
+                if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
+                    el.style.backgroundColor = '#1f2225';
+                }
+                
+                // En-têtes de tableaux (th, thead td) : gris moyen #8a8d90
+                if (tagName === 'th' || (tagName === 'td' && el.parentElement.tagName.toLowerCase() === 'thead')) {
+                    el.style.backgroundColor = '#8a8d90';
+                    el.style.color = '#ffffff';
+                    el.style.fontWeight = 'bold';
+                }
+                
+                // Cellules de données : fond sombre
+                if (tagName === 'td') {
+                    el.style.backgroundColor = '#1a1d20';
+                    el.style.color = '#e3e6e8';
+                    el.style.borderColor = '#3a3d40';
+                }
+                
+                // Titres (h2, h3, b, strong) : bleu #4ba3e3
+                if (tagName === 'h2' || tagName === 'h3' || tagName === 'b' || tagName === 'strong') {
+                    el.style.color = '#4ba3e3';
+                    el.style.backgroundColor = 'transparent';
+                }
+            });
+            
+            console.log('✅ Styles appliqués au widget');
+        }, 3000); // Attendre 3 secondes que le widget se charge
     });
     </script>
 </body>
