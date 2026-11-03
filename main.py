@@ -6,7 +6,6 @@ main.py v3.0
 Moteur SGE unifié + Mode manuel + Fichiers statiques (image de fond)
 Compatible FastAPI + Jinja2 + APScheduler
 """
-
 import sys
 import os
 import json
@@ -322,20 +321,24 @@ def dashboard(request: Request):
     }
 
     combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
-    score_pegasus = calculer_score_sge([int(n) for n in prono_pegasus])
-    score_combinaison = calculer_score_sge(combo_int) if len(combo_int) == 5 else 0
+    
+    # ✅ CORRECTION : Calcule le score pour 5 à 8 chevaux (et non plus exactement 5)
+    if 5 <= len(combo_int) <= 8:
+        score_utilisateur = calculer_score_sge(combo_int)
+    else:
+        score_utilisateur = 0
 
     stats = {
         "historique_courses": total_courses, 
         "taux_reussite": 20,
         "nb_dernieres_courses": 5, 
-        "ponderation_pegasus": score_pegasus,
-        "ponderation_combinaison": score_combinaison, 
+        "ponderation_pegasus": score_utilisateur,  # ✅ Affiche VOTRE score, pas celui du robot
+        "ponderation_combinaison": score_utilisateur, 
         "moyenne_chevaux_trouves": "0.00",
         "niveau_performance": "Faible", 
         "top_chevaux_frequents": top_chevaux
-    }
-
+    } 
+    
     combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE)
     
     tag_quinte = "✅ Quinté vérifié" if FLAG_QUINTE_VALIDE is True else \
