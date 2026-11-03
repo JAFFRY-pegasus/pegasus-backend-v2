@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.0
-Moteur SGE unifié + Mode manuel + Fichiers statiques (image de fond)
+main.py v3.1
+Moteur SGE unifié + Mode manuel + Fichiers statiques + Grille dynamique (1-20 chevaux)
 Compatible FastAPI + Jinja2 + APScheduler
 """
+
 import sys
 import os
 import json
@@ -24,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.0", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.1", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -54,16 +55,13 @@ except Exception as e:
     ERREUR_EXTRACTION = f"{type(e).__name__}: {e}"
 
 # =====================================================================
-# APPLICATION FASTAPI + STATIC FILES (CRITIQUE POUR L'IMAGE)
+# APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.0")
+app = FastAPI(title="Pegasus Backend v3.1")
 
-# ✅ CRITIQUE : Servir les fichiers statiques (image de fond)
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
-    print(f"✅ Dossier static monté sur /static ({CHEMIN_STATIC})", flush=True)
-else:
-    print(f"⚠️ Dossier static introuvable : {CHEMIN_STATIC}. Créez-le pour l'image de fond.", flush=True)
+    print(f"✅ Dossier static monté sur /static", flush=True)
 
 templates = Jinja2Templates(directory=CHEMIN_TEMPLATES)
 DEBUG = os.environ.get("DEBUG", "0") == "1"
@@ -84,27 +82,19 @@ def _date_francaise():
 
 OPPOSITIONS_VERTICALES = {
     1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
-    9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8
+    9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8,
+    17: 17, 18: 18, 19: 19, 20: 20 # Extension pour les chevaux > 16
 }
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
 
 # =====================================================================
-# DONNÉES GLOBALES DU QUINTÉ DU JOUR
+# DONNÉES GLOBALES
 # =====================================================================
 DONNEES_QUINTE_DU_JOUR = {
-    "hippodrome": "EN ATTENTE",
-    "discipline": "Inconnue",
-    "distance": 0,
-    "nb_partants": 0,
-    "heure_depart": "--:--",
-    "nom_course": "Chargement...",
-    "date": _date_francaise(),
-    "synthese_presse": "",
-    "statut_robot": "Actif",
-    "isQuinte": None,
-    "numReunion": None,
-    "numOrdre": None,
-    "mode_manuel": False
+    "hippodrome": "EN ATTENTE", "discipline": "Inconnue", "distance": 0,
+    "nb_partants": 16, "heure_depart": "--:--", "nom_course": "Chargement...",
+    "date": _date_francaise(), "synthese_presse": "", "statut_robot": "Actif",
+    "isQuinte": None, "numReunion": None, "numOrdre": None, "mode_manuel": False
 }
 
 DERNIERE_VERIFICATION = 0.0
@@ -118,22 +108,16 @@ CLEFS_ATTENDUES = [
 ]
 
 # =====================================================================
-# LOGIQUE D'ACTUALISATION & FALLBACK
+# LOGIQUE D'ACTUALISATION
 # =====================================================================
 def _fusionner(nouvelles_donnees):
     global DONNEES_QUINTE_DU_JOUR, FLAG_QUINTE_VALIDE
-    if not isinstance(nouvelles_donnees, dict):
-        return False
-
+    if not isinstance(nouvelles_donnees, dict): return False
     flag = nouvelles_donnees.get("isQuinte")
-    if flag is True:
-        FLAG_QUINTE_VALIDE = True
-    elif flag is False:
-        FLAG_QUINTE_VALIDE = False
-        return False
-    else:
-        FLAG_QUINTE_VALIDE = None
-
+    if flag is True: FLAG_QUINTE_VALIDE = True
+    elif flag is False: FLAG_QUINTE_VALIDE = False; return False
+    else: FLAG_QUINTE_VALIDE = None
+    
     maj = False
     for clef in CLEFS_ATTENDUES:
         valeur = nouvelles_donnees.get(clef)
@@ -144,38 +128,29 @@ def _fusionner(nouvelles_donnees):
 
 def rafraichir_donnees_quinte(force=False):
     global DERNIERE_VERIFICATION, DERNIERE_VERIFICATION_HHMM
-    
     maintenant = time.time()
     if not force and (maintenant - DERNIERE_VERIFICATION) < TTL_CACHE_SECONDS:
-        if DONNEES_QUINTE_DU_JOUR.get("mode_manuel"):
-            return DONNEES_QUINTE_DU_JOUR
+        if DONNEES_QUINTE_DU_JOUR.get("mode_manuel"): return DONNEES_QUINTE_DU_JOUR
         return DONNEES_QUINTE_DU_JOUR
 
     source = "aucune"
-    
-    # Tentative API
     if EXTRACTION_DISPONIBLE and not DONNEES_QUINTE_DU_JOUR.get("mode_manuel"):
         try:
             resultat = obtenir_quinte_du_jour()
             if resultat and _fusionner(resultat):
                 source = "extraction.py"
                 DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
-        except Exception as e:
-            print(f"⚠️ Extraction API échouée: {e}", flush=True)
+        except Exception as e: print(f"⚠️ Extraction API échouée: {e}", flush=True)
 
-    # Fallback Fichier JSON
     if source == "aucune":
         try:
             with open(FICHIER_SAUVEGARDE, encoding="utf-8") as f:
                 secours = json.load(f)
-            if secours and _fusionner(secours):
-                source = "quinte_du_jour.json"
-        except Exception:
-            pass
+            if secours and _fusionner(secours): source = "quinte_du_jour.json"
+        except Exception: pass
 
-    # Fallback Mode Manuel
     if source == "aucune":
-        print("⚠️ Activation du MODE MANUEL (API & JSON indisponibles)", flush=True)
+        print("⚠️ Activation du MODE MANUEL", flush=True)
         DONNEES_QUINTE_DU_JOUR["statut_robot"] = "Mode Manuel"
         DONNEES_QUINTE_DU_JOUR["mode_manuel"] = True
         DONNEES_QUINTE_DU_JOUR["date"] = _date_francaise()
@@ -187,7 +162,7 @@ def rafraichir_donnees_quinte(force=False):
     return DONNEES_QUINTE_DU_JOUR
 
 # =====================================================================
-# SCHEDULER AUTOMATIQUE
+# SCHEDULER
 # =====================================================================
 SCHEDULER_ACTIF = False
 try:
@@ -196,9 +171,7 @@ try:
     scheduler.add_job(lambda: rafraichir_donnees_quinte(force=True), "interval", minutes=30)
     scheduler.start()
     SCHEDULER_ACTIF = True
-    print("✅ Scheduler APScheduler actif (rafraîchissement toutes les 30 min)", flush=True)
-except Exception as e:
-    print(f"ℹ️ Scheduler inactif: {e}", flush=True)
+except Exception as e: print(f"ℹ️ Scheduler inactif: {e}", flush=True)
 
 # =====================================================================
 # MOTEUR SGE
@@ -229,10 +202,12 @@ def calculer_score_sge(combinaison):
                     score_brut += POIDS_AXES_HISTORIQUE[axe]
     nombre_axes = len(axes_touches)
     ponderation = COEFFICIENTS_RESONANCE.get(nombre_axes, 2.0)
-    return int(score_brut * ponderation)
+    score_final = int(score_brut * ponderation)
+    print(f"🔍 DEBUG SCORE: Combo={combinaison} | Axes={list(axes_touches)} | Score={score_final}", flush=True)
+    return score_final
 
 def generer_prono_automatique(combinaison_ref):
-    valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 16]
+    valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 20]
     if len(valides) < 5:
         liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16]
         complements = [n for n in liste_defaut if n not in valides]
@@ -244,49 +219,12 @@ def generer_prono_automatique(combinaison_ref):
         score = calculer_score_sge(list(combo))
         scores_candidats.append((score, list(combo)))
     scores_candidats.sort(key=lambda x: x[0], reverse=True)
-    if scores_candidats:
-        return [str(x) for x in scores_candidats[0][1]]
+    if scores_candidats: return [str(x) for x in scores_candidats[0][1]]
     return [str(x) for x in valides[:5]]
 
 # =====================================================================
 # ROUTES
 # =====================================================================
-@app.exception_handler(Exception)
-async def erreur_non_geree(request: Request, exc: Exception):
-    trace = traceback.format_exc()
-    if DEBUG:
-        return HTMLResponse(f"<h1>Erreur 500</h1><pre>{trace}</pre>", status_code=500)
-    return HTMLResponse("Internal Server Error.", status_code=500)
-
-@app.get("/health")
-def health():
-    return {
-        "status": "ok", 
-        "debug": DEBUG, 
-        "nb_courses": len(HISTORIQUE_SGE_DATA),
-        "scheduler_actif": SCHEDULER_ACTIF,
-        "extraction_disponible": EXTRACTION_DISPONIBLE
-    }
-
-@app.get("/debug-extraction")
-def debug_extraction():
-    if not EXTRACTION_DISPONIBLE:
-        return JSONResponse({
-            "extraction_disponible": False, 
-            "erreur": ERREUR_EXTRACTION
-        })
-    try:
-        debut = time.time()
-        resultat = obtenir_quinte_du_jour()
-        return JSONResponse({
-            "extraction_disponible": True,
-            "duree_secondes": round(time.time() - debut, 2),
-            "flag_quinte_detecte": resultat.get("isQuinte") if isinstance(resultat, dict) else None,
-            "contenu": resultat
-        })
-    except Exception as e:
-        return JSONResponse({"extraction_disponible": True, "erreur": str(e)})
-
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     global COMBINAISON_SELECTIONNEE
@@ -310,8 +248,7 @@ def dashboard(request: Request):
     
     synthese_brute = str(DONNEES_QUINTE_DU_JOUR.get("synthese_presse", ""))
     jetons_presse = [x.strip() for x in synthese_brute.split("-") if x.strip().isdigit()]
-    if not jetons_presse: 
-        jetons_presse = ["?", "?", "?", "?", "?"]
+    if not jetons_presse: jetons_presse = ["?", "?", "?", "?", "?"]
 
     jetons = {
         "presse": jetons_presse,
@@ -320,33 +257,35 @@ def dashboard(request: Request):
         "retenus": COMBINAISON_SELECTIONNEE
     }
 
+    # ✅ CALCUL DU SCORE UTILISATEUR (Corrigé pour 5 à 8 chevaux)
     combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
-    
-    # ✅ CORRECTION : Calcule le score pour 5 à 8 chevaux (et non plus exactement 5)
     if 5 <= len(combo_int) <= 8:
         score_utilisateur = calculer_score_sge(combo_int)
     else:
         score_utilisateur = 0
 
+    # ✅ CALCUL DU NOMBRE DE PARTANTS POUR LA GRILLE DYNAMIQUE (Entre 8 et 20)
+    nb_partants_brut = info_quinte.get('nb_partants', 16)
+    try:
+        nb_partants = max(8, min(20, int(nb_partants_brut)))
+    except:
+        nb_partants = 16
+
     stats = {
         "historique_courses": total_courses, 
         "taux_reussite": 20,
         "nb_dernieres_courses": 5, 
-        "ponderation_pegasus": score_utilisateur,  # ✅ Affiche VOTRE score, pas celui du robot
+        "ponderation_pegasus": score_utilisateur,
         "ponderation_combinaison": score_utilisateur, 
         "moyenne_chevaux_trouves": "0.00",
         "niveau_performance": "Faible", 
         "top_chevaux_frequents": top_chevaux
-    } 
-    
+    }
+
     combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE)
-    
     tag_quinte = "✅ Quinté vérifié" if FLAG_QUINTE_VALIDE is True else \
-                 "⚠️ PAS un Quinté" if FLAG_QUINTE_VALIDE is False else \
-                 "Quinté non vérifié"
-    
+                 "⚠️ PAS un Quinté" if FLAG_QUINTE_VALIDE is False else "Quinté non vérifié"
     code_pmu = f"R{DONNEES_QUINTE_DU_JOUR.get('numReunion','?')}C{DONNEES_QUINTE_DU_JOUR.get('numOrdre','?')}"
-    nb_partants = info_quinte.get('nb_partants', 0)
     message_statut = f"{tag_quinte} • {code_pmu} • {nb_partants} partants • Vérif: {DERNIERE_VERIFICATION_HHMM}"
 
     return templates.TemplateResponse(
@@ -358,7 +297,8 @@ def dashboard(request: Request):
             "info_quinte": info_quinte,
             "combinaison_saisie": combinaison_saisie,
             "jetons": jetons, 
-            "stats": stats
+            "stats": stats,
+            "nb_partants": nb_partants  # ✅ ENVOYÉ AU TEMPLATE
         }
     )
 
@@ -366,8 +306,7 @@ def dashboard(request: Request):
 def calculer(combinaison_utilisateur: str = Form(...)):
     global COMBINAISON_SELECTIONNEE
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
-    if extraits: 
-        COMBINAISON_SELECTIONNEE = extraits[:8]  # ✅ Limite à 8 chevaux
+    if extraits: COMBINAISON_SELECTIONNEE = extraits[:8]
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
@@ -377,7 +316,7 @@ def selectionner_grille(numero: str):
         COMBINAISON_SELECTIONNEE.remove(numero)
     elif len(COMBINAISON_SELECTIONNEE) < 8:
         COMBINAISON_SELECTIONNEE.append(numero)
-        COMBINAISON_SELECTIONNEE.sort(key=int)
+        COMBINAISON_SELECTIONNEE.sort(key=lambda x: int(x))
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/reinitialiser")
@@ -402,39 +341,23 @@ def relancer():
 
 @app.post("/saisie-manuelle")
 def saisie_manuelle(
-    hippodrome: str = Form(...),
-    nom_course: str = Form(...),
-    nb_partants: int = Form(...),
-    heure_depart: str = Form(...),
-    discipline: str = Form("TROT ATTELÉ"),
-    distance: int = Form(0)
+    hippodrome: str = Form(...), nom_course: str = Form(...),
+    nb_partants: int = Form(...), heure_depart: str = Form(...),
+    discipline: str = Form("TROT ATTELÉ"), distance: int = Form(0)
 ):
-    """Route pour saisir manuellement les infos quand l'API est morte."""
     global DONNEES_QUINTE_DU_JOUR
     DONNEES_QUINTE_DU_JOUR.update({
-        "hippodrome": hippodrome.upper(),
-        "nom_course": nom_course,
-        "nb_partants": nb_partants,
-        "heure_depart": heure_depart,
-        "discipline": discipline.upper(),
-        "distance": distance,
-        "statut_robot": "Données Manuelles",
-        "mode_manuel": True,
-        "isQuinte": True,
-        "numReunion": 1,
-        "numOrdre": 5
+        "hippodrome": hippodrome.upper(), "nom_course": nom_course,
+        "nb_partants": nb_partants, "heure_depart": heure_depart,
+        "discipline": discipline.upper(), "distance": distance,
+        "statut_robot": "Données Manuelles", "mode_manuel": True,
+        "isQuinte": True, "numReunion": 1, "numOrdre": 5
     })
     try:
         with open(FICHIER_SAUVEGARDE, 'w', encoding='utf-8') as f:
             json.dump(DONNEES_QUINTE_DU_JOUR, f, ensure_ascii=False)
-    except Exception:
-        pass
+    except Exception: pass
     return RedirectResponse(url="/", status_code=303)
-
-# =====================================================================
-# LANCEMENT
-# =====================================================================
-print("✅ Initialisation terminée", flush=True)
 
 if __name__ == '__main__':
     import uvicorn
