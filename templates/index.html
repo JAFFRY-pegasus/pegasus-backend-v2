@@ -140,16 +140,16 @@
                         id="combinaison-input" 
                         name="combinaison_utilisateur"
                         value="{{ combinaison_saisie }}"
-                        placeholder="Tapez 13651211..." 
+                        placeholder="Ex: 13-6-5-12-11" 
                         maxlength="30"
                         class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
                         autocomplete="off"
                       />
                       <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center mt-1">
-                        ️ Maximum 8 numéros atteints
+                        ⚠️ Maximum 8 numéros atteints
                       </div>
                       <span class="text-alpha-sm text-[#7a8292] text-center block">
-                        Saisissez les numéros (1-20). Les tirets s'insèrent automatiquement.
+                        Saisissez les numéros (1-20) séparés par des tirets.
                       </span>
                       <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
                         Calculer
@@ -173,13 +173,12 @@
         </div>
       </div>
 
-      <!-- ✅ GRILLE DYNAMIQUE MODIFIÉE -->
+      <!-- ✅ GRILLE DYNAMIQUE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 text-center">
            SÉLECTION RAPIDE (GRILLE 1-{{ nb_partants }})
         </h2>
         
-        <!-- Grille CSS dynamique : le nombre de colonnes est la moitié arrondie au supérieur -->
         <div class="grid gap-3 mb-6" style="grid-template-columns: repeat({{ (nb_partants / 2) | round(0, 'ceil') | int }}, minmax(0, 1fr));">
           {% for i in range(1, nb_partants + 1) %}
           <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-105 shadow-lg{% endif %}">
@@ -201,74 +200,55 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT DE SAISIE AUTOMATIQUE ===== -->
+    <!-- ===== SCRIPT DE SAISIE SIMPLIFIÉ ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
         
-        let buffer = "";
-        let numbers = [];
+        if (!inputField) return;
 
-        inputField.addEventListener('keydown', function(e) {
-            if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                if (e.key === 'Backspace') {
-                    if (buffer.length > 0) {
-                        buffer = buffer.slice(0, -1);
-                    } else if (numbers.length > 0) {
-                        numbers.pop();
-                    }
-                    updateDisplay();
-                    e.preventDefault();
-                }
-                return;
-            }
-
-            if (e.key >= '0' && e.key <= '9') {
-                if (numbers.length >= 8 && buffer === "") {
-                    e.preventDefault();
-                    return;
-                }
-
-                buffer += e.key;
-
-                if (buffer.length === 2) {
-                    let num = parseInt(buffer);
-                    if (num >= 1 && num <= 20) {
-                        numbers.push(num);
-                        buffer = "";
-                    } else {
-                        let firstDigit = parseInt(buffer[0]);
-                        if (firstDigit >= 1 && firstDigit <= 9 && numbers.length < 8) {
-                            numbers.push(firstDigit);
-                        }
-                        buffer = e.key;
-                    }
-                }
-                
-                updateDisplay();
-                e.preventDefault();
-            }
-        });
-
-        function updateDisplay() {
-            let displayArray = [...numbers];
-            if (buffer.length > 0) {
-                displayArray.push(buffer);
-            }
+        inputField.addEventListener('input', function(e) {
+            // 1. On récupère la valeur tapée
+            let valeur = this.value;
             
-            inputField.value = displayArray.join('-');
+            // 2. On nettoie : on garde seulement les chiffres et tirets
+            valeur = valeur.replace(/[^0-9\-]/g, '');
             
-            if (numbers.length >= 8 && buffer === "") {
+            // 3. On split par tirets et on filtre
+            let numeros = valeur.split('-')
+                .map(n => n.trim())
+                .filter(n => n !== '' && !isNaN(n));
+            
+            // 4. On valide chaque numéro (1-20) et on limite à 8
+            numeros = numeros
+                .map(n => parseInt(n))
+                .filter(n => n >= 1 && n <= 20)
+                .slice(0, 8);
+            
+            // 5. On reformate avec tirets
+            this.value = numeros.join('-');
+            
+            // 6. Warning si 8 numéros atteints
+            if (numeros.length >= 8) {
                 warningMsg.classList.remove('hidden');
             } else {
                 warningMsg.classList.add('hidden');
             }
             
+            // 7. Curseur à la fin
             setTimeout(() => {
-                inputField.setSelectionRange(inputField.value.length, inputField.value.length);
+                this.setSelectionRange(this.value.length, this.value.length);
             }, 0);
-        }
+        });
+
+        // Empêcher la saisie de caractères invalides en temps réel
+        inputField.addEventListener('keydown', function(e) {
+            const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', '-'];
+            if (allowedKeys.includes(e.key)) return;
+            if (e.key >= '0' && e.key <= '9') return;
+            e.preventDefault();
+        });
     });
 
     // ===== STYLES DU WIDGET =====
