@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.1
-Moteur SGE unifié + Mode manuel + Fichiers statiques + Grille dynamique (1-20 chevaux)
+main.py v3.3
+Moteur SGE unifié + Mode manuel + Fichiers statiques + Grille dynamique + Score Amorti + Fix Refresh
 Compatible FastAPI + Jinja2 + APScheduler
 """
 
@@ -25,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.1", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.3 (Amorti + Fix Refresh)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -57,7 +57,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.1")
+app = FastAPI(title="Pegasus Backend v3.3")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -83,7 +83,7 @@ def _date_francaise():
 OPPOSITIONS_VERTICALES = {
     1: 9, 2: 10, 3: 11, 4: 12, 5: 13, 6: 14, 7: 15, 8: 16,
     9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8,
-    17: 17, 18: 18, 19: 19, 20: 20 # Extension pour les chevaux > 16
+    17: 17, 18: 18, 19: 19, 20: 20
 }
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
 
@@ -174,7 +174,7 @@ try:
 except Exception as e: print(f"ℹ️ Scheduler inactif: {e}", flush=True)
 
 # =====================================================================
-# MOTEUR SGE
+# MOTEUR SGE (AVEC AMORTISSEMENT PHYSIQUE)
 # =====================================================================
 def calculer_poids_axes():
     frequence_axes = Counter()
@@ -192,6 +192,8 @@ POIDS_AXES_HISTORIQUE = calculer_poids_axes()
 def calculer_score_sge(combinaison):
     score_brut = 0
     axes_touches = set()
+    
+    # 1. La "Force du Champ" : On compte les axes validés
     for i in range(len(combinaison)):
         for j in range(i + 1, len(combinaison)):
             a, b = combinaison[i], combinaison[j]
@@ -200,10 +202,21 @@ def calculer_score_sge(combinaison):
                 axes_touches.add(axe)
                 if axe in POIDS_AXES_HISTORIQUE:
                     score_brut += POIDS_AXES_HISTORIQUE[axe]
+    
     nombre_axes = len(axes_touches)
+    taille_combinaison = len(combinaison)
+    
+    # 2. Le "Frottement" (Amortissement) : Rendement décroissant
+    # Une combo de 5 chevaux a un facteur de 1.0. Une combo de 8 chevaux a un facteur de ~0.69
+    facteur_amortissement = 1.0 / (1.0 + (taille_combinaison - 5) * 0.15) 
+    
+    # 3. La Résonance (Le multiplicateur)
     ponderation = COEFFICIENTS_RESONANCE.get(nombre_axes, 2.0)
-    score_final = int(score_brut * ponderation)
-    print(f"🔍 DEBUG SCORE: Combo={combinaison} | Axes={list(axes_touches)} | Score={score_final}", flush=True)
+    
+    # 4. L'Équilibre Final (Vitesse limite)
+    score_final = int(score_brut * ponderation * facteur_amortissement)
+    
+    print(f"🔍 DEBUG SCORE: Combo={combinaison} | Taille={taille_combinaison} | Axes={nombre_axes} | Score Brut={score_brut} | Amorti={facteur_amortissement:.2f} | Score Final={score_final}", flush=True)
     return score_final
 
 def generer_prono_automatique(combinaison_ref):
@@ -257,7 +270,7 @@ def dashboard(request: Request):
         "retenus": COMBINAISON_SELECTIONNEE
     }
 
-    # ✅ CALCUL DU SCORE UTILISATEUR (Corrigé pour 5 à 8 chevaux)
+    # ✅ CALCUL DU SCORE UTILISATEUR (Avec amortissement)
     combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
     if 5 <= len(combo_int) <= 8:
         score_utilisateur = calculer_score_sge(combo_int)
@@ -298,9 +311,15 @@ def dashboard(request: Request):
             "combinaison_saisie": combinaison_saisie,
             "jetons": jetons, 
             "stats": stats,
-            "nb_partants": nb_partants  # ✅ ENVOYÉ AU TEMPLATE
+            "nb_partants": nb_partants
         }
     )
+
+# ✅ FIX REFRESH : Route GET pour éviter "Method Not Allowed"
+@app.get("/calculer")
+def calculer_get():
+    """Redirige vers l'accueil si on accède à /calculer en GET (rafraîchissement de page)"""
+    return RedirectResponse(url="/", status_code=302)
 
 @app.post("/calculer")
 def calculer(combinaison_utilisateur: str = Form(...)):
