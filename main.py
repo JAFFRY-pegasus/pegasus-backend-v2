@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.3
-Moteur SGE unifié + Mode manuel + Fichiers statiques + Grille dynamique + Score Amorti + Fix Refresh
-Compatible FastAPI + Jinja2 + APScheduler
+main.py v3.5
+Moteur SGE + Grille fixe 1-20 + Score amorti + Persistance combinaison (fichier JSON)
 """
 
 import sys
@@ -25,13 +24,14 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.3 (Amorti + Fix Refresh)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.5 (Persistance combinaison)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
 CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
 CHEMIN_STATIC = os.path.join(CHEMIN_BASE, "static")
 FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
+FICHIER_COMBINAISON = os.path.join(CHEMIN_BASE, "combinaison.json")  # ✅ NOUVEAU
 
 # =====================================================================
 # IMPORTS DES MODULES
@@ -57,7 +57,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.3")
+app = FastAPI(title="Pegasus Backend v3.5")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -86,6 +86,33 @@ OPPOSITIONS_VERTICALES = {
     17: 17, 18: 18, 19: 19, 20: 20
 }
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
+
+# =====================================================================
+# FONCTIONS DE PERSISTANCE DE LA COMBINAISON
+# =====================================================================
+def charger_combinaison():
+    """Charge la combinaison depuis le fichier JSON au démarrage"""
+    global COMBINAISON_SELECTIONNEE
+    try:
+        if os.path.exists(FICHIER_COMBINAISON):
+            with open(FICHIER_COMBINAISON, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if 'combinaison' in data and isinstance(data['combinaison'], list):
+                    COMBINAISON_SELECTIONNEE = data['combinaison']
+                    print(f"✅ Combinaison chargée depuis fichier: {COMBINAISON_SELECTIONNEE}", flush=True)
+    except Exception as e:
+        print(f"⚠️ Erreur chargement combinaison: {e}", flush=True)
+
+def sauvegarder_combinaison():
+    """Sauvegarde la combinaison dans le fichier JSON"""
+    try:
+        with open(FICHIER_COMBINAISON, 'w', encoding='utf-8') as f:
+            json.dump({'combinaison': COMBINAISON_SELECTIONNEE}, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️ Erreur sauvegarde combinaison: {e}", flush=True)
+
+# Charger la combinaison au démarrage
+charger_combinaison()
 
 # =====================================================================
 # DONNÉES GLOBALES
@@ -193,7 +220,6 @@ def calculer_score_sge(combinaison):
     score_brut = 0
     axes_touches = set()
     
-    # 1. La "Force du Champ" : On compte les axes validés
     for i in range(len(combinaison)):
         for j in range(i + 1, len(combinaison)):
             a, b = combinaison[i], combinaison[j]
@@ -206,17 +232,11 @@ def calculer_score_sge(combinaison):
     nombre_axes = len(axes_touches)
     taille_combinaison = len(combinaison)
     
-    # 2. Le "Frottement" (Amortissement) : Rendement décroissant
-    # Une combo de 5 chevaux a un facteur de 1.0. Une combo de 8 chevaux a un facteur de ~0.69
     facteur_amortissement = 1.0 / (1.0 + (taille_combinaison - 5) * 0.15) 
-    
-    # 3. La Résonance (Le multiplicateur)
     ponderation = COEFFICIENTS_RESONANCE.get(nombre_axes, 2.0)
-    
-    # 4. L'Équilibre Final (Vitesse limite)
     score_final = int(score_brut * ponderation * facteur_amortissement)
     
-    print(f"🔍 DEBUG SCORE: Combo={combinaison} | Taille={taille_combinaison} | Axes={nombre_axes} | Score Brut={score_brut} | Amorti={facteur_amortissement:.2f} | Score Final={score_final}", flush=True)
+    print(f"🔍 DEBUG SCORE: Combo={combinaison} | Taille={taille_combinaison} | Axes={nombre_axes} | Score Final={score_final}", flush=True)
     return score_final
 
 def generer_prono_automatique(combinaison_ref):
@@ -270,19 +290,13 @@ def dashboard(request: Request):
         "retenus": COMBINAISON_SELECTIONNEE
     }
 
-    # ✅ CALCUL DU SCORE UTILISATEUR (Avec amortissement)
     combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
     if 5 <= len(combo_int) <= 8:
         score_utilisateur = calculer_score_sge(combo_int)
     else:
         score_utilisateur = 0
 
-    # ✅ CALCUL DU NOMBRE DE PARTANTS POUR LA GRILLE DYNAMIQUE (Entre 8 et 20)
-    nb_partants_brut = info_quinte.get('nb_partants', 16)
-    try:
-        nb_partants = max(8, min(20, int(nb_partants_brut)))
-    except:
-        nb_partants = 16
+    nb_partants = 20  # Grille fixe 1-20
 
     stats = {
         "historique_courses": total_courses, 
@@ -315,17 +329,17 @@ def dashboard(request: Request):
         }
     )
 
-# ✅ FIX REFRESH : Route GET pour éviter "Method Not Allowed"
 @app.get("/calculer")
 def calculer_get():
-    """Redirige vers l'accueil si on accède à /calculer en GET (rafraîchissement de page)"""
     return RedirectResponse(url="/", status_code=302)
 
 @app.post("/calculer")
 def calculer(combinaison_utilisateur: str = Form(...)):
     global COMBINAISON_SELECTIONNEE
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
-    if extraits: COMBINAISON_SELECTIONNEE = extraits[:8]
+    if extraits: 
+        COMBINAISON_SELECTIONNEE = extraits[:8]
+        sauvegarder_combinaison()  # ✅ Sauvegarde après modification
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
@@ -336,12 +350,14 @@ def selectionner_grille(numero: str):
     elif len(COMBINAISON_SELECTIONNEE) < 8:
         COMBINAISON_SELECTIONNEE.append(numero)
         COMBINAISON_SELECTIONNEE.sort(key=lambda x: int(x))
+    sauvegarder_combinaison()  # ✅ Sauvegarde après modification
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/reinitialiser")
 def reinitialiser():
     global COMBINAISON_SELECTIONNEE
     COMBINAISON_SELECTIONNEE = []
+    sauvegarder_combinaison()  # ✅ Sauvegarde après réinitialisation
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/actualiser")
@@ -356,6 +372,7 @@ def relancer():
     DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
     rafraichir_donnees_quinte(force=True)
     COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
+    sauvegarder_combinaison()  # ✅ Sauvegarde après relance
     return RedirectResponse(url="/", status_code=303)
 
 @app.post("/saisie-manuelle")
