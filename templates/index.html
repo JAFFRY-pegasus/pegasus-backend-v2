@@ -179,7 +179,6 @@
            SÉLECTION RAPIDE (1 À 20)
         </h2>
         
-        <!-- 5 colonnes sur mobile, 10 colonnes sur tablette/PC -->
         <div class="grid grid-cols-5 sm:grid-cols-10 gap-3 mb-6">
           {% for i in range(1, 21) %}
           <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-105 shadow-lg{% endif %}">
@@ -201,33 +200,24 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT MINIMAL ===== -->
+    <!-- ===== SCRIPT AVEC LOCALSTORAGE ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
         
-        if (!form || !inputField) return;
+        if (!inputField) return;
 
-        form.addEventListener('submit', function(e) {
-            const valeur = inputField.value;
-            const numeros = valeur.split(/[\s,\-;]+/)
-                .map(n => n.trim())
-                .filter(n => n !== '' && /^\d+$/.test(n))
-                .map(n => parseInt(n))
-                .filter(n => n >= 1 && n <= 20)
-                .slice(0, 8);
-            
-            if (numeros.length < 5) {
-                e.preventDefault();
-                alert('Veuillez saisir au moins 5 numéros (entre 1 et 20).');
-                return;
-            }
-            
-            inputField.value = numeros.join('-');
-        });
+        // 1. RESTAURER la combinaison depuis le navigateur au chargement
+        const savedCombo = localStorage.getItem('pegasus_combinaison');
+        if (savedCombo) {
+            inputField.value = savedCombo;
+            // Déclencher l'événement input pour mettre à jour le warning
+            inputField.dispatchEvent(new Event('input'));
+        }
 
+        // 2. SAUVEGARDER la combinaison dans le navigateur à chaque modification
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
@@ -240,7 +230,32 @@
             } else {
                 warningMsg.classList.add('hidden');
             }
+            
+            // Sauvegarder dans le navigateur
+            localStorage.setItem('pegasus_combinaison', this.value);
         });
+
+        // 3. Validation au submit
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const valeur = inputField.value;
+                const numeros = valeur.split(/[\s,\-;]+/)
+                    .map(n => n.trim())
+                    .filter(n => n !== '' && /^\d+$/.test(n))
+                    .map(n => parseInt(n))
+                    .filter(n => n >= 1 && n <= 20)
+                    .slice(0, 8);
+                
+                if (numeros.length < 5) {
+                    e.preventDefault();
+                    alert('Veuillez saisir au moins 5 numéros (entre 1 et 20).');
+                    return;
+                }
+                
+                inputField.value = numeros.join('-');
+                localStorage.setItem('pegasus_combinaison', inputField.value);
+            });
+        }
     });
 
     // ===== STYLES DU WIDGET =====
