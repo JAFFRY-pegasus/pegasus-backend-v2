@@ -43,6 +43,43 @@
             font-size: 0.6875rem;
             font-weight: 500;
         }
+
+        /* ✅ Force le texte en blanc dans le widget, sans toucher au reste */
+        #widget-container,
+        #widget-container *,
+        #widget-container p,
+        #widget-container span,
+        #widget-container a,
+        #widget-container td,
+        #widget-container th,
+        #widget-container div,
+        #widget-container h1,
+        #widget-container h2,
+        #widget-container h3,
+        #widget-container h4,
+        #widget-container b,
+        #widget-container strong,
+        #widget-container label,
+        #widget-container small,
+        #widget-container li {
+            color: #ffffff !important;
+        }
+
+        /* Les liens restent bleus pour être reconnaissables */
+        #widget-container a {
+            color: #60a5fa !important;
+            text-decoration: underline;
+        }
+
+        /* Les titres en orange pour rester cohérents avec le thème */
+        #widget-container h1,
+        #widget-container h2,
+        #widget-container h3,
+        #widget-container h4,
+        #widget-container b,
+        #widget-container strong {
+            color: #f1a934 !important;
+        }
     </style>
 </head>
 
@@ -213,7 +250,6 @@
         const savedCombo = localStorage.getItem('pegasus_combinaison');
         if (savedCombo) {
             inputField.value = savedCombo;
-            // Déclencher l'événement input pour mettre à jour le warning
             inputField.dispatchEvent(new Event('input'));
         }
 
@@ -231,7 +267,6 @@
                 warningMsg.classList.add('hidden');
             }
             
-            // Sauvegarder dans le navigateur
             localStorage.setItem('pegasus_combinaison', this.value);
         });
 
@@ -256,46 +291,6 @@
                 localStorage.setItem('pegasus_combinaison', inputField.value);
             });
         }
-    });
-
-    // ===== STYLES DU WIDGET =====
-    document.addEventListener('DOMContentLoaded', function() {
-        const widgetContainer = document.getElementById('widget-container');
-        if (!widgetContainer) return;
-        
-        const observer = new MutationObserver(function() {
-            applyWidgetStyles();
-        });
-        
-        observer.observe(widgetContainer, { childList: true, subtree: true });
-        
-        function applyWidgetStyles() {
-            const allElements = widgetContainer.querySelectorAll('*');
-            allElements.forEach(function(el) {
-                const tagName = el.tagName.toLowerCase();
-                if (tagName === 'table' || tagName === 'div' || tagName === 'tr') {
-                    el.style.backgroundColor = '#1f2225';
-                }
-                if (tagName === 'th' || (tagName === 'td' && el.parentElement.tagName.toLowerCase() === 'thead')) {
-                    el.style.backgroundColor = '#8a8d90';
-                    el.style.color = '#ffffff';
-                    el.style.fontWeight = 'bold';
-                }
-                if (tagName === 'td') {
-                    el.style.backgroundColor = '#1a1d20';
-                    el.style.color = '#e3e6e8';
-                    el.style.borderColor = '#3a3d40';
-                }
-                if (tagName === 'h2' || tagName === 'h3' || tagName === 'b' || tagName === 'strong') {
-                    el.style.color = '#4ba3e3';
-                    el.style.backgroundColor = 'transparent';
-                }
-            });
-        }
-        
-        setTimeout(applyWidgetStyles, 100);
-        setTimeout(applyWidgetStyles, 500);
-        setTimeout(applyWidgetStyles, 1000);
     });
     </script>
 </body>
