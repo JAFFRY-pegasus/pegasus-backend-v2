@@ -173,14 +173,15 @@
         </div>
       </div>
 
-      <!-- ✅ GRILLE DYNAMIQUE -->
+      <!-- ✅ GRILLE FIXE 1 À 20 -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 text-center">
-           SÉLECTION RAPIDE (GRILLE 1-{{ nb_partants }})
+           SÉLECTION RAPIDE (1 À 20)
         </h2>
         
-        <div class="grid gap-3 mb-6" style="grid-template-columns: repeat({{ (nb_partants / 2) | round(0, 'ceil') | int }}, minmax(0, 1fr));">
-          {% for i in range(1, nb_partants + 1) %}
+        <!-- 5 colonnes sur mobile, 10 colonnes sur tablette/PC -->
+        <div class="grid grid-cols-5 sm:grid-cols-10 gap-3 mb-6">
+          {% for i in range(1, 21) %}
           <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-105 shadow-lg{% endif %}">
             {{ i }}
           </a>
@@ -200,7 +201,7 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT MINIMAL - VALIDATION UNIQUEMENT AU SUBMIT ===== -->
+    <!-- ===== SCRIPT MINIMAL ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
@@ -209,31 +210,24 @@
         
         if (!form || !inputField) return;
 
-        // Validation UNIQUEMENT au moment de soumettre le formulaire
         form.addEventListener('submit', function(e) {
             const valeur = inputField.value;
-            
-            // Extraire tous les nombres (séparés par tirets, espaces, virgules, points)
             const numeros = valeur.split(/[\s,\-;]+/)
                 .map(n => n.trim())
                 .filter(n => n !== '' && /^\d+$/.test(n))
                 .map(n => parseInt(n))
-                .filter(n => n >= 1 && n <= 20);
+                .filter(n => n >= 1 && n <= 20)
+                .slice(0, 8);
             
-            // Limiter à 8 numéros
-            const numerosFinaux = numeros.slice(0, 8);
-            
-            if (numerosFinaux.length < 5) {
+            if (numeros.length < 5) {
                 e.preventDefault();
                 alert('Veuillez saisir au moins 5 numéros (entre 1 et 20).');
                 return;
             }
             
-            // Reformater proprement avant envoi
-            inputField.value = numerosFinaux.join('-');
+            inputField.value = numeros.join('-');
         });
 
-        // Affichage discret du nombre de numéros (sans bloquer la saisie)
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
