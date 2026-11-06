@@ -65,7 +65,6 @@
             color: #ffffff !important;
         }
 
-        /* Force le fond de TOUTES les cellules en sombre */
         #widget-container td,
         #widget-container th,
         #widget-container tr,
@@ -74,13 +73,11 @@
             background-color: #1f2225 !important;
         }
 
-        /* Les liens restent bleus pour être reconnaissables */
         #widget-container a {
             color: #60a5fa !important;
             text-decoration: underline;
         }
 
-        /* Les titres en orange pour rester cohérents avec le thème */
         #widget-container h1,
         #widget-container h2,
         #widget-container h3,
@@ -90,32 +87,31 @@
             color: #f1a934 !important;
         }
 
-        /* Alternance de couleur pour les lignes du tableau (zebra striping) */
         #widget-container tr:nth-child(even) td {
             background-color: #2d3238 !important;
         }
 
-        /* ✅ NOUVEAU : Rendre le widget plus compact */
+        /* ✅ Widget compact */
         #widget-container table {
-            font-size: 11px !important;  /* Réduit la taille du texte du tableau */
+            font-size: 11px !important;
             border-collapse: collapse !important;
         }
 
         #widget-container td,
         #widget-container th {
-            padding: 3px 6px !important;  /* Réduit l'espacement dans les cellules */
-            line-height: 1.2 !important;  /* Réduit la hauteur des lignes */
+            padding: 3px 6px !important;
+            line-height: 1.2 !important;
             font-size: 11px !important;
         }
 
         #widget-container th {
-            padding: 4px 6px !important;  /* En-têtes un peu plus grands */
+            padding: 4px 6px !important;
             font-size: 12px !important;
         }
 
         #widget-container h2,
         #widget-container h3 {
-            font-size: 14px !important;  /* Titres plus petits */
+            font-size: 14px !important;
             margin: 4px 0 !important;
             padding: 2px 0 !important;
         }
@@ -130,7 +126,6 @@
             height: auto !important;
         }
 
-        /* Réduit l'espacement global du widget */
         #widget-container {
             padding: 6px !important;
         }
@@ -211,7 +206,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
-                      <div class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
+                      <div id="score-display" class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
@@ -259,6 +254,11 @@
                           <span class="text-[#6c757d] text-sm italic">Aucune sélection active...</span>
                       {% endif %}
                   </div>
+                  
+                  <!-- ✅ NOUVEAU BOUTON PARTAGER -->
+                  <button id="btn-partager" type="button" class="w-full mt-4 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-2.5 px-4 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                    📤 Partager mon pronostic
+                  </button>
                 </div>
             </div>
         </div>
@@ -291,7 +291,7 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC LOCALSTORAGE ===== -->
+    <!-- ===== SCRIPT AVEC LOCALSTORAGE ET PARTAGE ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
@@ -343,6 +343,46 @@
                 
                 inputField.value = numeros.join('-');
                 localStorage.setItem('pegasus_combinaison', inputField.value);
+            });
+        }
+
+        // ✅ 4. LOGIQUE DU BOUTON PARTAGER
+        const btnPartager = document.getElementById('btn-partager');
+        if (btnPartager) {
+            btnPartager.addEventListener('click', () => {
+                const combo = inputField.value;
+                const scoreElement = document.getElementById('score-display');
+                const score = scoreElement ? scoreElement.innerText.trim() : '? pts';
+                
+                // Vérifier qu'il y a bien une combinaison
+                if (!combo || combo.includes('Aucune') || combo.trim() === '') {
+                    alert('⚠️ Veuillez d\'abord sélectionner ou saisir une combinaison !');
+                    return;
+                }
+
+                // Créer le message à copier
+                const message = `🐎 Mon pronostic Pegasus du jour :\n🔢 Combinaison : ${combo}\n📊 Score Pegasus : ${score}\n🔮 Testez l'algo géométrique gratuit ici :\nhttps://pegasus-backend-v2.onrender.com`;
+
+                // Copier dans le presse-papier
+                navigator.clipboard.writeText(message).then(() => {
+                    // Feedback visuel de succès
+                    const originalHTML = btnPartager.innerHTML;
+                    const originalBg = 'bg-[#3b82f6]';
+                    const successBg = 'bg-[#10b981]'; // Vert succès
+                    
+                    btnPartager.innerHTML = '✅ Pronostic copié !';
+                    btnPartager.classList.remove(originalBg);
+                    btnPartager.classList.add(successBg);
+                    
+                    setTimeout(() => {
+                        btnPartager.innerHTML = originalHTML;
+                        btnPartager.classList.remove(successBg);
+                        btnPartager.classList.add(originalBg);
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Erreur copie:', err);
+                    alert('Erreur lors de la copie. Essayez de copier manuellement.');
+                });
             });
         }
     });
