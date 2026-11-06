@@ -94,6 +94,46 @@
         #widget-container tr:nth-child(even) td {
             background-color: #2d3238 !important;
         }
+
+        /* ✅ NOUVEAU : Rendre le widget plus compact */
+        #widget-container table {
+            font-size: 11px !important;  /* Réduit la taille du texte du tableau */
+            border-collapse: collapse !important;
+        }
+
+        #widget-container td,
+        #widget-container th {
+            padding: 3px 6px !important;  /* Réduit l'espacement dans les cellules */
+            line-height: 1.2 !important;  /* Réduit la hauteur des lignes */
+            font-size: 11px !important;
+        }
+
+        #widget-container th {
+            padding: 4px 6px !important;  /* En-têtes un peu plus grands */
+            font-size: 12px !important;
+        }
+
+        #widget-container h2,
+        #widget-container h3 {
+            font-size: 14px !important;  /* Titres plus petits */
+            margin: 4px 0 !important;
+            padding: 2px 0 !important;
+        }
+
+        #widget-container p {
+            font-size: 11px !important;
+            margin: 2px 0 !important;
+            padding: 0 !important;
+        }
+
+        #widget-container tr {
+            height: auto !important;
+        }
+
+        /* Réduit l'espacement global du widget */
+        #widget-container {
+            padding: 6px !important;
+        }
     </style>
 </head>
 
