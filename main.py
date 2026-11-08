@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.14
-Moteur SGE + Grille fixe 1-20 + Score amorti + Persistance combinaison + Routes GET sécurisées (Anti-refresh error)
+main.py v3.15
+Moteur SGE + Grille fixe 1-20 + Score amorti + Persistance combinaison utilisateur 
++ Combinaison propriétaire (référence) + Pronostic jusqu'à 8 chevaux
 """
 
 import sys
@@ -24,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.14 (Sécurisé)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.15 (Combinaison propriétaire)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +33,7 @@ CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
 CHEMIN_STATIC = os.path.join(CHEMIN_BASE, "static")
 FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
 FICHIER_COMBINAISON = os.path.join(CHEMIN_BASE, "combinaison.json")
+FICHIER_COMBINAISON_PROPRIO = os.path.join(CHEMIN_BASE, "combinaison_proprio.json")
 
 # =====================================================================
 # IMPORTS DES MODULES
@@ -57,7 +59,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.14")
+app = FastAPI(title="Pegasus Backend v3.15")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -71,6 +73,7 @@ TTL_CACHE_SECONDS = 900
 # CONSTANTES DU MOTEUR SGE
 # =====================================================================
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
+COMBINAISON_PROPRIO = ["7", "1", "15", "4", "12", "8", "11", "2"]  # Valeur par défaut
 
 _JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 _MOIS = ["janvier", "février", "mars", "avril", "mai", "juin",
@@ -88,7 +91,7 @@ OPPOSITIONS_VERTICALES = {
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
 
 # =====================================================================
-# FONCTIONS DE PERSISTANCE DE LA COMBINAISON
+# FONCTIONS DE PERSISTANCE
 # =====================================================================
 def charger_combinaison():
     global COMBINAISON_SELECTIONNEE
@@ -98,7 +101,7 @@ def charger_combinaison():
                 data = json.load(f)
                 if 'combinaison' in data and isinstance(data['combinaison'], list):
                     COMBINAISON_SELECTIONNEE = data['combinaison']
-                    print(f"✅ Combinaison chargée: {COMBINAISON_SELECTIONNEE}", flush=True)
+                    print(f"✅ Combinaison utilisateur chargée: {COMBINAISON_SELECTIONNEE}", flush=True)
     except Exception as e:
         print(f"⚠️ Erreur chargement combinaison: {e}", flush=True)
 
@@ -109,7 +112,20 @@ def sauvegarder_combinaison():
     except Exception as e:
         print(f"⚠️ Erreur sauvegarde combinaison: {e}", flush=True)
 
+def charger_combinaison_proprio():
+    global COMBINAISON_PROPRIO
+    try:
+        if os.path.exists(FICHIER_COMBINAISON_PROPRIO):
+            with open(FICHIER_COMBINAISON_PROPRIO, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if 'combinaison' in data and isinstance(data['combinaison'], list):
+                    COMBINAISON_PROPRIO = data['combinaison']
+                    print(f"✅ Combinaison propriétaire chargée: {COMBINAISON_PROPRIO}", flush=True)
+    except Exception as e:
+        print(f"⚠️ Erreur chargement combinaison proprio: {e}. Valeur par défaut utilisée.", flush=True)
+
 charger_combinaison()
+charger_combinaison_proprio()
 
 # =====================================================================
 # DONNÉES GLOBALES
@@ -237,32 +253,57 @@ def calculer_score_sge(combinaison):
     print(f"🔍 DEBUG SCORE: Combo={combinaison} | Taille={taille_combinaison} | Axes={nombre_axes} | Score Final={score_final}", flush=True)
     return score_final
 
-def generer_prono_automatique(combinaison_ref):
+def generer_prono_automatique(combinaison_ref, nombre_max=5):
+    """Génère un pronostic basé sur la combinaison de référence.
+    nombre_max permet de retourner entre 5 et 8 chevaux."""
     valides = [int(n) for n in combinaison_ref if n.isdigit() and 1 <= int(n) <= 20]
-    if len(valides) < 5:
-        liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16]
+    
+    # Si pas assez de chevaux valides, on complète avec une liste par défaut
+    if len(valides) < nombre_max:
+        liste_defaut = [11, 4, 7, 5, 9, 1, 2, 3, 6, 8, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         complements = [n for n in liste_defaut if n not in valides]
-        valides = (valides + complements)[:5]
+        valides = (valides + complements)[:nombre_max]
+    
+    # On ajoute les opposés des chevaux valides pour enrichir les candidats
     opposes = [OPPOSITIONS_VERTICALES[n] for n in valides if n in OPPOSITIONS_VERTICALES]
     candidats = list(dict.fromkeys(valides + opposes))
+    
+    # Si trop de candidats, on limite pour éviter un calcul trop long
+    if len(candidats) > 16:
+        candidats = candidats[:16]
+    
     scores_candidats = []
-    for combo in combinations(candidats, 5):
+    for combo in combinations(candidats, nombre_max):
         score = calculer_score_sge(list(combo))
         scores_candidats.append((score, list(combo)))
+    
     scores_candidats.sort(key=lambda x: x[0], reverse=True)
-    if scores_candidats: return [str(x) for x in scores_candidats[0][1]]
-    return [str(x) for x in valides[:5]]
+    
+    if scores_candidats:
+        return [str(x) for x in scores_candidats[0][1]]
+    return [str(x) for x in valides[:nombre_max]]
 
 # =====================================================================
 # ROUTES
 # =====================================================================
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
-    global COMBINAISON_SELECTIONNEE
+    global COMBINAISON_SELECTIONNEE, COMBINAISON_PROPRIO
     rafraichir_donnees_quinte()
 
-    prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE)
+    # ✅ PRONOSTIC PEGASUS CALCULÉ À PARTIR DE LA COMBINAISON PROPRIÉTAIRE
+    # Le nombre de chevaux du pronostic = nombre de chevaux de la combinaison proprio (5 à 8)
+    nb_chevaux_proprio = len(COMBINAISON_PROPRIO)
+    prono_pegasus = generer_prono_automatique(COMBINAISON_PROPRIO, nombre_max=nb_chevaux_proprio)
     
+    # ✅ SCORE DE LA COMBINAISON PROPRIÉTAIRE
+    combo_proprio_int = [int(n) for n in COMBINAISON_PROPRIO if n.isdigit()]
+    if 5 <= len(combo_proprio_int) <= 8:
+        score_proprio = calculer_score_sge(combo_proprio_int)
+    else:
+        score_proprio = 0
+    
+    # Stats classiques
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
@@ -298,7 +339,7 @@ def dashboard(request: Request):
     try:
         nb_partants = max(8, min(20, int(nb_partants_brut)))
     except:
-        nb_partants = 20 # Fallback sécurisé pour la grille fixe
+        nb_partants = 20
 
     stats = {
         "historique_courses": total_courses, 
@@ -327,12 +368,16 @@ def dashboard(request: Request):
             "combinaison_saisie": combinaison_saisie,
             "jetons": jetons, 
             "stats": stats,
-            "nb_partants": nb_partants
+            "nb_partants": nb_partants,
+            # ✅ NOUVELLES VARIABLES POUR LA COMBINAISON PROPRIÉTAIRE
+            "combinaison_proprio": COMBINAISON_PROPRIO,
+            "prono_proprio": prono_pegasus,
+            "score_proprio": score_proprio
         }
     )
 
 # =====================================================================
-# ROUTES SÉCURISÉES (GET + POST pour éviter les erreurs de rafraîchissement)
+# ROUTES SÉCURISÉES (GET + POST)
 # =====================================================================
 
 @app.get("/calculer")
@@ -420,4 +465,4 @@ def saisie_manuelle(
 if __name__ == '__main__':
     import uvicorn
     port = int(os.environ.get("PORT", 5000))
-    uvicorn.run(app, host='0.0.0.0', port=_port)
+    uvicorn.run(app, host='0.0.0.0', port=port)
