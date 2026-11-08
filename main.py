@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.5
-Moteur SGE + Grille fixe 1-20 + Score amorti + Persistance combinaison (fichier JSON)
+main.py v3.14
+Moteur SGE + Grille fixe 1-20 + Score amorti + Persistance combinaison + Routes GET sécurisées (Anti-refresh error)
 """
 
 import sys
@@ -24,14 +24,14 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.5 (Persistance combinaison)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.14 (Sécurisé)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
 CHEMIN_TEMPLATES = os.path.join(CHEMIN_BASE, "templates")
 CHEMIN_STATIC = os.path.join(CHEMIN_BASE, "static")
 FICHIER_SAUVEGARDE = os.path.join(CHEMIN_BASE, "quinte_du_jour.json")
-FICHIER_COMBINAISON = os.path.join(CHEMIN_BASE, "combinaison.json")  # ✅ NOUVEAU
+FICHIER_COMBINAISON = os.path.join(CHEMIN_BASE, "combinaison.json")
 
 # =====================================================================
 # IMPORTS DES MODULES
@@ -57,7 +57,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.5")
+app = FastAPI(title="Pegasus Backend v3.14")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -91,7 +91,6 @@ COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
 # FONCTIONS DE PERSISTANCE DE LA COMBINAISON
 # =====================================================================
 def charger_combinaison():
-    """Charge la combinaison depuis le fichier JSON au démarrage"""
     global COMBINAISON_SELECTIONNEE
     try:
         if os.path.exists(FICHIER_COMBINAISON):
@@ -99,19 +98,17 @@ def charger_combinaison():
                 data = json.load(f)
                 if 'combinaison' in data and isinstance(data['combinaison'], list):
                     COMBINAISON_SELECTIONNEE = data['combinaison']
-                    print(f"✅ Combinaison chargée depuis fichier: {COMBINAISON_SELECTIONNEE}", flush=True)
+                    print(f"✅ Combinaison chargée: {COMBINAISON_SELECTIONNEE}", flush=True)
     except Exception as e:
         print(f"⚠️ Erreur chargement combinaison: {e}", flush=True)
 
 def sauvegarder_combinaison():
-    """Sauvegarde la combinaison dans le fichier JSON"""
     try:
         with open(FICHIER_COMBINAISON, 'w', encoding='utf-8') as f:
             json.dump({'combinaison': COMBINAISON_SELECTIONNEE}, f, ensure_ascii=False)
     except Exception as e:
         print(f"⚠️ Erreur sauvegarde combinaison: {e}", flush=True)
 
-# Charger la combinaison au démarrage
 charger_combinaison()
 
 # =====================================================================
@@ -232,6 +229,7 @@ def calculer_score_sge(combinaison):
     nombre_axes = len(axes_touches)
     taille_combinaison = len(combinaison)
     
+    # Frottement / Amortissement physique
     facteur_amortissement = 1.0 / (1.0 + (taille_combinaison - 5) * 0.15) 
     ponderation = COEFFICIENTS_RESONANCE.get(nombre_axes, 2.0)
     score_final = int(score_brut * ponderation * facteur_amortissement)
@@ -296,7 +294,11 @@ def dashboard(request: Request):
     else:
         score_utilisateur = 0
 
-    nb_partants = 20  # Grille fixe 1-20
+    nb_partants_brut = info_quinte.get('nb_partants', 16)
+    try:
+        nb_partants = max(8, min(20, int(nb_partants_brut)))
+    except:
+        nb_partants = 20 # Fallback sécurisé pour la grille fixe
 
     stats = {
         "historique_courses": total_courses, 
@@ -329,6 +331,10 @@ def dashboard(request: Request):
         }
     )
 
+# =====================================================================
+# ROUTES SÉCURISÉES (GET + POST pour éviter les erreurs de rafraîchissement)
+# =====================================================================
+
 @app.get("/calculer")
 def calculer_get():
     return RedirectResponse(url="/", status_code=302)
@@ -339,7 +345,7 @@ def calculer(combinaison_utilisateur: str = Form(...)):
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
     if extraits: 
         COMBINAISON_SELECTIONNEE = extraits[:8]
-        sauvegarder_combinaison()  # ✅ Sauvegarde après modification
+        sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
@@ -350,15 +356,23 @@ def selectionner_grille(numero: str):
     elif len(COMBINAISON_SELECTIONNEE) < 8:
         COMBINAISON_SELECTIONNEE.append(numero)
         COMBINAISON_SELECTIONNEE.sort(key=lambda x: int(x))
-    sauvegarder_combinaison()  # ✅ Sauvegarde après modification
+    sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
+
+@app.get("/reinitialiser")
+def reinitialiser_get():
+    return RedirectResponse(url="/", status_code=302)
 
 @app.post("/reinitialiser")
 def reinitialiser():
     global COMBINAISON_SELECTIONNEE
     COMBINAISON_SELECTIONNEE = []
-    sauvegarder_combinaison()  # ✅ Sauvegarde après réinitialisation
+    sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
+
+@app.get("/actualiser")
+def actualiser_get():
+    return RedirectResponse(url="/", status_code=302)
 
 @app.post("/actualiser")
 def actualiser():
@@ -366,14 +380,22 @@ def actualiser():
     rafraichir_donnees_quinte(force=True)
     return RedirectResponse(url="/", status_code=303)
 
+@app.get("/relancer")
+def relancer_get():
+    return RedirectResponse(url="/", status_code=302)
+
 @app.post("/relancer")
 def relancer():
     global COMBINAISON_SELECTIONNEE
     DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
     rafraichir_donnees_quinte(force=True)
     COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
-    sauvegarder_combinaison()  # ✅ Sauvegarde après relance
+    sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
+
+@app.get("/saisie-manuelle")
+def saisie_manuelle_get():
+    return RedirectResponse(url="/", status_code=302)
 
 @app.post("/saisie-manuelle")
 def saisie_manuelle(
@@ -398,4 +420,4 @@ def saisie_manuelle(
 if __name__ == '__main__':
     import uvicorn
     port = int(os.environ.get("PORT", 5000))
-    uvicorn.run(app, host='0.0.0.0', port=port)
+    uvicorn.run(app, host='0.0.0.0', port=_port)
