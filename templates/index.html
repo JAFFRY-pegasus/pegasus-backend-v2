@@ -44,7 +44,7 @@
             font-weight: 500;
         }
 
-        /* ✅ Force le texte en blanc ET le fond en sombre dans le widget */
+        /* Widget Boturfers - thème sombre et compact */
         #widget-container,
         #widget-container *,
         #widget-container p,
@@ -91,7 +91,6 @@
             background-color: #2d3238 !important;
         }
 
-        /* ✅ Widget compact */
         #widget-container table {
             font-size: 11px !important;
             border-collapse: collapse !important;
@@ -186,27 +185,34 @@
         </div>
       </div>
 
-      <!-- BLOC MOTEUR PEGASUS -->
-      <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
-        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
-          🔮 ANALYSE GÉOMÉTRIQUE PEGASUS
+      <!-- ✅ NOUVEAU BLOC : COMBINAISON DE RÉFÉRENCE DU PROPRIÉTAIRE + PRONOSTIC PEGASUS -->
+      <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
+        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
+          🔮 ANALYSE GÉOMÉTRIQUE PEGASUS - COMBINAISON DE RÉFÉRENCE
         </h2>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- COLONNE GAUCHE : Combinaison de référence du propriétaire -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">Pronostic Pegasus calculé :</span>
+                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">
+                    🎯 Ma combinaison de référence (propriétaire) :
+                  </span>
                   <div class="flex flex-wrap gap-3">
-                      {% for cheval in jetons.pegasus %}
-                      <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
+                      {% for cheval in combinaison_proprio %}
+                      <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
                       {% endfor %}
                   </div>
+                  <p class="text-alpha-sm text-[#7a8292] mt-3 italic">
+                    Cette combinaison est définie par le propriétaire du site et mise à jour quotidiennement.
+                  </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score Pegasus</div>
-                      <div id="score-display" class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
+                      <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score de ma combinaison</div>
+                      <div class="text-chiffre text-[#f1a934]">{{ score_proprio }} <span class="text-base">pts</span></div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Taux Réussite</div>
@@ -215,11 +221,46 @@
                 </div>
             </div>
 
+            <!-- COLONNE DROITE : Pronostic Pegasus calculé (jusqu'à 8 chevaux) -->
+            <div class="space-y-6">
+                <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
+                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">
+                    🧠 Pronostic Pegasus optimisé (jusqu'à 8 chevaux) :
+                  </span>
+                  <div class="flex flex-wrap gap-3">
+                      {% for cheval in prono_proprio %}
+                      <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
+                      {% endfor %}
+                  </div>
+                  <p class="text-alpha-sm text-[#7a8292] mt-3 italic">
+                    L'algorithme Pegasus optimise la combinaison de référence en appliquant les axes géométriques et le principe de résonance.
+                  </p>
+                </div>
+
+                <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
+                  <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
+                    📊 Ce que Pegasus calcule avec ma combinaison :
+                  </span>
+                  <ul class="text-alpha-sm text-[#98a2b3] space-y-1">
+                    <li>• <span class="text-white font-semibold">{{ combinaison_proprio|length }}</span> chevaux analysés</li>
+                    <li>• <span class="text-white font-semibold">{{ prono_proprio|length }}</span> chevaux optimisés par l'IA géométrique</li>
+                    <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ score_proprio }} pts</span></li>
+                    <li>• Axes verticaux détectés dans l'historique</li>
+                  </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- BLOC MOTEUR PEGASUS (UTILISATEUR) -->
+      <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
+        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
+          💡 VOTRE COMBINAISON (5 À 8 CHEVAUX)
+        </h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="space-y-6">
                 <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
-                  <label class="text-alpha text-[#4ba3e3] uppercase block mb-3">
-                    💡 Votre combinaison (5 à 8 chevaux) :
-                  </label>
                   <form action="/calculer" method="POST" class="flex flex-col gap-3" id="form-calculer">
                       <input 
                         type="text" 
@@ -255,16 +296,23 @@
                       {% endif %}
                   </div>
                   
-                  <!-- ✅ NOUVEAU BOUTON PARTAGER -->
+                  <!-- BOUTON PARTAGER -->
                   <button id="btn-partager" type="button" class="w-full mt-4 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-2.5 px-4 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer">
                     📤 Partager mon pronostic
                   </button>
                 </div>
             </div>
+
+            <div class="space-y-6">
+                <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
+                    <div class="text-alpha-sm text-[#98a2b3] font-medium mb-2 uppercase">Score de votre combinaison</div>
+                    <div id="score-display" class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
+                </div>
+            </div>
         </div>
       </div>
 
-      <!-- ✅ GRILLE FIXE 1 À 20 -->
+      <!-- GRILLE FIXE 1 À 20 -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 text-center">
            SÉLECTION RAPIDE (1 À 20)
@@ -300,14 +348,12 @@
         
         if (!inputField) return;
 
-        // 1. RESTAURER la combinaison depuis le navigateur au chargement
         const savedCombo = localStorage.getItem('pegasus_combinaison');
         if (savedCombo) {
             inputField.value = savedCombo;
             inputField.dispatchEvent(new Event('input'));
         }
 
-        // 2. SAUVEGARDER la combinaison dans le navigateur à chaque modification
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
@@ -324,7 +370,6 @@
             localStorage.setItem('pegasus_combinaison', this.value);
         });
 
-        // 3. Validation au submit
         if (form) {
             form.addEventListener('submit', function(e) {
                 const valeur = inputField.value;
@@ -346,7 +391,6 @@
             });
         }
 
-        // ✅ 4. LOGIQUE DU BOUTON PARTAGER
         const btnPartager = document.getElementById('btn-partager');
         if (btnPartager) {
             btnPartager.addEventListener('click', () => {
@@ -354,21 +398,17 @@
                 const scoreElement = document.getElementById('score-display');
                 const score = scoreElement ? scoreElement.innerText.trim() : '? pts';
                 
-                // Vérifier qu'il y a bien une combinaison
                 if (!combo || combo.includes('Aucune') || combo.trim() === '') {
                     alert('⚠️ Veuillez d\'abord sélectionner ou saisir une combinaison !');
                     return;
                 }
 
-                // Créer le message à copier
                 const message = `🐎 Mon pronostic Pegasus du jour :\n🔢 Combinaison : ${combo}\n📊 Score Pegasus : ${score}\n🔮 Testez l'algo géométrique gratuit ici :\nhttps://pegasus-backend-v2.onrender.com`;
 
-                // Copier dans le presse-papier
                 navigator.clipboard.writeText(message).then(() => {
-                    // Feedback visuel de succès
                     const originalHTML = btnPartager.innerHTML;
                     const originalBg = 'bg-[#3b82f6]';
-                    const successBg = 'bg-[#10b981]'; // Vert succès
+                    const successBg = 'bg-[#10b981]';
                     
                     btnPartager.innerHTML = '✅ Pronostic copié !';
                     btnPartager.classList.remove(originalBg);
@@ -388,9 +428,8 @@
     });
     </script>
 
-    <!-- ✅ CLOUDFLARE WEB ANALYTICS (Suivi de fréquentation) -->
+    <!-- CLOUDFLARE WEB ANALYTICS -->
     <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0e3a23be57b84bf0a7b726f3c7203e46"}'></script>
-    <!-- Fin Cloudflare Web Analytics -->
 
 </body>
 </html>
