@@ -185,7 +185,7 @@
         </div>
       </div>
 
-      <!-- ✅ NOUVEAU BLOC : COMBINAISON DE RÉFÉRENCE DU PROPRIÉTAIRE + PRONOSTIC PEGASUS -->
+      <!-- BLOC COMBINAISON DE RÉFÉRENCE + PRONOSTIC PEGASUS -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS - COMBINAISON DE RÉFÉRENCE
@@ -221,7 +221,7 @@
                 </div>
             </div>
 
-            <!-- COLONNE DROITE : Pronostic Pegasus calculé (jusqu'à 8 chevaux) -->
+            <!-- COLONNE DROITE : Pronostic Pegasus calculé -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase tracking-wider">
@@ -252,7 +252,7 @@
         </div>
       </div>
 
-      <!-- BLOC MOTEUR PEGASUS (UTILISATEUR) -->
+      <!-- BLOC UTILISATEUR : SAISIE + SCORE + BOUTON PARTAGER -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
           💡 VOTRE COMBINAISON (5 À 8 CHEVAUX)
@@ -284,20 +284,9 @@
                   </form>
                 </div>
 
-                <div>
-                  <span class="text-alpha-sm text-[#98a2b3] block mb-3 font-medium uppercase">Combinaison retenue :</span>
-                  <div class="flex gap-2 font-mono flex-wrap bg-[#121416]/30 p-3 rounded border border-[#2d3238] min-h-[50px] items-center">
-                      {% if jetons.retenus %}
-                          {% for cheval in jetons.retenus %}
-                          <span class="px-4 py-1.5 bg-[#2d3238] text-white rounded font-bold text-sm border border-[#3a4149] shadow-sm">{{ cheval }}</span>
-                          {% endfor %}
-                      {% else %}
-                          <span class="text-[#6c757d] text-sm italic">Aucune sélection active...</span>
-                      {% endif %}
-                  </div>
-                  
-                  <!-- BOUTON PARTAGER -->
-                  <button id="btn-partager" type="button" class="w-full mt-4 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-2.5 px-4 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                <!-- ✅ BOUTON PARTAGER CENTRÉ (sans la zone "Combinaison retenue") -->
+                <div class="flex justify-center">
+                  <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">
                     📤 Partager mon pronostic
                   </button>
                 </div>
