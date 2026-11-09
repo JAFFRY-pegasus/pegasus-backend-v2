@@ -117,124 +117,101 @@
         </div>
       </div>
 
-      <!-- ✅ BLOC ANALYSE DYNAMIQUE (Réagit à la saisie utilisateur) -->
+      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Avec formulaire de saisie) -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- LIGNE 1 : Boules grises (votre saisie) + Boules oranges (pronostic Pegasus) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             
             <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) -->
-            <div class="space-y-6">
-                <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-                  <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                    🎯 Votre combinaison saisie :
-                  </span>
-                  <div class="flex flex-wrap gap-3">
-                      {% if jetons.retenus %}
-                          {% for cheval in jetons.retenus %}
-                          <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
-                          {% endfor %}
-                      {% else %}
-                          <span class="text-alpha-sm text-[#7a8292] italic">Aucune sélection...</span>
-                      {% endif %}
-                  </div>
-                  <p class="text-alpha-sm text-white mt-3 italic">
-                    Les numéros que vous avez sélectionnés via la grille ou le champ de saisie.
-                  </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
-                      <div class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
-                  </div>
-                  <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite</div>
-                      <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
-                  </div>
-                </div>
+            <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
+              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
+                🎯 Votre combinaison saisie :
+              </span>
+              <div class="flex flex-wrap gap-3">
+                  {% if jetons.retenus %}
+                      {% for cheval in jetons.retenus %}
+                      <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
+                      {% endfor %}
+                  {% else %}
+                      <span class="text-alpha-sm text-[#7a8292] italic">Aucune sélection...</span>
+                  {% endif %}
+              </div>
             </div>
 
             <!-- COLONNE DROITE : Pronostic Pegasus optimisé (Boules oranges) -->
-            <div class="space-y-6">
-                <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-                  <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                    🧠 Pronostic Pegasus optimisé :
-                  </span>
-                  <div class="flex flex-wrap gap-3">
-                      {% for cheval in jetons.pegasus %}
-                      <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
-                      {% endfor %}
-                  </div>
-                  <p class="text-alpha-sm text-white mt-3 italic">
-                    L'algorithme Pegasus optimise votre sélection en appliquant les axes géométriques et le principe de résonance.
-                  </p>
-                </div>
-
-                <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-                  <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
-                    📊 Ce que Pegasus calcule avec votre combinaison :
-                  </span>
-                  <ul class="text-alpha-sm text-white space-y-1">
-                    <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
-                    <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
-                    <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ stats.ponderation_pegasus }} pts</span></li>
-                    <li>• Axes verticaux détectés dans l'historique</li>
-                  </ul>
-                </div>
+            <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
+              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
+                🧠 Pronostic Pegasus optimisé :
+              </span>
+              <div class="flex flex-wrap gap-3">
+                  {% for cheval in jetons.pegasus %}
+                  <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
+                  {% endfor %}
+              </div>
             </div>
+        </div>
+
+        <!-- LIGNE 2 : Scores + Formulaire de saisie -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- COLONNE 1 : Score -->
+            <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
+                <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
+                <div class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
+            </div>
+
+            <!-- COLONNE 2 : Taux réussite -->
+            <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
+                <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite</div>
+                <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
+            </div>
+
+            <!-- COLONNE 3 : Formulaire de saisie -->
+            <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
+              <form action="/calculer" method="POST" class="flex flex-col gap-2" id="form-calculer">
+                  <input 
+                    type="text" 
+                    id="combinaison-input" 
+                    name="combinaison_utilisateur"
+                    value="{{ combinaison_saisie }}"
+                    placeholder="Ex: 13-6-5-12-11" 
+                    maxlength="30"
+                    class="w-full p-2 text-base font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
+                    autocomplete="off"
+                  />
+                  <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center">
+                    ⚠️ Maximum 8 numéros
+                  </div>
+                  <button type="submit" class="w-full p-2 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
+                    Calculer
+                  </button>
+              </form>
+            </div>
+        </div>
+
+        <!-- LIGNE 3 : Infos Pegasus -->
+        <div class="mt-6 bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
+          <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
+            📊 Ce que Pegasus calcule avec votre combinaison :
+          </span>
+          <ul class="text-alpha-sm text-white space-y-1">
+            <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
+            <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
+            <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ stats.ponderation_pegasus }} pts</span></li>
+            <li>• Axes verticaux détectés dans l'historique</li>
+          </ul>
         </div>
       </div>
 
-      <!-- BLOC UTILISATEUR : SAISIE + BOUTON PARTAGER -->
-      <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
-        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
-          💡 SAISIR VOTRE COMBINAISON (5 À 8 CHEVAUX)
-        </h2>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="space-y-6">
-                <div class="bg-[#1a1f26] p-5 rounded-lg border border-[#2b3542] w-full">
-                  <form action="/calculer" method="POST" class="flex flex-col gap-3" id="form-calculer">
-                      <input 
-                        type="text" 
-                        id="combinaison-input" 
-                        name="combinaison_utilisateur"
-                        value="{{ combinaison_saisie }}"
-                        placeholder="Ex: 13-6-5-12-11" 
-                        maxlength="30"
-                        class="w-full p-3 text-lg font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
-                        autocomplete="off"
-                      />
-                      <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center mt-1">
-                        ⚠️ Maximum 8 numéros
-                      </div>
-                      <span class="text-alpha-sm text-white text-center block">
-                        Saisissez les numéros (1-20) séparés par des tirets, espaces ou virgules.
-                      </span>
-                      <button type="submit" class="w-full p-3 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
-                        Calculer
-                      </button>
-                  </form>
-                </div>
-
-                <!-- BOUTON PARTAGER CENTRÉ -->
-                <div class="flex justify-center">
-                  <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">
-                    📤 Partager mon pronostic
-                  </button>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                    <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
-                    <div id="score-display" class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
-                </div>
-            </div>
-        </div>
+      <!-- BOUTON PARTAGER (Centré, hors de la bordure orange) -->
+      <div class="flex justify-center mb-8">
+        <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">
+          📤 Partager mon pronostic
+        </button>
       </div>
 
       <!-- GRILLE FIXE 1 À 20 -->
@@ -320,7 +297,7 @@
         if (btnPartager) {
             btnPartager.addEventListener('click', () => {
                 const combo = inputField.value;
-                const scoreElement = document.getElementById('score-display');
+                const scoreElement = document.querySelector('.text-chiffre.text-\\[\\#f1a934\\]');
                 const score = scoreElement ? scoreElement.innerText.trim() : '? pts';
                 
                 if (!combo || combo.includes('Aucune') || combo.trim() === '') {
