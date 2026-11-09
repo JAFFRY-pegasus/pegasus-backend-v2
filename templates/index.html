@@ -45,27 +45,7 @@
         }
 
         /* ✅ UNIFORMISATION DE TOUS LES TEXTES EN BLANC PUR */
-        body,
-        body *,
-        body p,
-        body span,
-        body a,
-        body td,
-        body th,
-        body div,
-        body h1,
-        body h2,
-        body h3,
-        body h4,
-        body h5,
-        body h6,
-        body b,
-        body strong,
-        body label,
-        body small,
-        body li,
-        body input,
-        body button {
+        body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body label, body small, body li, body input, body button {
             color: #ffffff !important;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -73,103 +53,22 @@
         }
 
         /* Widget Boturfers - thème sombre et compact */
-        #widget-container,
-        #widget-container *,
-        #widget-container p,
-        #widget-container span,
-        #widget-container a,
-        #widget-container td,
-        #widget-container th,
-        #widget-container div,
-        #widget-container h1,
-        #widget-container h2,
-        #widget-container h3,
-        #widget-container h4,
-        #widget-container b,
-        #widget-container strong,
-        #widget-container label,
-        #widget-container small,
-        #widget-container li {
-            color: #ffffff !important;
-        }
-
-        #widget-container td,
-        #widget-container th,
-        #widget-container tr,
-        #widget-container table,
-        #widget-container div {
-            background-color: #1f2225 !important;
-        }
-
-        #widget-container a {
-            color: #60a5fa !important;
-            text-decoration: underline;
-        }
-
-        #widget-container h1,
-        #widget-container h2,
-        #widget-container h3,
-        #widget-container h4,
-        #widget-container b,
-        #widget-container strong {
-            color: #f1a934 !important;
-        }
-
-        #widget-container tr:nth-child(even) td {
-            background-color: #2d3238 !important;
-        }
-
-        #widget-container table {
-            font-size: 11px !important;
-            border-collapse: collapse !important;
-        }
-
-        #widget-container td,
-        #widget-container th {
-            padding: 3px 6px !important;
-            line-height: 1.2 !important;
-            font-size: 11px !important;
-        }
-
-        #widget-container th {
-            padding: 4px 6px !important;
-            font-size: 12px !important;
-        }
-
-        #widget-container h2,
-        #widget-container h3 {
-            font-size: 14px !important;
-            margin: 4px 0 !important;
-            padding: 2px 0 !important;
-        }
-
-        #widget-container p {
-            font-size: 11px !important;
-            margin: 2px 0 !important;
-            padding: 0 !important;
-        }
-
-        #widget-container tr {
-            height: auto !important;
-        }
-
-        #widget-container {
-            padding: 6px !important;
-        }
+        #widget-container, #widget-container *, #widget-container p, #widget-container span, #widget-container a, #widget-container td, #widget-container th, #widget-container div, #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong, #widget-container label, #widget-container small, #widget-container li { color: #ffffff !important; }
+        #widget-container td, #widget-container th, #widget-container tr, #widget-container table, #widget-container div { background-color: #1f2225 !important; }
+        #widget-container a { color: #60a5fa !important; text-decoration: underline; }
+        #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong { color: #f1a934 !important; }
+        #widget-container tr:nth-child(even) td { background-color: #2d3238 !important; }
+        #widget-container table { font-size: 11px !important; border-collapse: collapse !important; }
+        #widget-container td, #widget-container th { padding: 3px 6px !important; line-height: 1.2 !important; font-size: 11px !important; }
+        #widget-container th { padding: 4px 6px !important; font-size: 12px !important; }
+        #widget-container h2, #widget-container h3 { font-size: 14px !important; margin: 4px 0 !important; padding: 2px 0 !important; }
+        #widget-container p { font-size: 11px !important; margin: 2px 0 !important; padding: 0 !important; }
+        #widget-container tr { height: auto !important; }
+        #widget-container { padding: 6px !important; }
 
         /* Exceptions pour maintenir la hiérarchie visuelle */
-        .text-[#f1a934],
-        .text-[#2ecc71],
-        .text-[#4ba3e3],
-        .text-[#ff4d4d] {
-            /* Ces couleurs spéciales sont conservées */
-        }
-
-        /* Placeholder des inputs en gris clair */
-        input::placeholder {
-            color: #9ca3af !important;
-            opacity: 1;
-        }
+        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { /* Ces couleurs spéciales sont conservées */ }
+        input::placeholder { color: #9ca3af !important; opacity: 1; }
     </style>
 </head>
 
@@ -188,14 +87,10 @@
 
         <div class="flex justify-center gap-4 mt-4 flex-wrap">
           <form action="/actualiser" method="POST" class="inline">
-            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
-              🔄 Actualiser
-            </button>
+            <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">🔄 Actualiser</button>
           </form>
           <form action="/relancer" method="POST" class="inline">
-            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">
-              🤖 Relancer Robot
-            </button>
+            <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">🤖 Relancer Robot</button>
           </form>
         </div>
       </div>
@@ -203,20 +98,15 @@
       <!-- BLOC WIDGET BOTURFERS -->
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
-          
           <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
-            <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3">
-              <span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS
-            </h3>
+            <h3 class="text-alpha text-[#f1a934] uppercase tracking-widest flex items-center gap-3"><span class="text-xl">🐎</span> DONNÉES OFFICIELLES QUINTÉ - BOTURFERS</h3>
             <p class="text-alpha-sm text-white mt-1">Partants, arrivées et rapports en temps réel</p>
           </div>
-          
           <div class="overflow-x-auto widget-scroll w-full p-4">
              <div id="widget-container" class="widget-dark min-w-[320px] w-full">
                 <script type="text/javascript" src="https://www.boturfers.fr/public/widgets/widget-quinte-v1.php?style=default"></script>
              </div>
           </div>
-
           <div class="p-3 bg-[#121416]/80 mx-3 mb-3 rounded border border-[#2d3238]">
             <p class="text-alpha-sm text-white leading-relaxed">
               <span class="font-semibold text-white block mb-1">📊 Légende des rapports :</span>
@@ -227,34 +117,38 @@
         </div>
       </div>
 
-      <!-- BLOC COMBINAISON DE RÉFÉRENCE + PRONOSTIC PEGASUS -->
+      <!-- ✅ BLOC ANALYSE DYNAMIQUE (Réagit à la saisie utilisateur) -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
-          🔮 ANALYSE GÉOMÉTRIQUE PEGASUS - COMBINAISON DE RÉFÉRENCE
+          🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <!-- COLONNE GAUCHE : Combinaison de référence du propriétaire -->
+            <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                    🎯 Ma combinaison de référence (propriétaire) :
+                    🎯 Votre combinaison saisie :
                   </span>
                   <div class="flex flex-wrap gap-3">
-                      {% for cheval in combinaison_proprio %}
-                      <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
-                      {% endfor %}
+                      {% if jetons.retenus %}
+                          {% for cheval in jetons.retenus %}
+                          <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
+                          {% endfor %}
+                      {% else %}
+                          <span class="text-alpha-sm text-[#7a8292] italic">Aucune sélection...</span>
+                      {% endif %}
                   </div>
                   <p class="text-alpha-sm text-white mt-3 italic">
-                    Cette combinaison est définie par le propriétaire du site et mise à jour quotidiennement.
+                    Les numéros que vous avez sélectionnés via la grille ou le champ de saisie.
                   </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
-                      <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de ma combinaison</div>
-                      <div class="text-chiffre text-[#f1a934]">{{ score_proprio }} <span class="text-base">pts</span></div>
+                      <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
+                      <div class="text-chiffre text-[#f1a934]">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
                   </div>
                   <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                       <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite</div>
@@ -263,30 +157,30 @@
                 </div>
             </div>
 
-            <!-- COLONNE DROITE : Pronostic Pegasus calculé -->
+            <!-- COLONNE DROITE : Pronostic Pegasus optimisé (Boules oranges) -->
             <div class="space-y-6">
                 <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
                   <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                    🧠 Pronostic Pegasus optimisé (jusqu'à 8 chevaux) :
+                    🧠 Pronostic Pegasus optimisé :
                   </span>
                   <div class="flex flex-wrap gap-3">
-                      {% for cheval in prono_proprio %}
+                      {% for cheval in jetons.pegasus %}
                       <span class="w-10 h-10 bg-[#e67e22] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#f39c12]">{{ cheval }}</span>
                       {% endfor %}
                   </div>
                   <p class="text-alpha-sm text-white mt-3 italic">
-                    L'algorithme Pegasus optimise la combinaison de référence en appliquant les axes géométriques et le principe de résonance.
+                    L'algorithme Pegasus optimise votre sélection en appliquant les axes géométriques et le principe de résonance.
                   </p>
                 </div>
 
                 <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
                   <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
-                    📊 Ce que Pegasus calcule avec ma combinaison :
+                    📊 Ce que Pegasus calcule avec votre combinaison :
                   </span>
                   <ul class="text-alpha-sm text-white space-y-1">
-                    <li>• <span class="text-white font-semibold">{{ combinaison_proprio|length }}</span> chevaux analysés</li>
-                    <li>• <span class="text-white font-semibold">{{ prono_proprio|length }}</span> chevaux optimisés par l'IA géométrique</li>
-                    <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ score_proprio }} pts</span></li>
+                    <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
+                    <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
+                    <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ stats.ponderation_pegasus }} pts</span></li>
                     <li>• Axes verticaux détectés dans l'historique</li>
                   </ul>
                 </div>
@@ -294,10 +188,10 @@
         </div>
       </div>
 
-      <!-- BLOC UTILISATEUR : SAISIE + SCORE + BOUTON PARTAGER -->
+      <!-- BLOC UTILISATEUR : SAISIE + BOUTON PARTAGER -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 border-b border-[#2d3238] pb-3">
-          💡 VOTRE COMBINAISON (5 À 8 CHEVAUX)
+          💡 SAISIR VOTRE COMBINAISON (5 À 8 CHEVAUX)
         </h2>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
