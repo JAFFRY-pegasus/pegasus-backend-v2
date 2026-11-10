@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Variables d'environnement
+.env
+
+# Fichiers de sauvegarde locale Pegasus (ne pas committer)
+combinaison.json
+quinte_du_jour.json
+
+# Système
+.DS_Store
+Thumbs.db
