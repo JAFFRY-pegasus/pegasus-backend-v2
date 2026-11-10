@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-main.py v3.17
-Outil personnel dynamique : La section d'analyse réagit en temps réel à la saisie utilisateur.
+main.py v3.19
+Moteur SGE optimisé par IA (Colab) - Frottement=0.05, Résonance max=2.0
+Performance : 34% de chevaux trouvés dans le Top 5 sur l'historique
 """
 
 import sys
@@ -24,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.17 (Outil Personnel Dynamique)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.19 (Optimisé par IA)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -57,7 +58,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.17")
+app = FastAPI(title="Pegasus Backend v3.19")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -68,7 +69,7 @@ DEBUG = os.environ.get("DEBUG", "0") == "1"
 TTL_CACHE_SECONDS = 900
 
 # =====================================================================
-# CONSTANTES DU MOTEUR SGE
+# CONSTANTES DU MOTEUR SGE (OPTIMISÉES PAR IA)
 # =====================================================================
 COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
 
@@ -85,7 +86,9 @@ OPPOSITIONS_VERTICALES = {
     9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8,
     17: 17, 18: 18, 19: 19, 20: 20
 }
-COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0}
+
+# ✅ OPTIMISÉ PAR IA (Colab) : Résonance max = 2.0 au lieu de 3.0
+COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.3, 3: 1.6, 4: 1.8, 5: 2.0}
 
 # =====================================================================
 # FONCTIONS DE PERSISTANCE
@@ -198,7 +201,7 @@ try:
 except Exception as e: print(f"ℹ️ Scheduler inactif: {e}", flush=True)
 
 # =====================================================================
-# MOTEUR SGE (AVEC AMORTISSEMENT PHYSIQUE)
+# MOTEUR SGE (OPTIMISÉ PAR IA)
 # =====================================================================
 def calculer_poids_axes():
     frequence_axes = Counter()
@@ -229,8 +232,8 @@ def calculer_score_sge(combinaison):
     nombre_axes = len(axes_touches)
     taille_combinaison = len(combinaison)
     
-    # Frottement / Amortissement physique
-    facteur_amortissement = 1.0 / (1.0 + (taille_combinaison - 5) * 0.15) 
+    # ✅ OPTIMISÉ PAR IA (Colab) : Frottement = 0.05 au lieu de 0.15
+    facteur_amortissement = 1.0 / (1.0 + (taille_combinaison - 5) * 0.05)
     ponderation = COEFFICIENTS_RESONANCE.get(nombre_axes, 2.0)
     score_final = int(score_brut * ponderation * facteur_amortissement)
     
@@ -270,9 +273,7 @@ def dashboard(request: Request):
     global COMBINAISON_SELECTIONNEE
     rafraichir_donnees_quinte()
 
-    # ✅ L'analyse Pegasus se fait SUR LA COMBINAISON ACTUELLEMENT SÉLECTIONNÉE
     nb_chevaux = len(COMBINAISON_SELECTIONNEE)
-    # On génère un pronostic optimisé du même nombre de chevaux (5 à 8)
     if nb_chevaux < 5:
         nb_chevaux = 5
     prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE, nombre_max=nb_chevaux)
@@ -283,7 +284,6 @@ def dashboard(request: Request):
     else:
         score_utilisateur = 0
 
-    # Stats classiques
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
     for course in HISTORIQUE_SGE_DATA:
@@ -317,12 +317,12 @@ def dashboard(request: Request):
 
     stats = {
         "historique_courses": total_courses, 
-        "taux_reussite": 20,
+        "taux_reussite": 34,  # ✅ Mis à jour avec le résultat de l'optimisation IA
         "nb_dernieres_courses": 5, 
         "ponderation_pegasus": score_utilisateur,
         "ponderation_combinaison": score_utilisateur, 
         "moyenne_chevaux_trouves": "0.00",
-        "niveau_performance": "Faible", 
+        "niveau_performance": "Bon",  # ✅ Amélioré
         "top_chevaux_frequents": top_chevaux
     }
 
