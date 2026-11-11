@@ -54,6 +54,32 @@
             font-weight: 500;
         }
 
+        /* ✅ ANIMATION CLIGNOTANTE POUR LES DIODES */
+        @keyframes blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px 2px currentColor; }
+            50% { opacity: 0.3; box-shadow: 0 0 2px 0px currentColor; }
+        }
+
+        .diode {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: blink 1.2s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .diode-blanc {
+            background-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .diode-orange {
+            background-color: #f1a934;
+            color: #f1a934;
+        }
+
         /* ✅ UNIFORMISATION DE TOUS LES TEXTES EN BLANC PUR */
         body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body label, body small, body li, body input, body button {
             color: #ffffff !important;
@@ -127,19 +153,20 @@
         </div>
       </div>
 
-      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Disposition réorganisée) -->
+      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Avec diodes clignotantes) -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
         
-        <!-- LIGNE 1 : Boules grises (votre saisie) + Boules oranges (pronostic Pegasus) -->
+        <!-- LIGNE 1 : Boules grises (votre saisie) + Boules oranges (pronostic Pegasus) avec diodes -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             
-            <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) -->
+            <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) avec diode blanche -->
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                🎯 Votre combinaison saisie :
+              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
+                <span class="diode diode-blanc"></span>
+                VOTRE COMBINAISON SAISIE :
               </span>
               <div class="flex flex-wrap gap-3">
                   {% if jetons.retenus %}
@@ -152,10 +179,11 @@
               </div>
             </div>
 
-            <!-- COLONNE DROITE : Pronostic Pegasus optimisé (Boules oranges) -->
+            <!-- COLONNE DROITE : Pronostic Pegasus optimisé (Boules oranges) avec diode orange -->
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
-              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider">
-                🧠 Pronostic Pegasus optimisé :
+              <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
+                <span class="diode diode-orange"></span>
+                PRONOSTIC PEGASUS OPTIMISÉ :
               </span>
               <div class="flex flex-wrap gap-3">
                   {% for cheval in jetons.pegasus %}
@@ -235,8 +263,12 @@
                 <div class="text-alpha-sm text-[#7a8292] mt-2">Basé sur {{ stats.historique_courses }} courses</div>
             </div>
 
-            <!-- COLONNE DROITE : Formulaire de saisie -->
+            <!-- COLONNE DROITE : Formulaire de saisie avec texte explicatif -->
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
+              <!-- ✅ TEXTE EXPLICATIF AU-DESSUS DU CHAMP DE SAISIE -->
+              <div class="text-alpha-sm text-[#4ba3e3] font-medium mb-2 text-center uppercase tracking-wider">
+                💡 Saisissez votre combinaison personnelle ci-dessous
+              </div>
               <form action="/calculer" method="POST" class="flex flex-col gap-2" id="form-calculer">
                   <input 
                     type="text" 
