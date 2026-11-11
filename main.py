@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# =====================================================================
+# PROPRIÉTÉ INTELLECTUELLE - USAGE STRICTEMENT NON COMMERCIAL
+# Copyright (c) 2024-2026 JAFFRY-pegasus. Tous droits réservés.
+# 
+# Ce code source, y compris ses algorithmes (moteur SGE, résonance, 
+# amortissement physique, bonus signature), est protégé par le droit 
+# d'auteur. Toute utilisation commerciale, revente ou intégration dans 
+# un produit lucratif est strictement interdite sans autorisation écrite.
+# =====================================================================
+
 """
-main.py v3.20
+main.py v3.21
 Moteur SGE optimisé par IA + Bonus Géométrique Signature (axes 6-14 et 7-15)
-Performance : 34% de chevaux trouvés dans le Top 5 sur l'historique
-Signature : les axes 6-14 et 7-15 apparaissent dans 100% des combinaisons optimales
+Protection : Licence propriétaire non-commerciale intégrée.
+Performance : 34% de chevaux trouvés dans le Top 5 sur l'historique.
 """
 
 import sys
@@ -26,7 +36,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.20 (Bonus Signature Géométrique)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.21 (Protégé & Optimisé)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -59,7 +69,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.20")
+app = FastAPI(title="Pegasus Backend v3.21")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -239,8 +249,6 @@ def calculer_score_sge(combinaison):
     taille_combinaison = len(combinaison)
     
     # ✅ BONUS SIGNATURE GÉOMÉTRIQUE
-    # Les axes (6,14) et (7,15) sont les plus puissants de l'historique
-    # Chaque axe signature touché multiplie le score brut par 1.2 (+20%)
     bonus_multiplicateur = 1.0
     axes_signature_touches = []
     for axe_sig in AXES_SIGNATURE:
