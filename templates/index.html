@@ -127,7 +127,7 @@
         </div>
       </div>
 
-      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Avec formulaire de saisie) -->
+      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Disposition réorganisée) -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
@@ -165,10 +165,10 @@
             </div>
         </div>
 
-        <!-- LIGNE 2 : Scores + Formulaire de saisie -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- LIGNE 2 : Score + "Ce que Pegasus calcule" (2 colonnes) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             
-            <!-- COLONNE 1 : Score avec Échelle Visuelle -->
+            <!-- COLONNE GAUCHE : Score avec Échelle Visuelle -->
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
                 <div id="score-display" class="text-chiffre text-[#f1a934] mb-3">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
@@ -209,16 +209,33 @@
                 <div class="text-xs font-bold {{ couleur_text }} uppercase tracking-wider bg-[#2d3238]/50 inline-block px-3 py-1 rounded-full border border-[#4a5568]">
                     Niveau : {{ niveau }}
                 </div>
-           
+            </div>
 
-            <!-- COLONNE 2 : Taux réussite -->
+            <!-- COLONNE DROITE : Ce que Pegasus calcule -->
+            <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
+              <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
+                📊 Ce que Pegasus calcule avec votre combinaison :
+              </span>
+              <ul class="text-alpha-sm text-white space-y-1">
+                <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
+                <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
+                <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ stats.ponderation_pegasus }} pts</span></li>
+                <li>• Axes verticaux détectés dans l'historique</li>
+              </ul>
+            </div>
+        </div>
+
+        <!-- LIGNE 3 : Taux réussite + Formulaire de saisie (2 colonnes) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- COLONNE GAUCHE : Taux réussite -->
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite Historique</div>
                 <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
                 <div class="text-alpha-sm text-[#7a8292] mt-2">Basé sur {{ stats.historique_courses }} courses</div>
             </div>
 
-            <!-- COLONNE 3 : Formulaire de saisie -->
+            <!-- COLONNE DROITE : Formulaire de saisie -->
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
               <form action="/calculer" method="POST" class="flex flex-col gap-2" id="form-calculer">
                   <input 
@@ -239,19 +256,6 @@
                   </button>
               </form>
             </div>
-        </div>
-
-        <!-- LIGNE 3 : Infos Pegasus -->
-        <div class="mt-6 bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-          <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
-            📊 Ce que Pegasus calcule avec votre combinaison :
-          </span>
-          <ul class="text-alpha-sm text-white space-y-1">
-            <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
-            <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
-            <li>• Score de résonance : <span class="text-[#f1a934] font-bold">{{ stats.ponderation_pegasus }} pts</span></li>
-            <li>• Axes verticaux détectés dans l'historique</li>
-          </ul>
         </div>
       </div>
 
