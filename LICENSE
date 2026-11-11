@@ -1,21 +1,26 @@
-MIT License
+LICENCE PROPRIÉTAIRE – USAGE STRICTEMENT NON COMMERCIAL
+Copyright (c) 2024-2026 JAFFRY-pegasus. Tous droits réservés.
 
-Copyright (c) 2026 JAFFRY-pegasus
+1. OBJET
+Le présent logiciel ("Pegasus Backend"), y compris son code source, ses algorithmes (notamment le moteur d'analyse géométrique SGE), sa documentation et ses interfaces, est la propriété intellectuelle exclusive de son auteur.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+2. AUTORISATIONS LIMITÉES
+L'auteur accorde une permission limitée, révocable et non exclusive d'utiliser, de consulter et d'exécuter ce logiciel uniquement à des fins :
+- Personnelles et privées.
+- Éducatives ou de recherche académique.
+- De démonstration non lucrative.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+3. INTERDICTIONS STRICTES
+Il est formellement interdit, sans l'autorisation écrite préalable et explicite de l'auteur :
+- D'utiliser ce logiciel, en tout ou partie, à des fins commerciales, lucratives ou professionnelles.
+- De vendre, louer, sous-licencier ou monétiser ce logiciel ou des travaux dérivés.
+- D'intégrer ce code ou ses algorithmes dans un produit ou service commercial (y compris les sites web, applications ou bots de pronostics payants).
+- De retirer ou modifier les mentions de copyright ou de propriété intellectuelle.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+4. PROPRIÉTÉ INTELLECTUELLE
+Ce logiciel est fourni "en l'état". L'auteur conserve l'intégralité des droits de propriété intellectuelle, y compris les droits d'auteur et les secrets d'affaires liés aux algorithmes de pondération et de résonance.
+
+5. CONTACT
+Pour toute demande de licence commerciale ou de partenariat, veuillez contacter le propriétaire du dépôt via la plateforme GitHub.
+
+Toute violation de cette licence entraînera des poursuites judiciaires pour contrefaçon et concurrence déloye.
