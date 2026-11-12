@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pegasus Quinté - Dashboard</title>
-    
-    <!-- SEO & Partage Réseaux Sociaux (Open Graph) -->
     <meta name="description" content="Pegasus : Algorithme gratuit de pronostics hippiques basé sur l'analyse géométrique, la résonance des axes et un modèle d'amortissement physique.">
     <meta property="og:title" content="Pegasus Quinté - L'IA géométrique au service du turf">
     <meta property="og:description" content="Découvrez la combinaison optimisée du jour par l'algorithme Pegasus. Outil 100% gratuit et transparent.">
@@ -19,106 +17,53 @@
         .widget-scroll::-webkit-scrollbar { height: 6px; }
         .widget-scroll::-webkit-scrollbar-track { background: #1f2225; }
         .widget-scroll::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 3px; }
-        
-        body.bg-pegasus {
-            background-image: url('/static/Horse-racing-1.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-        }
-        
-        .overlay-sombre {
-            background-color: rgba(15, 17, 18, 0.94);
-            backdrop-filter: blur(2px);
-        }
-        
-        .widget-dark {
-            background-color: #1f2225;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        
-        .text-chiffre { 
-            font-size: 1.875rem;
-            font-weight: 900; 
-            font-family: 'Courier New', monospace;
-        }
-        .text-alpha { 
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-        }
-        .text-alpha-sm { 
-            font-size: 0.6875rem;
-            font-weight: 500;
-        }
+        body.bg-pegasus { background-image: url('/static/Horse-racing-1.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; }
+        .overlay-sombre { background-color: rgba(15, 17, 18, 0.94); backdrop-filter: blur(2px); }
+        .widget-dark { background-color: #1f2225; padding: 12px; border-radius: 8px; }
+        .text-chiffre { font-size: 1.875rem; font-weight: 900; font-family: 'Courier New', monospace; }
+        .text-alpha { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
+        .text-alpha-sm { font-size: 0.6875rem; font-weight: 500; }
 
-        /* ✅ ANIMATION CLIGNOTANTE POUR LES DIODES */
-        @keyframes blink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 8px 2px currentColor; }
-            50% { opacity: 0.3; box-shadow: 0 0 2px 0px currentColor; }
-        }
+        @keyframes blink { 0%,100% { opacity:1; box-shadow:0 0 8px 2px currentColor; } 50% { opacity:0.3; box-shadow:0 0 2px 0 currentColor; } }
+        .diode { display:inline-block; width:10px; height:10px; border-radius:50%; animation: blink 1.2s ease-in-out infinite; margin-right:8px; vertical-align:middle; }
+        .diode-blanc { background-color:#ffffff; color:#ffffff; }
+        .diode-orange { background-color:#f1a934; color:#f1a934; }
 
-        .diode {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: blink 1.2s ease-in-out infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        .diode-blanc { background-color: #ffffff; color: #ffffff; }
-        .diode-orange { background-color: #f1a934; color: #f1a934; }
-
-        /* ✅ UNIFORMISATION DE TOUS LES TEXTES EN BLANC PUR */
         body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body label, body small, body li, body input, body button {
-            color: #ffffff !important;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
+            color:#ffffff !important; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility;
         }
 
-        /* Widget Boturfers */
-        #widget-container, #widget-container *, #widget-container p, #widget-container span, #widget-container a, #widget-container td, #widget-container th, #widget-container div, #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong, #widget-container label, #widget-container small, #widget-container li { color: #ffffff !important; }
-        #widget-container td, #widget-container th, #widget-container tr, #widget-container table, #widget-container div { background-color: #1f2225 !important; }
-        #widget-container a { color: #60a5fa !important; text-decoration: underline; }
-        #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong { color: #f1a934 !important; }
-        #widget-container tr:nth-child(even) td { background-color: #2d3238 !important; }
-        #widget-container table { font-size: 11px !important; border-collapse: collapse !important; }
-        #widget-container td, #widget-container th { padding: 3px 6px !important; line-height: 1.2 !important; font-size: 11px !important; }
-        #widget-container th { padding: 4px 6px !important; font-size: 12px !important; }
-        #widget-container h2, #widget-container h3 { font-size: 14px !important; margin: 4px 0 !important; padding: 2px 0 !important; }
-        #widget-container p { font-size: 11px !important; margin: 2px 0 !important; padding: 0 !important; }
-        #widget-container tr { height: auto !important; }
-        #widget-container { padding: 6px !important; }
+        #widget-container, #widget-container *, #widget-container p, #widget-container span, #widget-container a, #widget-container td, #widget-container th, #widget-container div, #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong, #widget-container label, #widget-container small, #widget-container li { color:#ffffff !important; }
+        #widget-container td, #widget-container th, #widget-container tr, #widget-container table, #widget-container div { background-color:#1f2225 !important; }
+        #widget-container a { color:#60a5fa !important; text-decoration:underline; }
+        #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong { color:#f1a934 !important; }
+        #widget-container tr:nth-child(even) td { background-color:#2d3238 !important; }
+        #widget-container table { font-size:11px !important; border-collapse:collapse !important; }
+        #widget-container td, #widget-container th { padding:3px 6px !important; line-height:1.2 !important; font-size:11px !important; }
+        #widget-container th { padding:4px 6px !important; font-size:12px !important; }
+        #widget-container h2, #widget-container h3 { font-size:14px !important; margin:4px 0 !important; padding:2px 0 !important; }
+        #widget-container p { font-size:11px !important; margin:2px 0 !important; padding:0 !important; }
+        #widget-container tr { height:auto !important; }
+        #widget-container { padding:6px !important; }
 
-        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { /* Couleurs spéciales conservées */ }
-        input::placeholder { color: #9ca3af !important; opacity: 1; }
+        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { }
+        input::placeholder { color:#9ca3af !important; opacity:1; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
         .boules-container { animation: fadeIn 0.5s ease-out; }
     </style>
 </head>
 
 <body class="bg-pegasus min-h-screen p-4 md:p-8">
-
     <div class="overlay-sombre text-white w-full max-w-5xl mx-auto rounded-xl p-6 md:p-8 font-sans shadow-2xl select-none border border-[#2d3238]">
 
       <!-- EN-TÊTE -->
       <div class="text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-2">PEGASUS QUINTÉ</h1>
         <p class="text-alpha text-white italic">Analyse Géométrique & Données Officielles en Temps Réel</p>
-
         <div class="bg-[#1f2225]/80 border border-[#2d3238] rounded-lg p-4 my-6 text-left text-alpha-sm text-white leading-relaxed shadow-sm max-w-3xl mx-auto">
           Ce robot combine l'analyse géométrique PEGASUS avec les données officielles Boturfers. Les résultats sont indicatifs et ne garantissent aucun gain.
         </div>
-
         <div class="flex justify-center gap-4 mt-4 flex-wrap">
           <form action="/actualiser" method="POST" class="inline">
             <button type="submit" class="bg-[#1abc9c] hover:bg-[#16a085] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">🔄 Actualiser</button>
@@ -134,7 +79,7 @@
         </div>
       </div>
 
-      <!-- BLOC WIDGET BOTURFERS -->
+      <!-- WIDGET BOTURFERS -->
       <div class="mb-10">
         <div class="bg-[#1f2225] rounded-xl border border-[#2d3238] shadow-lg overflow-hidden">
           <div class="bg-[#2d3238] p-4 border-b border-[#4a5568]">
@@ -156,23 +101,19 @@
         </div>
       </div>
 
-      <!-- ✅ BLOC ANALYSE DYNAMIQUE -->
+      <!-- ANALYSE PEGASUS -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
-        
+
         {% if est_proprietaire %}
-        <!-- ✅ MODE PROPRIÉTAIRE : afficher la combinaison -->
         <div class="mb-4 text-center">
-            <span class="inline-block bg-[#f1a934] text-[#1f2225] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                🔐 Mode Propriétaire actif
-            </span>
+            <span class="inline-block bg-[#f1a934] text-[#1f2225] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">🔐 Mode Propriétaire actif</span>
         </div>
         {% endif %}
-        
+
         {% if not jetons.retenus or jetons.retenus|length == 0 %}
-        <!-- ✅ MESSAGE D'ACCUEIL SI AUCUNE COMBINAISON -->
         <div class="text-center py-12 mb-6">
             <div class="text-6xl mb-4">🎯</div>
             <h3 class="text-xl font-bold text-[#f1a934] mb-3">Bienvenue sur Pegasus Quinté</h3>
@@ -180,25 +121,15 @@
                 Saisissez votre combinaison de 5 à 8 chevaux ci-dessous pour obtenir une analyse géométrique complète avec score de résonance et pronostic optimisé par l'IA.
             </p>
             <div class="flex justify-center gap-8 text-sm text-[#7a8292]">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-[#4a5568]"></span>
-                    <span>Votre saisie</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-[#e67e22]"></span>
-                    <span>Pronostic Pegasus</span>
-                </div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#4a5568]"></span><span>Votre saisie</span></div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#e67e22]"></span><span>Pronostic Pegasus</span></div>
             </div>
         </div>
         {% else %}
-        
-        <!-- LIGNE 1 : Boules grises + Boules oranges avec diodes -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 boules-container">
-            
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
               <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
-                <span class="diode diode-blanc"></span>
-                VOTRE COMBINAISON SAISIE :
+                <span class="diode diode-blanc"></span>VOTRE COMBINAISON SAISIE :
               </span>
               <div class="flex flex-wrap gap-3">
                   {% for cheval in jetons.retenus %}
@@ -206,11 +137,9 @@
                   {% endfor %}
               </div>
             </div>
-
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
               <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
-                <span class="diode diode-orange"></span>
-                PRONOSTIC PEGASUS OPTIMISÉ :
+                <span class="diode diode-orange"></span>PRONOSTIC PEGASUS OPTIMISÉ :
               </span>
               <div class="flex flex-wrap gap-3">
                   {% for cheval in jetons.pegasus %}
@@ -220,38 +149,24 @@
             </div>
         </div>
 
-        <!-- LIGNE 2 : Score + "Ce que Pegasus calcule" -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
                 <div id="score-display" class="text-chiffre text-[#f1a934] mb-3">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
-                
                 {% set score = stats.ponderation_pegasus %}
-                {% if score < 30 %}
-                    {% set niveau = "Faible" %}{% set couleur_bg = "bg-red-500" %}{% set couleur_text = "text-red-400" %}{% set largeur = "20%" %}
-                {% elif score < 80 %}
-                    {% set niveau = "Moyen" %}{% set couleur_bg = "bg-orange-500" %}{% set couleur_text = "text-orange-400" %}{% set largeur = "40%" %}
-                {% elif score < 150 %}
-                    {% set niveau = "Fort" %}{% set couleur_bg = "bg-yellow-500" %}{% set couleur_text = "text-yellow-400" %}{% set largeur = "60%" %}
-                {% elif score < 250 %}
-                    {% set niveau = "Excellent" %}{% set couleur_bg = "bg-green-500" %}{% set couleur_text = "text-green-400" %}{% set largeur = "80%" %}
-                {% else %}
-                    {% set niveau = "Exceptionnel 🚀" %}{% set couleur_bg = "bg-purple-500" %}{% set couleur_text = "text-purple-400" %}{% set largeur = "100%" %}
+                {% if score < 30 %}{% set niveau="Faible" %}{% set couleur_bg="bg-red-500" %}{% set couleur_text="text-red-400" %}{% set largeur="20%" %}
+                {% elif score < 80 %}{% set niveau="Moyen" %}{% set couleur_bg="bg-orange-500" %}{% set couleur_text="text-orange-400" %}{% set largeur="40%" %}
+                {% elif score < 150 %}{% set niveau="Fort" %}{% set couleur_bg="bg-yellow-500" %}{% set couleur_text="text-yellow-400" %}{% set largeur="60%" %}
+                {% elif score < 250 %}{% set niveau="Excellent" %}{% set couleur_bg="bg-green-500" %}{% set couleur_text="text-green-400" %}{% set largeur="80%" %}
+                {% else %}{% set niveau="Exceptionnel 🚀" %}{% set couleur_bg="bg-purple-500" %}{% set couleur_text="text-purple-400" %}{% set largeur="100%" %}
                 {% endif %}
-
                 <div class="w-full bg-[#2d3238] rounded-full h-2.5 mb-2 overflow-hidden">
                     <div class="{{ couleur_bg }} h-2.5 rounded-full transition-all duration-700 ease-out" style="width: {{ largeur }}"></div>
                 </div>
-                <div class="text-xs font-bold {{ couleur_text }} uppercase tracking-wider bg-[#2d3238]/50 inline-block px-3 py-1 rounded-full border border-[#4a5568]">
-                    Niveau : {{ niveau }}
-                </div>
+                <div class="text-xs font-bold {{ couleur_text }} uppercase tracking-wider bg-[#2d3238]/50 inline-block px-3 py-1 rounded-full border border-[#4a5568]">Niveau : {{ niveau }}</div>
             </div>
-
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-              <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
-                📊 Ce que Pegasus calcule avec votre combinaison :
-              </span>
+              <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">📊 Ce que Pegasus calcule avec votre combinaison :</span>
               <ul class="text-alpha-sm text-white space-y-1">
                 <li>• <span class="text-white font-semibold">{{ jetons.retenus|length }}</span> chevaux analysés</li>
                 <li>• <span class="text-white font-semibold">{{ jetons.pegasus|length }}</span> chevaux optimisés par l'IA géométrique</li>
@@ -262,79 +177,47 @@
         </div>
         {% endif %}
 
-        <!-- LIGNE 3 : Taux réussite + Formulaire de saisie -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite Historique</div>
                 <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
                 <div class="text-alpha-sm text-[#7a8292] mt-2">Basé sur {{ stats.historique_courses }} courses</div>
             </div>
-
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-              <div class="text-alpha-sm text-[#4ba3e3] font-medium mb-2 text-center uppercase tracking-wider">
-                💡 Saisissez votre combinaison personnelle ci-dessous
-              </div>
+              <div class="text-alpha-sm text-[#4ba3e3] font-medium mb-2 text-center uppercase tracking-wider">💡 Saisissez votre combinaison personnelle ci-dessous</div>
               <form action="/calculer" method="POST" class="flex flex-col gap-2" id="form-calculer">
-                  <input 
-                    type="text" 
-                    id="combinaison-input" 
-                    name="combinaison_utilisateur"
-                    value=""
-                    placeholder="Ex: 13-6-5-12-11" 
-                    maxlength="30"
-                    class="w-full p-2 text-base font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
-                    autocomplete="off"
-                  />
-                  <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center">
-                    ⚠️ Maximum 8 numéros
-                  </div>
-                  <button type="submit" class="w-full p-2 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">
-                    Calculer
-                  </button>
+                  <input type="text" id="combinaison-input" name="combinaison_utilisateur"
+                    value="{{ combinaison_saisie }}" placeholder="Ex: 13-6-5-12-11" maxlength="30"
+                    class="w-full p-2 text-base font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono" autocomplete="off"/>
+                  <div id="warning-msg" class="text-[#ff4d4d] text-alpha font-bold hidden text-center">⚠️ Maximum 8 numéros</div>
+                  <button type="submit" class="w-full p-2 text-alpha font-bold bg-[#00bfa5] hover:bg-[#009688] text-white border-none rounded cursor-pointer uppercase transition shadow-lg">Calculer</button>
               </form>
-              
-              <!-- ✅ BOUTON CONNEXION PROPRIÉTAIRE (ou DÉCONNEXION si déjà connecté) -->
               <div class="mt-3 text-center">
                 {% if est_proprietaire %}
-                    <span class="text-[10px] text-[#2ecc71] font-bold uppercase tracking-wider">
-                        ✅ Connecté en tant que propriétaire
-                    </span>
+                    <span class="text-[10px] text-[#2ecc71] font-bold uppercase tracking-wider">✅ Connecté en tant que propriétaire</span>
                 {% else %}
-                    <button id="btn-connexion-proprio" type="button" class="text-[10px] text-[#f1a934] hover:text-[#f39c12] font-bold uppercase tracking-wider cursor-pointer border border-[#f1a934] px-3 py-1 rounded hover:bg-[#f1a934]/10 transition">
-                        🔑 Connexion propriétaire
-                    </button>
+                    <button id="btn-connexion-proprio" type="button" class="text-[10px] text-[#f1a934] hover:text-[#f39c12] font-bold uppercase tracking-wider cursor-pointer border border-[#f1a934] px-3 py-1 rounded hover:bg-[#f1a934]/10 transition">🔑 Connexion propriétaire</button>
                 {% endif %}
               </div>
             </div>
         </div>
       </div>
 
-      <!-- BOUTON PARTAGER -->
+      <!-- PARTAGER -->
       <div class="flex justify-center mb-8">
-        <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">
-          📤 Partager mon pronostic
-        </button>
+        <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">📤 Partager mon pronostic</button>
       </div>
 
-      <!-- GRILLE FIXE 1 À 20 -->
+      <!-- GRILLE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border border-[#2d3238] shadow-lg">
-        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 text-center">
-           SÉLECTION RAPIDE (1 À 20)
-        </h2>
-        
+        <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-4 text-center">SÉLECTION RAPIDE (1 À 20)</h2>
         <div class="grid grid-cols-5 sm:grid-cols-10 gap-3 mb-6">
           {% for i in range(1, 21) %}
-          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-105 shadow-lg{% endif %}">
-            {{ i }}
-          </a>
+          <a href="/selectionner/{{ i }}" class="bg-[#2d3238] hover:bg-[#3a4149] text-white text-center py-4 rounded-lg font-mono font-bold text-lg transition {% if i|string in jetons.retenus %}ring-2 ring-[#f1a934] bg-[#3a4149] text-[#f1a934] scale-105 shadow-lg{% endif %}">{{ i }}</a>
           {% endfor %}
         </div>
-        
         <form action="/reinitialiser" method="POST">
-          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-alpha transition uppercase tracking-wider shadow-lg">
-            🗑️ Réinitialiser la sélection
-          </button>
+          <button type="submit" class="w-full bg-[#e74c3c] hover:bg-[#c0392b] text-white font-bold py-3 px-4 rounded-lg text-alpha transition uppercase tracking-wider shadow-lg">🗑️ Réinitialiser la sélection</button>
         </form>
       </div>
 
@@ -344,144 +227,64 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC AUTHENTIFICATION PROPRIÉTAIRE ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
         const btnConnexionProprio = document.getElementById('btn-connexion-proprio');
-        
         if (!inputField) return;
 
-        // ✅ RÉCUPÉRER LE TOKEN PROPRIÉTAIRE (si existant)
-        const tokenProprio = localStorage.getItem('pegasus_token_proprio');
-        
-        // ✅ ENVOYER LE TOKEN À CHAQUE REQUÊTE FORM (via un champ caché dynamique)
-        // On utilise un intercepteur de soumission pour ajouter le header
-        if (form && tokenProprio) {
-            const originalSubmit = form.submit.bind(form);
-            form.addEventListener('submit', function(e) {
-                // Ajouter le token comme champ caché temporairement
-                let hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'x_proprio_token';
-                hiddenInput.value = tokenProprio;
-                form.appendChild(hiddenInput);
-            }, true);
-        }
-
-        // ✅ SAUVEGARDE À CHAQUE SAISIE (uniquement si propriétaire connecté)
         inputField.addEventListener('input', function() {
-            const numeros = this.value.split(/[\s,\-;]+/)
-                .map(n => n.trim())
-                .filter(n => n !== '' && /^\d+$/.test(n))
-                .map(n => parseInt(n))
-                .filter(n => n >= 1 && n <= 20);
-            
-            if (numeros.length >= 8) {
-                warningMsg.classList.remove('hidden');
-            } else {
-                warningMsg.classList.add('hidden');
-            }
+            const numeros = this.value.split(/[\s,\-;]+/).map(n=>n.trim()).filter(n=>n!==''&&/^\d+$/.test(n)).map(n=>parseInt(n)).filter(n=>n>=1&&n<=20);
+            if (numeros.length >= 8) warningMsg.classList.remove('hidden'); else warningMsg.classList.add('hidden');
         });
 
-        // ✅ VALIDATION AU SUBMIT
         if (form) {
             form.addEventListener('submit', function(e) {
-                const valeur = inputField.value;
-                const numeros = valeur.split(/[\s,\-;]+/)
-                    .map(n => n.trim())
-                    .filter(n => n !== '' && /^\d+$/.test(n))
-                    .map(n => parseInt(n))
-                    .filter(n => n >= 1 && n <= 20)
-                    .slice(0, 8);
-                
-                if (numeros.length < 5) {
-                    e.preventDefault();
-                    alert('Veuillez saisir au moins 5 numéros (entre 1 et 20).');
-                    return;
-                }
-                
+                const numeros = inputField.value.split(/[\s,\-;]+/).map(n=>n.trim()).filter(n=>n!==''&&/^\d+$/.test(n)).map(n=>parseInt(n)).filter(n=>n>=1&&n<=20).slice(0,8);
+                if (numeros.length < 5) { e.preventDefault(); alert('Veuillez saisir au moins 5 numéros (entre 1 et 20).'); return; }
                 inputField.value = numeros.join('-');
             });
         }
 
-        // ✅ BOUTON CONNEXION PROPRIÉTAIRE
         if (btnConnexionProprio) {
             btnConnexionProprio.addEventListener('click', () => {
                 const motDePasse = prompt("🔐 Entrez le mot de passe propriétaire :");
-                
-                if (!motDePasse || motDePasse.trim() === '') {
-                    return;
-                }
-                
-                // Envoyer le mot de passe au serveur pour vérification
+                if (motDePasse === null || motDePasse.trim() === '') return;
                 fetch('/connexion_proprio', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ mot_de_passe: motDePasse })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Stocker le token
-                        localStorage.setItem('pegasus_token_proprio', data.token);
-                        alert("✅ Connexion propriétaire réussie !\nVotre combinaison va s'afficher.");
-                        location.reload();
-                    } else {
-                        alert("❌ Mot de passe incorrect.\nVeuillez réessayer.");
-                    }
+                .then(r => {
+                    if (r.ok) return r.json();
+                    return r.json().then(d => { throw new Error(d.message || 'Mot de passe incorrect'); });
                 })
-                .catch(err => {
-                    console.error('Erreur connexion:', err);
-                    alert("❌ Erreur de connexion. Vérifiez votre connexion internet.");
-                });
+                .then(data => { if (data.success) { alert('✅ Connexion réussie !'); location.reload(); } })
+                .catch(err => { console.error(err); alert('❌ ' + err.message); });
             });
         }
 
-        // ✅ BOUTON PARTAGER
         const btnPartager = document.getElementById('btn-partager');
         if (btnPartager) {
             btnPartager.addEventListener('click', () => {
                 const combo = inputField.value;
                 const scoreElement = document.querySelector('.text-chiffre.text-\\[\\#f1a934\\]');
                 const score = scoreElement ? scoreElement.innerText.trim() : '? pts';
-                
-                if (!combo || combo.includes('Aucune') || combo.trim() === '') {
-                    alert('⚠️ Veuillez d\'abord sélectionner ou saisir une combinaison !');
-                    return;
-                }
-
+                if (!combo || combo.trim() === '') { alert('⚠️ Veuillez d\'abord saisir une combinaison !'); return; }
                 const message = `🐎 Mon pronostic Pegasus du jour :\n🔢 Combinaison : ${combo}\n📊 Score Pegasus : ${score}\n🔮 Testez l'algo géométrique gratuit ici :\nhttps://pegasus-backend-v2.onrender.com`;
-
                 navigator.clipboard.writeText(message).then(() => {
                     const originalHTML = btnPartager.innerHTML;
-                    const originalBg = 'bg-[#3b82f6]';
-                    const successBg = 'bg-[#10b981]';
-                    
                     btnPartager.innerHTML = '✅ Pronostic copié !';
-                    btnPartager.classList.remove(originalBg);
-                    btnPartager.classList.add(successBg);
-                    
-                    setTimeout(() => {
-                        btnPartager.innerHTML = originalHTML;
-                        btnPartager.classList.remove(successBg);
-                        btnPartager.classList.add(originalBg);
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Erreur copie:', err);
-                    alert('Erreur lors de la copie. Essayez de copier manuellement.');
-                });
+                    btnPartager.classList.remove('bg-[#3b82f6]'); btnPartager.classList.add('bg-[#10b981]');
+                    setTimeout(() => { btnPartager.innerHTML = originalHTML; btnPartager.classList.remove('bg-[#10b981]'); btnPartager.classList.add('bg-[#3b82f6]'); }, 2000);
+                }).catch(err => { console.error(err); alert('Erreur lors de la copie.'); });
             });
         }
     });
     </script>
 
-    <!-- CLOUDFLARE WEB ANALYTICS -->
     <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0e3a23be57b84bf0a7b726f3c7203e46"}'></script>
-
 </body>
 </html>
