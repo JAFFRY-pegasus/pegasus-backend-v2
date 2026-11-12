@@ -359,7 +359,7 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC PERSISTANCE INTELLIGENTE ===== -->
+    <!-- ===== SCRIPT AVEC PERSISTANCE INTELLIGENTE (SANS BOUCLE) ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
@@ -372,20 +372,20 @@
         // ✅ DÉTECTION DU MODE : Propriétaire ou Visiteur
         const isProprietaire = localStorage.getItem('pegasus_mode_proprio') === 'true';
         
-        // ✅ RESTAURATION DE LA COMBINAISON (selon le mode)
+        // ✅ RESTAURATION DE LA COMBINAISON (SANS SOUMETTRE AUTOMATIQUEMENT)
         let savedCombo = null;
         if (isProprietaire) {
-            // Propriétaire : restauration depuis localStorage (permanent)
             savedCombo = localStorage.getItem('pegasus_combinaison');
         } else {
-            // Visiteur : restauration depuis sessionStorage (session uniquement)
             savedCombo = sessionStorage.getItem('pegasus_visiteur_combo');
         }
         
+        // ✅ On remplit le champ mais on NE SOUMET PAS automatiquement
+        // (cela évite la boucle de rechargement infinie)
         if (savedCombo && savedCombo.trim() !== '') {
             inputField.value = savedCombo;
-            // Soumettre automatiquement pour afficher les boules et le score
-            form.submit();
+            // Déclencher l'événement input pour mettre à jour l'avertissement
+            inputField.dispatchEvent(new Event('input'));
         }
 
         // ✅ SAUVEGARDE À CHAQUE SAISIE
@@ -410,7 +410,7 @@
             }
         });
 
-        // ✅ SAUVEGARDE AU SUBMIT
+        // ✅ SAUVEGARDE AU SUBMIT (quand l'utilisateur clique Calculer)
         if (form) {
             form.addEventListener('submit', function(e) {
                 const valeur = inputField.value;
@@ -442,7 +442,6 @@
         if (btnModeProprio) {
             btnModeProprio.addEventListener('click', () => {
                 if (confirm("Activer le mode Propriétaire ?\n\n✅ Vos combinaisons seront sauvegardées PERMANEMMENT.\n🔄 Les visiteurs n'auront qu'une sauvegarde TEMPORAIRE (session).")) {
-                    // Transférer la combinaison session vers localStorage
                     const sessionCombo = sessionStorage.getItem('pegasus_visiteur_combo');
                     localStorage.setItem('pegasus_mode_proprio', 'true');
                     if (sessionCombo) {
