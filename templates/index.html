@@ -70,15 +70,8 @@
             vertical-align: middle;
         }
 
-        .diode-blanc {
-            background-color: #ffffff;
-            color: #ffffff;
-        }
-
-        .diode-orange {
-            background-color: #f1a934;
-            color: #f1a934;
-        }
+        .diode-blanc { background-color: #ffffff; color: #ffffff; }
+        .diode-orange { background-color: #f1a934; color: #f1a934; }
 
         /* ✅ UNIFORMISATION DE TOUS LES TEXTES EN BLANC PUR */
         body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body label, body small, body li, body input, body button {
@@ -88,7 +81,7 @@
             text-rendering: optimizeLegibility;
         }
 
-        /* Widget Boturfers - thème sombre et compact */
+        /* Widget Boturfers */
         #widget-container, #widget-container *, #widget-container p, #widget-container span, #widget-container a, #widget-container td, #widget-container th, #widget-container div, #widget-container h1, #widget-container h2, #widget-container h3, #widget-container h4, #widget-container b, #widget-container strong, #widget-container label, #widget-container small, #widget-container li { color: #ffffff !important; }
         #widget-container td, #widget-container th, #widget-container tr, #widget-container table, #widget-container div { background-color: #1f2225 !important; }
         #widget-container a { color: #60a5fa !important; text-decoration: underline; }
@@ -102,18 +95,14 @@
         #widget-container tr { height: auto !important; }
         #widget-container { padding: 6px !important; }
 
-        /* Exceptions pour maintenir la hiérarchie visuelle */
-        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { /* Ces couleurs spéciales sont conservées */ }
+        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { /* Couleurs spéciales conservées */ }
         input::placeholder { color: #9ca3af !important; opacity: 1; }
 
-        /* ✅ ANIMATION D'APPARITION POUR LES BOULES */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .boules-container {
-            animation: fadeIn 0.5s ease-out;
-        }
+        .boules-container { animation: fadeIn 0.5s ease-out; }
     </style>
 </head>
 
@@ -137,6 +126,11 @@
           <form action="/relancer" method="POST" class="inline">
             <button type="submit" class="bg-[#9b59b6] hover:bg-[#8e44ad] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">🤖 Relancer Robot</button>
           </form>
+          {% if est_proprietaire %}
+          <form action="/deconnexion" method="POST" class="inline">
+            <button type="submit" class="bg-[#6c757d] hover:bg-[#495057] text-white text-alpha font-bold py-2 px-6 rounded shadow uppercase tracking-wider flex items-center gap-2 transition">🔓 Déconnexion</button>
+          </form>
+          {% endif %}
         </div>
       </div>
 
@@ -162,14 +156,23 @@
         </div>
       </div>
 
-      <!-- ✅ BLOC ANALYSE DYNAMIQUE INTÉGRÉ (Avec diodes clignotantes) -->
+      <!-- ✅ BLOC ANALYSE DYNAMIQUE -->
       <div class="bg-[#1f2225] rounded-xl p-6 mb-8 border-2 border-[#f1a934] shadow-lg">
         <h2 class="text-alpha text-[#f1a934] uppercase tracking-widest mb-6 text-center border-b border-[#2d3238] pb-3">
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
         
-        <!-- ✅ MESSAGE D'ACCUEIL SI AUCUNE COMBINAISON -->
+        {% if est_proprietaire %}
+        <!-- ✅ MODE PROPRIÉTAIRE : afficher la combinaison -->
+        <div class="mb-4 text-center">
+            <span class="inline-block bg-[#f1a934] text-[#1f2225] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                🔐 Mode Propriétaire actif
+            </span>
+        </div>
+        {% endif %}
+        
         {% if not jetons.retenus or jetons.retenus|length == 0 %}
+        <!-- ✅ MESSAGE D'ACCUEIL SI AUCUNE COMBINAISON -->
         <div class="text-center py-12 mb-6">
             <div class="text-6xl mb-4">🎯</div>
             <h3 class="text-xl font-bold text-[#f1a934] mb-3">Bienvenue sur Pegasus Quinté</h3>
@@ -189,10 +192,9 @@
         </div>
         {% else %}
         
-        <!-- LIGNE 1 : Boules grises (votre saisie) + Boules oranges (pronostic Pegasus) avec diodes -->
+        <!-- LIGNE 1 : Boules grises + Boules oranges avec diodes -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 boules-container">
             
-            <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) avec diode blanche -->
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
               <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
                 <span class="diode diode-blanc"></span>
@@ -205,7 +207,6 @@
               </div>
             </div>
 
-            <!-- COLONNE DROITE : Pronostic Pegasus optimisé (Boules oranges) avec diode orange -->
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
               <span class="text-alpha-sm text-white block mb-3 font-medium uppercase tracking-wider flex items-center">
                 <span class="diode diode-orange"></span>
@@ -219,53 +220,34 @@
             </div>
         </div>
 
-        <!-- LIGNE 2 : Score + "Ce que Pegasus calcule" (2 colonnes) -->
+        <!-- LIGNE 2 : Score + "Ce que Pegasus calcule" -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             
-            <!-- COLONNE GAUCHE : Score avec Échelle Visuelle -->
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Score de votre combinaison</div>
                 <div id="score-display" class="text-chiffre text-[#f1a934] mb-3">{{ stats.ponderation_pegasus }} <span class="text-base">pts</span></div>
                 
                 {% set score = stats.ponderation_pegasus %}
                 {% if score < 30 %}
-                    {% set niveau = "Faible" %}
-                    {% set couleur_bg = "bg-red-500" %}
-                    {% set couleur_text = "text-red-400" %}
-                    {% set largeur = "20%" %}
+                    {% set niveau = "Faible" %}{% set couleur_bg = "bg-red-500" %}{% set couleur_text = "text-red-400" %}{% set largeur = "20%" %}
                 {% elif score < 80 %}
-                    {% set niveau = "Moyen" %}
-                    {% set couleur_bg = "bg-orange-500" %}
-                    {% set couleur_text = "text-orange-400" %}
-                    {% set largeur = "40%" %}
+                    {% set niveau = "Moyen" %}{% set couleur_bg = "bg-orange-500" %}{% set couleur_text = "text-orange-400" %}{% set largeur = "40%" %}
                 {% elif score < 150 %}
-                    {% set niveau = "Fort" %}
-                    {% set couleur_bg = "bg-yellow-500" %}
-                    {% set couleur_text = "text-yellow-400" %}
-                    {% set largeur = "60%" %}
+                    {% set niveau = "Fort" %}{% set couleur_bg = "bg-yellow-500" %}{% set couleur_text = "text-yellow-400" %}{% set largeur = "60%" %}
                 {% elif score < 250 %}
-                    {% set niveau = "Excellent" %}
-                    {% set couleur_bg = "bg-green-500" %}
-                    {% set couleur_text = "text-green-400" %}
-                    {% set largeur = "80%" %}
+                    {% set niveau = "Excellent" %}{% set couleur_bg = "bg-green-500" %}{% set couleur_text = "text-green-400" %}{% set largeur = "80%" %}
                 {% else %}
-                    {% set niveau = "Exceptionnel 🚀" %}
-                    {% set couleur_bg = "bg-purple-500" %}
-                    {% set couleur_text = "text-purple-400" %}
-                    {% set largeur = "100%" %}
+                    {% set niveau = "Exceptionnel 🚀" %}{% set couleur_bg = "bg-purple-500" %}{% set couleur_text = "text-purple-400" %}{% set largeur = "100%" %}
                 {% endif %}
 
-                <!-- Barre de progression -->
                 <div class="w-full bg-[#2d3238] rounded-full h-2.5 mb-2 overflow-hidden">
                     <div class="{{ couleur_bg }} h-2.5 rounded-full transition-all duration-700 ease-out" style="width: {{ largeur }}"></div>
                 </div>
-                <!-- Badge de niveau -->
                 <div class="text-xs font-bold {{ couleur_text }} uppercase tracking-wider bg-[#2d3238]/50 inline-block px-3 py-1 rounded-full border border-[#4a5568]">
                     Niveau : {{ niveau }}
                 </div>
             </div>
 
-            <!-- COLONNE DROITE : Ce que Pegasus calcule -->
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
               <span class="text-alpha-sm text-[#4ba3e3] block mb-2 font-medium uppercase">
                 📊 Ce que Pegasus calcule avec votre combinaison :
@@ -280,19 +262,16 @@
         </div>
         {% endif %}
 
-        <!-- LIGNE 3 : Taux réussite + Formulaire de saisie (2 colonnes) -->
+        <!-- LIGNE 3 : Taux réussite + Formulaire de saisie -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- COLONNE GAUCHE : Taux réussite -->
             <div class="bg-[#121416]/60 p-4 rounded-lg border border-[#2d3238] text-center">
                 <div class="text-alpha-sm text-white font-medium mb-2 uppercase">Taux Réussite Historique</div>
                 <div class="text-chiffre text-[#2ecc71]">{{ stats.taux_reussite }} <span class="text-base">%</span></div>
                 <div class="text-alpha-sm text-[#7a8292] mt-2">Basé sur {{ stats.historique_courses }} courses</div>
             </div>
 
-            <!-- COLONNE DROITE : Formulaire de saisie avec texte explicatif -->
             <div class="bg-[#1a1f26] p-4 rounded-lg border border-[#2b3542]">
-              <!-- ✅ TEXTE EXPLICATIF AU-DESSUS DU CHAMP DE SAISIE -->
               <div class="text-alpha-sm text-[#4ba3e3] font-medium mb-2 text-center uppercase tracking-wider">
                 💡 Saisissez votre combinaison personnelle ci-dessous
               </div>
@@ -315,17 +294,23 @@
                   </button>
               </form>
               
-              <!-- ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE -->
+              <!-- ✅ BOUTON CONNEXION PROPRIÉTAIRE (ou DÉCONNEXION si déjà connecté) -->
               <div class="mt-3 text-center">
-                <button id="btn-mode-proprio" type="button" class="text-[10px] text-[#6c757d] hover:text-[#adb5bd] underline cursor-pointer">
-                  🔑 Activer le mode Propriétaire (sauvegarde permanente)
-                </button>
+                {% if est_proprietaire %}
+                    <span class="text-[10px] text-[#2ecc71] font-bold uppercase tracking-wider">
+                        ✅ Connecté en tant que propriétaire
+                    </span>
+                {% else %}
+                    <button id="btn-connexion-proprio" type="button" class="text-[10px] text-[#f1a934] hover:text-[#f39c12] font-bold uppercase tracking-wider cursor-pointer border border-[#f1a934] px-3 py-1 rounded hover:bg-[#f1a934]/10 transition">
+                        🔑 Connexion propriétaire
+                    </button>
+                {% endif %}
               </div>
             </div>
         </div>
       </div>
 
-      <!-- BOUTON PARTAGER (Centré, hors de la bordure orange) -->
+      <!-- BOUTON PARTAGER -->
       <div class="flex justify-center mb-8">
         <button id="btn-partager" type="button" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-3 px-8 rounded-lg text-sm transition uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer max-w-xs">
           📤 Partager mon pronostic
@@ -359,36 +344,34 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC PERSISTANCE INTELLIGENTE (SANS BOUCLE) ===== -->
+    <!-- ===== SCRIPT AVEC AUTHENTIFICATION PROPRIÉTAIRE ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
-        const btnModeProprio = document.getElementById('btn-mode-proprio');
+        const btnConnexionProprio = document.getElementById('btn-connexion-proprio');
         
         if (!inputField) return;
 
-        // ✅ DÉTECTION DU MODE : Propriétaire ou Visiteur
-        const isProprietaire = localStorage.getItem('pegasus_mode_proprio') === 'true';
+        // ✅ RÉCUPÉRER LE TOKEN PROPRIÉTAIRE (si existant)
+        const tokenProprio = localStorage.getItem('pegasus_token_proprio');
         
-        // ✅ RESTAURATION DE LA COMBINAISON (SANS SOUMETTRE AUTOMATIQUEMENT)
-        let savedCombo = null;
-        if (isProprietaire) {
-            savedCombo = localStorage.getItem('pegasus_combinaison');
-        } else {
-            savedCombo = sessionStorage.getItem('pegasus_visiteur_combo');
-        }
-        
-        // ✅ On remplit le champ mais on NE SOUMET PAS automatiquement
-        // (cela évite la boucle de rechargement infinie)
-        if (savedCombo && savedCombo.trim() !== '') {
-            inputField.value = savedCombo;
-            // Déclencher l'événement input pour mettre à jour l'avertissement
-            inputField.dispatchEvent(new Event('input'));
+        // ✅ ENVOYER LE TOKEN À CHAQUE REQUÊTE FORM (via un champ caché dynamique)
+        // On utilise un intercepteur de soumission pour ajouter le header
+        if (form && tokenProprio) {
+            const originalSubmit = form.submit.bind(form);
+            form.addEventListener('submit', function(e) {
+                // Ajouter le token comme champ caché temporairement
+                let hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'x_proprio_token';
+                hiddenInput.value = tokenProprio;
+                form.appendChild(hiddenInput);
+            }, true);
         }
 
-        // ✅ SAUVEGARDE À CHAQUE SAISIE
+        // ✅ SAUVEGARDE À CHAQUE SAISIE (uniquement si propriétaire connecté)
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
@@ -401,16 +384,9 @@
             } else {
                 warningMsg.classList.add('hidden');
             }
-            
-            // Sauvegarde selon le mode
-            if (isProprietaire) {
-                localStorage.setItem('pegasus_combinaison', this.value);
-            } else {
-                sessionStorage.setItem('pegasus_visiteur_combo', this.value);
-            }
         });
 
-        // ✅ SAUVEGARDE AU SUBMIT (quand l'utilisateur clique Calculer)
+        // ✅ VALIDATION AU SUBMIT
         if (form) {
             form.addEventListener('submit', function(e) {
                 const valeur = inputField.value;
@@ -428,28 +404,41 @@
                 }
                 
                 inputField.value = numeros.join('-');
-                
-                // Sauvegarde selon le mode
-                if (isProprietaire) {
-                    localStorage.setItem('pegasus_combinaison', inputField.value);
-                } else {
-                    sessionStorage.setItem('pegasus_visiteur_combo', inputField.value);
-                }
             });
         }
 
-        // ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE
-        if (btnModeProprio) {
-            btnModeProprio.addEventListener('click', () => {
-                if (confirm("Activer le mode Propriétaire ?\n\n✅ Vos combinaisons seront sauvegardées PERMANEMMENT.\n🔄 Les visiteurs n'auront qu'une sauvegarde TEMPORAIRE (session).")) {
-                    const sessionCombo = sessionStorage.getItem('pegasus_visiteur_combo');
-                    localStorage.setItem('pegasus_mode_proprio', 'true');
-                    if (sessionCombo) {
-                        localStorage.setItem('pegasus_combinaison', sessionCombo);
-                    }
-                    alert("✅ Mode Propriétaire activé !\nVos combinaisons sont désormais sauvegardées de façon permanente.");
-                    location.reload();
+        // ✅ BOUTON CONNEXION PROPRIÉTAIRE
+        if (btnConnexionProprio) {
+            btnConnexionProprio.addEventListener('click', () => {
+                const motDePasse = prompt("🔐 Entrez le mot de passe propriétaire :");
+                
+                if (!motDePasse || motDePasse.trim() === '') {
+                    return;
                 }
+                
+                // Envoyer le mot de passe au serveur pour vérification
+                fetch('/connexion_proprio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mot_de_passe: motDePasse })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Stocker le token
+                        localStorage.setItem('pegasus_token_proprio', data.token);
+                        alert("✅ Connexion propriétaire réussie !\nVotre combinaison va s'afficher.");
+                        location.reload();
+                    } else {
+                        alert("❌ Mot de passe incorrect.\nVeuillez réessayer.");
+                    }
+                })
+                .catch(err => {
+                    console.error('Erreur connexion:', err);
+                    alert("❌ Erreur de connexion. Vérifiez votre connexion internet.");
+                });
             });
         }
 
