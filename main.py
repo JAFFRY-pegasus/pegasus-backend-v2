@@ -12,32 +12,43 @@
 # =====================================================================
 
 """
-main.py v3.25
-Moteur SGE optimisé par IA + Bonus Géométrique Signature (axes 6-14 et 7-15)
-Protection : Licence propriétaire non-commerciale intégrée.
-Performance : 34% de chevaux trouvés dans le Top 5 sur l'historique.
-Nouveauté v3.25 : Combinaison vide par défaut pour page vierge des visiteurs.
+main.py v3.28
+Moteur SGE optimisé par IA + Authentification propriétaire par mot de passe
+- Page vierge par défaut pour tous les visiteurs
+- Connexion propriétaire par mot de passe (stocké côté serveur)
+- Combinaison propriétaire accessible depuis n'importe quel appareil
 """
 
 import sys
 import os
 import json
 import time
+import hashlib
 import traceback
 from datetime import datetime as _datetime
 from collections import Counter
 from itertools import combinations
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, Header
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 # =====================================================================
+# 🔐 CONFIGURATION SÉCURITÉ PROPRIÉTAIRE
+# =====================================================================
+# ⚠️ MODIFIEZ CE MOT DE PASSE PAR LE VÔTRE !
+MOT_DE_PASSE_PROPRIETAIRE = "pegasus2024"
+
+# Le token est calculé automatiquement à partir du mot de passe
+# (stable tant que le mot de passe ne change pas)
+TOKEN_PROPRIETAIRE = hashlib.sha256(MOT_DE_PASSE_PROPRIETAIRE.encode()).hexdigest()
+
+# =====================================================================
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.25 (Page vierge visiteurs)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.28 (Authentification proprio)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -70,7 +81,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.25")
+app = FastAPI(title="Pegasus Backend v3.28")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -84,9 +95,11 @@ TTL_CACHE_SECONDS = 900
 # CONSTANTES DU MOTEUR SGE (OPTIMISÉES PAR IA + SIGNATURE)
 # =====================================================================
 
-# ✅ VIDE PAR DÉFAUT : page vierge pour les visiteurs
-# Le propriétaire active le mode "Propriétaire" via le bouton dans l'interface
+# ✅ VIDE PAR DÉFAUT : la combinaison propriétaire est chargée séparément
 COMBINAISON_SELECTIONNEE = []
+
+# ✅ COMBINAISON PROPRIÉTAIRE PAR DÉFAUT (modifiable via GitHub)
+COMBINAISON_PROPRIO_DEFAUT = ["4", "5", "6", "7", "12", "13", "14", "15"]
 
 _JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 _MOIS = ["janvier", "février", "mars", "avril", "mai", "juin",
@@ -106,36 +119,37 @@ OPPOSITIONS_VERTICALES = {
 COEFFICIENTS_RESONANCE = {0: 0.5, 1: 1.0, 2: 1.3, 3: 1.6, 4: 1.8, 5: 2.0}
 
 # ✅ AXES SIGNATURE DÉCOUVERTS PAR ANALYSE EXHAUSTIVE
-# Ces axes apparaissent dans 100% des combinaisons optimales
 AXES_SIGNATURE = [(6, 14), (7, 15)]
 BONUS_SIGNATURE = 1.2  # +20% par axe signature touché
 
 # =====================================================================
 # FONCTIONS DE PERSISTANCE
 # =====================================================================
-def charger_combinaison():
-    """Charge la combinaison depuis le fichier local (mode Propriétaire)."""
-    global COMBINAISON_SELECTIONNEE
+def charger_combinaison_proprio():
+    """Charge la combinaison propriétaire depuis le fichier."""
     try:
         if os.path.exists(FICHIER_COMBINAISON):
             with open(FICHIER_COMBINAISON, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 if 'combinaison' in data and isinstance(data['combinaison'], list):
-                    COMBINAISON_SELECTIONNEE = data['combinaison']
-                    print(f"✅ Combinaison chargée: {COMBINAISON_SELECTIONNEE}", flush=True)
+                    return data['combinaison']
     except Exception as e:
-        print(f"⚠️ Erreur chargement combinaison: {e}", flush=True)
+        print(f"⚠️ Erreur chargement combinaison proprio: {e}", flush=True)
+    return COMBINAISON_PROPRIO_DEFAUT
 
-def sauvegarder_combinaison():
-    """Sauvegarde la combinaison dans le fichier local."""
+def sauvegarder_combinaison_proprio(combinaison):
+    """Sauvegarde la combinaison propriétaire."""
     try:
         with open(FICHIER_COMBINAISON, 'w', encoding='utf-8') as f:
-            json.dump({'combinaison': COMBINAISON_SELECTIONNEE}, f, ensure_ascii=False)
+            json.dump({'combinaison': combinaison}, f, ensure_ascii=False)
     except Exception as e:
-        print(f"⚠️ Erreur sauvegarde combinaison: {e}", flush=True)
+        print(f"⚠️ Erreur sauvegarde combinaison proprio: {e}", flush=True)
 
-# Charger la combinaison au démarrage (si fichier existe)
-charger_combinaison()
+def est_proprietaire(token: str) -> bool:
+    """Vérifie si le token correspond au propriétaire."""
+    if not token:
+        return False
+    return token == TOKEN_PROPRIETAIRE
 
 # =====================================================================
 # DONNÉES GLOBALES
@@ -272,7 +286,6 @@ def calculer_score_sge(combinaison):
     # Score final avec bonus signature
     score_final = int(score_brut * ponderation * facteur_amortissement * bonus_multiplicateur)
     
-    # Debug : afficher si bonus signature activé
     if axes_signature_touches:
         print(f"🔍 DEBUG SCORE: Combo={combinaison} | Taille={taille_combinaison} | Axes={nombre_axes} | Signature={axes_signature_touches} | Bonus x{bonus_multiplicateur:.2f} | Score Final={score_final}", flush=True)
     else:
@@ -306,14 +319,65 @@ def generer_prono_automatique(combinaison_ref, nombre_max=5):
     return [str(x) for x in valides[:nombre_max]]
 
 # =====================================================================
+# 🔐 ROUTE DE CONNEXION PROPRIÉTAIRE
+# =====================================================================
+@app.post("/connexion_proprio")
+def connexion_proprio(request: Request):
+    """Vérifie le mot de passe et renvoie un token si correct."""
+    try:
+        body = request.json() if hasattr(request, 'json') else {}
+    except:
+        body = {}
+    
+    # Récupérer le mot de passe depuis le body JSON ou les form data
+    mot_de_passe = body.get("mot_de_passe", "")
+    
+    if not mot_de_passe:
+        # Essayer de lire depuis le body brut
+        import asyncio
+        try:
+            body_bytes = asyncio.get_event_loop().run_until_complete(request.body())
+            import urllib.parse
+            params = urllib.parse.parse_qs(body_bytes.decode())
+            mot_de_passe = params.get("mot_de_passe", [""])[0]
+        except:
+            pass
+    
+    if mot_de_passe == MOT_DE_PASSE_PROPRIETAIRE:
+        # Charger la combinaison propriétaire
+        combinaison = charger_combinaison_proprio()
+        return JSONResponse(content={
+            "success": True,
+            "token": TOKEN_PROPRIETAIRE,
+            "combinaison": combinaison
+        })
+    else:
+        return JSONResponse(content={
+            "success": False,
+            "message": "Mot de passe incorrect"
+        }, status_code=401)
+
+# =====================================================================
 # ROUTES
 # =====================================================================
 @app.get("/", response_class=HTMLResponse)
-def dashboard(request: Request):
-    global COMBINAISON_SELECTIONNEE
+def dashboard(
+    request: Request,
+    x_proprio_token: str = Header(None, alias="X-Proprio-Token")
+):
+    """Page principale. Si token valide → mode propriétaire."""
     rafraichir_donnees_quinte()
-
-    # ✅ Si aucune combinaison sélectionnée, afficher page vierge
+    
+    # Vérifier si c'est le propriétaire
+    proprio = est_proprietaire(x_proprio_token)
+    
+    # Déterminer la combinaison à afficher
+    if proprio:
+        COMBINAISON_SELECTIONNEE = charger_combinaison_proprio()
+    else:
+        COMBINAISON_SELECTIONNEE = []
+    
+    # Calculer le pronostic et le score
     if not COMBINAISON_SELECTIONNEE or len(COMBINAISON_SELECTIONNEE) == 0:
         prono_pegasus = []
         score_utilisateur = 0
@@ -387,36 +451,45 @@ def dashboard(request: Request):
             "combinaison_saisie": combinaison_saisie,
             "jetons": jetons, 
             "stats": stats,
-            "nb_partants": nb_partants
+            "nb_partants": nb_partants,
+            "est_proprietaire": proprio  # ✅ Nouveau flag pour le template
         }
     )
 
-# =====================================================================
-# ROUTES SÉCURISÉES (GET + POST)
-# =====================================================================
-
-@app.get("/calculer")
-def calculer_get():
-    return RedirectResponse(url="/", status_code=302)
-
 @app.post("/calculer")
-def calculer(combinaison_utilisateur: str = Form(...)):
-    global COMBINAISON_SELECTIONNEE
+def calculer(
+    combinaison_utilisateur: str = Form(...),
+    x_proprio_token: str = Header(None, alias="X-Proprio-Token")
+):
+    """Sauvegarde la combinaison (propriétaire si token valide)."""
     extraits = [n.strip() for n in combinaison_utilisateur.split("-") if n.strip().isdigit()]
-    if extraits: 
-        COMBINAISON_SELECTIONNEE = extraits[:8]
-        sauvegarder_combinaison()
+    if extraits:
+        if est_proprietaire(x_proprio_token):
+            # Sauvegarder comme combinaison propriétaire
+            sauvegarder_combinaison_proprio(extraits[:8])
+        # Sinon, on ne sauvegarde pas (visiteur)
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/selectionner/{numero}")
 def selectionner_grille(numero: str):
-    global COMBINAISON_SELECTIONNEE
-    if numero in COMBINAISON_SELECTIONNEE:
-        COMBINAISON_SELECTIONNEE.remove(numero)
-    elif len(COMBINAISON_SELECTIONNEE) < 8:
-        COMBINAISON_SELECTIONNEE.append(numero)
-        COMBINAISON_SELECTIONNEE.sort(key=lambda x: int(x))
-    sauvegarder_combinaison()
+    return RedirectResponse(url="/", status_code=302)
+
+@app.post("/selectionner/{numero}")
+def selectionner_grille_post(
+    numero: str,
+    x_proprio_token: str = Header(None, alias="X-Proprio-Token")
+):
+    """Ajoute/retire un cheval de la combinaison propriétaire."""
+    if not est_proprietaire(x_proprio_token):
+        return RedirectResponse(url="/", status_code=303)
+    
+    combinaison = charger_combinaison_proprio()
+    if numero in combinaison:
+        combinaison.remove(numero)
+    elif len(combinaison) < 8:
+        combinaison.append(numero)
+        combinaison.sort(key=lambda x: int(x))
+    sauvegarder_combinaison_proprio(combinaison)
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/reinitialiser")
@@ -424,10 +497,11 @@ def reinitialiser_get():
     return RedirectResponse(url="/", status_code=302)
 
 @app.post("/reinitialiser")
-def reinitialiser():
-    global COMBINAISON_SELECTIONNEE
-    COMBINAISON_SELECTIONNEE = []
-    sauvegarder_combinaison()
+def reinitialiser(
+    x_proprio_token: str = Header(None, alias="X-Proprio-Token")
+):
+    if est_proprietaire(x_proprio_token):
+        sauvegarder_combinaison_proprio([])
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/actualiser")
@@ -446,35 +520,17 @@ def relancer_get():
 
 @app.post("/relancer")
 def relancer():
-    global COMBINAISON_SELECTIONNEE
     DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
     rafraichir_donnees_quinte(force=True)
-    COMBINAISON_SELECTIONNEE = []  # ✅ Réinitialisation complète (page vierge)
-    sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
 
-@app.get("/saisie-manuelle")
-def saisie_manuelle_get():
+@app.get("/deconnexion")
+def deconnexion_get():
     return RedirectResponse(url="/", status_code=302)
 
-@app.post("/saisie-manuelle")
-def saisie_manuelle(
-    hippodrome: str = Form(...), nom_course: str = Form(...),
-    nb_partants: int = Form(...), heure_depart: str = Form(...),
-    discipline: str = Form("TROT ATTELÉ"), distance: int = Form(0)
-):
-    global DONNEES_QUINTE_DU_JOUR
-    DONNEES_QUINTE_DU_JOUR.update({
-        "hippodrome": hippodrome.upper(), "nom_course": nom_course,
-        "nb_partants": nb_partants, "heure_depart": heure_depart,
-        "discipline": discipline.upper(), "distance": distance,
-        "statut_robot": "Données Manuelles", "mode_manuel": True,
-        "isQuinte": True, "numReunion": 1, "numOrdre": 5
-    })
-    try:
-        with open(FICHIER_SAUVEGARDE, 'w', encoding='utf-8') as f:
-            json.dump(DONNEES_QUINTE_DU_JOUR, f, ensure_ascii=False)
-    except Exception: pass
+@app.post("/deconnexion")
+def deconnexion():
+    """Route factice pour la déconnexion (le token est côté client)."""
     return RedirectResponse(url="/", status_code=303)
 
 if __name__ == '__main__':
