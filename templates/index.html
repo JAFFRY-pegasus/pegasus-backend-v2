@@ -105,6 +105,15 @@
         /* Exceptions pour maintenir la hiérarchie visuelle */
         .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3], .text-[#ff4d4d] { /* Ces couleurs spéciales sont conservées */ }
         input::placeholder { color: #9ca3af !important; opacity: 1; }
+
+        /* ✅ ANIMATION D'APPARITION POUR LES BOULES */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .boules-container {
+            animation: fadeIn 0.5s ease-out;
+        }
     </style>
 </head>
 
@@ -159,8 +168,29 @@
           🔮 ANALYSE GÉOMÉTRIQUE PEGASUS EN TEMPS RÉEL
         </h2>
         
+        <!-- ✅ MESSAGE D'ACCUEIL SI AUCUNE COMBINAISON -->
+        {% if not jetons.retenus or jetons.retenus|length == 0 %}
+        <div class="text-center py-12 mb-6">
+            <div class="text-6xl mb-4">🎯</div>
+            <h3 class="text-xl font-bold text-[#f1a934] mb-3">Bienvenue sur Pegasus Quinté</h3>
+            <p class="text-[#adb5bd] mb-6 max-w-2xl mx-auto">
+                Saisissez votre combinaison de 5 à 8 chevaux ci-dessous pour obtenir une analyse géométrique complète avec score de résonance et pronostic optimisé par l'IA.
+            </p>
+            <div class="flex justify-center gap-8 text-sm text-[#7a8292]">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#4a5568]"></span>
+                    <span>Votre saisie</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#e67e22]"></span>
+                    <span>Pronostic Pegasus</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        
         <!-- LIGNE 1 : Boules grises (votre saisie) + Boules oranges (pronostic Pegasus) avec diodes -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 boules-container">
             
             <!-- COLONNE GAUCHE : Votre combinaison saisie (Boules grises) avec diode blanche -->
             <div class="bg-[#121416]/50 p-4 rounded-lg border border-[#2d3238]">
@@ -169,13 +199,9 @@
                 VOTRE COMBINAISON SAISIE :
               </span>
               <div class="flex flex-wrap gap-3">
-                  {% if jetons.retenus %}
-                      {% for cheval in jetons.retenus %}
-                      <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
-                      {% endfor %}
-                  {% else %}
-                      <span class="text-alpha-sm text-[#7a8292] italic">Aucune sélection...</span>
-                  {% endif %}
+                  {% for cheval in jetons.retenus %}
+                  <span class="w-10 h-10 bg-[#4a5568] text-white text-lg font-bold rounded-full flex items-center justify-center shadow-md border-2 border-[#718096]">{{ cheval }}</span>
+                  {% endfor %}
               </div>
             </div>
 
@@ -252,6 +278,7 @@
               </ul>
             </div>
         </div>
+        {% endif %}
 
         <!-- LIGNE 3 : Taux réussite + Formulaire de saisie (2 colonnes) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -274,7 +301,7 @@
                     type="text" 
                     id="combinaison-input" 
                     name="combinaison_utilisateur"
-                    value="{{ combinaison_saisie }}"
+                    value=""
                     placeholder="Ex: 13-6-5-12-11" 
                     maxlength="30"
                     class="w-full p-2 text-base font-bold text-left border-2 border-[#4ba3e3] bg-[#121824] text-white rounded focus:outline-none focus:ring-2 focus:ring-[#4ba3e3] transition font-mono"
@@ -287,6 +314,13 @@
                     Calculer
                   </button>
               </form>
+              
+              <!-- ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE -->
+              <div class="mt-3 text-center">
+                <button id="btn-mode-proprio" type="button" class="text-[10px] text-[#6c757d] hover:text-[#adb5bd] underline cursor-pointer">
+                  🔑 Activer le mode Propriétaire (sauvegarde automatique)
+                </button>
+              </div>
             </div>
         </div>
       </div>
@@ -325,21 +359,30 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC LOCALSTORAGE ET PARTAGE ===== -->
+    <!-- ===== SCRIPT AVEC MODE PROPRIÉTAIRE vs VISITEUR ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
         const inputField = document.getElementById('combinaison-input');
         const warningMsg = document.getElementById('warning-msg');
+        const btnModeProprio = document.getElementById('btn-mode-proprio');
         
         if (!inputField) return;
 
-        const savedCombo = localStorage.getItem('pegasus_combinaison');
-        if (savedCombo) {
-            inputField.value = savedCombo;
-            inputField.dispatchEvent(new Event('input'));
+        // ✅ DÉTECTION DU MODE : Propriétaire ou Visiteur
+        const isProprietaire = localStorage.getItem('pegasus_mode_proprio') === 'true';
+        
+        // Si mode Propriétaire : restaurer la combinaison sauvegardée
+        if (isProprietaire) {
+            const savedCombo = localStorage.getItem('pegasus_combinaison');
+            if (savedCombo) {
+                inputField.value = savedCombo;
+                inputField.dispatchEvent(new Event('input'));
+            }
         }
+        // Si mode Visiteur : champ vide (déjà le cas par défaut)
 
+        // Sauvegarder la combinaison uniquement si mode Propriétaire actif
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
@@ -353,7 +396,10 @@
                 warningMsg.classList.add('hidden');
             }
             
-            localStorage.setItem('pegasus_combinaison', this.value);
+            // Sauvegarde conditionnelle
+            if (isProprietaire) {
+                localStorage.setItem('pegasus_combinaison', this.value);
+            }
         });
 
         if (form) {
@@ -373,7 +419,23 @@
                 }
                 
                 inputField.value = numeros.join('-');
-                localStorage.setItem('pegasus_combinaison', inputField.value);
+                
+                // Sauvegarde conditionnelle
+                if (isProprietaire) {
+                    localStorage.setItem('pegasus_combinaison', inputField.value);
+                }
+            });
+        }
+
+        // ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE
+        if (btnModeProprio) {
+            btnModeProprio.addEventListener('click', () => {
+                if (confirm("Activer le mode Propriétaire ?\n\n✅ Vos combinaisons seront sauvegardées automatiquement.\n❌ Les visiteurs verront une page vierge.")) {
+                    localStorage.setItem('pegasus_mode_proprio', 'true');
+                    localStorage.setItem('pegasus_combinaison', inputField.value || '');
+                    alert("✅ Mode Propriétaire activé !\nVotre combinaison sera désormais sauvegardée.");
+                    location.reload();
+                }
             });
         }
 
