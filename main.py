@@ -12,10 +12,11 @@
 # =====================================================================
 
 """
-main.py v3.21
+main.py v3.25
 Moteur SGE optimisé par IA + Bonus Géométrique Signature (axes 6-14 et 7-15)
 Protection : Licence propriétaire non-commerciale intégrée.
 Performance : 34% de chevaux trouvés dans le Top 5 sur l'historique.
+Nouveauté v3.25 : Combinaison vide par défaut pour page vierge des visiteurs.
 """
 
 import sys
@@ -36,7 +37,7 @@ from fastapi.templating import Jinja2Templates
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.21 (Protégé & Optimisé)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.25 (Page vierge visiteurs)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -69,7 +70,7 @@ except Exception as e:
 # =====================================================================
 # APPLICATION FASTAPI
 # =====================================================================
-app = FastAPI(title="Pegasus Backend v3.21")
+app = FastAPI(title="Pegasus Backend v3.25")
 
 if os.path.isdir(CHEMIN_STATIC):
     app.mount("/static", StaticFiles(directory=CHEMIN_STATIC), name="static")
@@ -82,7 +83,10 @@ TTL_CACHE_SECONDS = 900
 # =====================================================================
 # CONSTANTES DU MOTEUR SGE (OPTIMISÉES PAR IA + SIGNATURE)
 # =====================================================================
-COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
+
+# ✅ VIDE PAR DÉFAUT : page vierge pour les visiteurs
+# Le propriétaire active le mode "Propriétaire" via le bouton dans l'interface
+COMBINAISON_SELECTIONNEE = []
 
 _JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 _MOIS = ["janvier", "février", "mars", "avril", "mai", "juin",
@@ -110,6 +114,7 @@ BONUS_SIGNATURE = 1.2  # +20% par axe signature touché
 # FONCTIONS DE PERSISTANCE
 # =====================================================================
 def charger_combinaison():
+    """Charge la combinaison depuis le fichier local (mode Propriétaire)."""
     global COMBINAISON_SELECTIONNEE
     try:
         if os.path.exists(FICHIER_COMBINAISON):
@@ -122,12 +127,14 @@ def charger_combinaison():
         print(f"⚠️ Erreur chargement combinaison: {e}", flush=True)
 
 def sauvegarder_combinaison():
+    """Sauvegarde la combinaison dans le fichier local."""
     try:
         with open(FICHIER_COMBINAISON, 'w', encoding='utf-8') as f:
             json.dump({'combinaison': COMBINAISON_SELECTIONNEE}, f, ensure_ascii=False)
     except Exception as e:
         print(f"⚠️ Erreur sauvegarde combinaison: {e}", flush=True)
 
+# Charger la combinaison au démarrage (si fichier existe)
 charger_combinaison()
 
 # =====================================================================
@@ -306,16 +313,21 @@ def dashboard(request: Request):
     global COMBINAISON_SELECTIONNEE
     rafraichir_donnees_quinte()
 
-    nb_chevaux = len(COMBINAISON_SELECTIONNEE)
-    if nb_chevaux < 5:
-        nb_chevaux = 5
-    prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE, nombre_max=nb_chevaux)
-    
-    combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
-    if 5 <= len(combo_int) <= 8:
-        score_utilisateur = calculer_score_sge(combo_int)
-    else:
+    # ✅ Si aucune combinaison sélectionnée, afficher page vierge
+    if not COMBINAISON_SELECTIONNEE or len(COMBINAISON_SELECTIONNEE) == 0:
+        prono_pegasus = []
         score_utilisateur = 0
+    else:
+        nb_chevaux = len(COMBINAISON_SELECTIONNEE)
+        if nb_chevaux < 5:
+            nb_chevaux = 5
+        prono_pegasus = generer_prono_automatique(COMBINAISON_SELECTIONNEE, nombre_max=nb_chevaux)
+        
+        combo_int = [int(n) for n in COMBINAISON_SELECTIONNEE if n.isdigit()]
+        if 5 <= len(combo_int) <= 8:
+            score_utilisateur = calculer_score_sge(combo_int)
+        else:
+            score_utilisateur = 0
 
     counter = Counter()
     total_courses = len(HISTORIQUE_SGE_DATA)
@@ -359,7 +371,7 @@ def dashboard(request: Request):
         "top_chevaux_frequents": top_chevaux
     }
 
-    combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE)
+    combinaison_saisie = " - ".join(COMBINAISON_SELECTIONNEE) if COMBINAISON_SELECTIONNEE else ""
     tag_quinte = "✅ Quinté vérifié" if FLAG_QUINTE_VALIDE is True else \
                  "⚠️ PAS un Quinté" if FLAG_QUINTE_VALIDE is False else "Quinté non vérifié"
     code_pmu = f"R{DONNEES_QUINTE_DU_JOUR.get('numReunion','?')}C{DONNEES_QUINTE_DU_JOUR.get('numOrdre','?')}"
@@ -437,7 +449,7 @@ def relancer():
     global COMBINAISON_SELECTIONNEE
     DONNEES_QUINTE_DU_JOUR["mode_manuel"] = False
     rafraichir_donnees_quinte(force=True)
-    COMBINAISON_SELECTIONNEE = ["13", "6", "5", "12", "11"]
+    COMBINAISON_SELECTIONNEE = []  # ✅ Réinitialisation complète (page vierge)
     sauvegarder_combinaison()
     return RedirectResponse(url="/", status_code=303)
 
