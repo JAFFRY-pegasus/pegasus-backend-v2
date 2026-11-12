@@ -318,7 +318,7 @@
               <!-- ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE -->
               <div class="mt-3 text-center">
                 <button id="btn-mode-proprio" type="button" class="text-[10px] text-[#6c757d] hover:text-[#adb5bd] underline cursor-pointer">
-                  🔑 Activer le mode Propriétaire (sauvegarde automatique)
+                  🔑 Activer le mode Propriétaire (sauvegarde permanente)
                 </button>
               </div>
             </div>
@@ -359,7 +359,7 @@
       </div>
     </div>
 
-    <!-- ===== SCRIPT AVEC MODE PROPRIÉTAIRE vs VISITEUR ===== -->
+    <!-- ===== SCRIPT AVEC PERSISTANCE INTELLIGENTE ===== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('form-calculer');
@@ -372,17 +372,23 @@
         // ✅ DÉTECTION DU MODE : Propriétaire ou Visiteur
         const isProprietaire = localStorage.getItem('pegasus_mode_proprio') === 'true';
         
-        // Si mode Propriétaire : restaurer la combinaison sauvegardée
+        // ✅ RESTAURATION DE LA COMBINAISON (selon le mode)
+        let savedCombo = null;
         if (isProprietaire) {
-            const savedCombo = localStorage.getItem('pegasus_combinaison');
-            if (savedCombo) {
-                inputField.value = savedCombo;
-                inputField.dispatchEvent(new Event('input'));
-            }
+            // Propriétaire : restauration depuis localStorage (permanent)
+            savedCombo = localStorage.getItem('pegasus_combinaison');
+        } else {
+            // Visiteur : restauration depuis sessionStorage (session uniquement)
+            savedCombo = sessionStorage.getItem('pegasus_visiteur_combo');
         }
-        // Si mode Visiteur : champ vide (déjà le cas par défaut)
+        
+        if (savedCombo && savedCombo.trim() !== '') {
+            inputField.value = savedCombo;
+            // Soumettre automatiquement pour afficher les boules et le score
+            form.submit();
+        }
 
-        // Sauvegarder la combinaison uniquement si mode Propriétaire actif
+        // ✅ SAUVEGARDE À CHAQUE SAISIE
         inputField.addEventListener('input', function() {
             const numeros = this.value.split(/[\s,\-;]+/)
                 .map(n => n.trim())
@@ -396,12 +402,15 @@
                 warningMsg.classList.add('hidden');
             }
             
-            // Sauvegarde conditionnelle
+            // Sauvegarde selon le mode
             if (isProprietaire) {
                 localStorage.setItem('pegasus_combinaison', this.value);
+            } else {
+                sessionStorage.setItem('pegasus_visiteur_combo', this.value);
             }
         });
 
+        // ✅ SAUVEGARDE AU SUBMIT
         if (form) {
             form.addEventListener('submit', function(e) {
                 const valeur = inputField.value;
@@ -420,9 +429,11 @@
                 
                 inputField.value = numeros.join('-');
                 
-                // Sauvegarde conditionnelle
+                // Sauvegarde selon le mode
                 if (isProprietaire) {
                     localStorage.setItem('pegasus_combinaison', inputField.value);
+                } else {
+                    sessionStorage.setItem('pegasus_visiteur_combo', inputField.value);
                 }
             });
         }
@@ -430,15 +441,20 @@
         // ✅ BOUTON POUR ACTIVER LE MODE PROPRIÉTAIRE
         if (btnModeProprio) {
             btnModeProprio.addEventListener('click', () => {
-                if (confirm("Activer le mode Propriétaire ?\n\n✅ Vos combinaisons seront sauvegardées automatiquement.\n❌ Les visiteurs verront une page vierge.")) {
+                if (confirm("Activer le mode Propriétaire ?\n\n✅ Vos combinaisons seront sauvegardées PERMANEMMENT.\n🔄 Les visiteurs n'auront qu'une sauvegarde TEMPORAIRE (session).")) {
+                    // Transférer la combinaison session vers localStorage
+                    const sessionCombo = sessionStorage.getItem('pegasus_visiteur_combo');
                     localStorage.setItem('pegasus_mode_proprio', 'true');
-                    localStorage.setItem('pegasus_combinaison', inputField.value || '');
-                    alert("✅ Mode Propriétaire activé !\nVotre combinaison sera désormais sauvegardée.");
+                    if (sessionCombo) {
+                        localStorage.setItem('pegasus_combinaison', sessionCombo);
+                    }
+                    alert("✅ Mode Propriétaire activé !\nVos combinaisons sont désormais sauvegardées de façon permanente.");
                     location.reload();
                 }
             });
         }
 
+        // ✅ BOUTON PARTAGER
         const btnPartager = document.getElementById('btn-partager');
         if (btnPartager) {
             btnPartager.addEventListener('click', () => {
