@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Méthode Pegasus - Algorithme de Pronostic Hippique Géométrique</title>
+    <meta name="description" content="Découvrez la méthode Pegasus : un algorithme gratuit de pronostic hippique basé sur l'analyse géométrique, la résonance des axes et un modèle d'amortissement physique inspiré de Newton.">
+    <meta property="og:title" content="La Méthode Pegasus - L'IA géométrique au service du turf">
+    <meta property="og:description" content="Comprenez comment la physique et les mathématiques analysent les courses hippiques mieux que les simples statistiques de forme.">
+    <meta property="og:image" content="https://pegasus-backend-v2.onrender.com/static/Horse-racing-1.jpg">
+    <meta property="og:url" content="https://pegasus-backend-v2.onrender.com/methode">
+    <meta property="og:type" content="website">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body.bg-pegasus { background-image: url('/static/Horse-racing-1.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; }
+        .overlay-sombre { background-color: rgba(15, 17, 18, 0.96); backdrop-filter: blur(4px); }
+        body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body li { color:#ffffff !important; }
+        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3] { }
+        .highlight-box { background: rgba(241, 169, 52, 0.1); border-left: 4px solid #f1a934; }
+    </style>
+</head>
+<body class="bg-pegasus min-h-screen p-4 md:p-8">
+    <div class="overlay-sombre text-white w-full max-w-4xl mx-auto rounded-xl p-6 md:p-10 font-sans shadow-2xl border border-[#2d3238]">
+        
+        <!-- Navigation -->
+        <div class="flex justify-between items-center mb-8 pb-4 border-b border-[#2d3238]">
+            <a href="/" class="text-[#f1a934] font-bold text-xl hover:underline flex items-center gap-2">🐎 Pegasus Quinté</a>
+            <div class="flex gap-4">
+                <a href="/" class="text-sm text-white hover:text-[#f1a934] transition">🎯 Dashboard</a>
+                {% if est_proprietaire %}
+                <form action="/deconnexion" method="POST" class="inline"><button type="submit" class="text-sm text-[#6c757d] hover:text-white transition">🔓 Déconnexion</button></form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hero -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-5xl font-serif font-black text-[#f1a934] tracking-wide uppercase mb-4">La Méthode Pegasus</h1>
+            <p class="text-xl text-[#adb5bd] italic max-w-2xl mx-auto">Quand les lois de la physique newtonienne rencontrent l'analyse des courses hippiques.</p>
+        </div>
+
+        <!-- Contenu SEO -->
+        <div class="space-y-8 text-[#e2e8f0] leading-relaxed">
+            
+            <section>
+                <h2 class="text-2xl font-bold text-[#f1a934] mb-3 flex items-center gap-2">🎯 1. Pourquoi une approche géométrique ?</h2>
+                <p>La plupart des outils de pronostic gratuit se basent sur la "forme" du cheval, les cotes PMU ou les performances du jockey. Ces données sont utiles, mais elles sont <strong>déjà prises en compte par le marché</strong>, ce qui écrase les rapports.</p>
+                <p class="mt-2">Pegasus adopte une approche radicalement différente : <strong>l'analyse géométrique des arrivées passées</strong>. En étudiant l'historique des courses, nous ne cherchons pas qui est le "plus fort", mais quels <strong>motifs numériques récurrents</strong> (les "axes") se dessinent dans les combinaisons gagnantes.</p>
+            </section>
+
+            <section class="highlight-box p-4 rounded-r-lg">
+                <h2 class="text-xl font-bold text-[#f1a934] mb-2">📐 2. Le concept des Axes Verticaux</h2>
+                <p>L'algorithme identifie des paires de numéros qui ont une forte probabilité d'apparaître ensemble dans le Top 5. Ces oppositions verticales sont fixes :</p>
+                <div class="grid grid-cols-4 md:grid-cols-8 gap-2 my-4 text-center font-mono text-sm">
+                    <div class="bg-[#2d3238] p-2 rounded">1 ↔ 9</div>
+                    <div class="bg-[#2d3238] p-2 rounded">2 ↔ 10</div>
+                    <div class="bg-[#2d3238] p-2 rounded">3 ↔ 11</div>
+                    <div class="bg-[#2d3238] p-2 rounded">4 ↔ 12</div>
+                    <div class="bg-[#2d3238] p-2 rounded">5 ↔ 13</div>
+                    <div class="bg-[#2d3238] p-2 rounded">6 ↔ 14</div>
+                    <div class="bg-[#2d3238] p-2 rounded">7 ↔ 15</div>
+                    <div class="bg-[#2d3238] p-2 rounded">8 ↔ 16</div>
+                </div>
+                <p>Plus une combinaison de chevaux valide un grand nombre de ces axes, plus son "score brut" augmente.</p>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-bold text-[#f1a934] mb-3 flex items-center gap-2">⚡ 3. La Résonance et le Frottement (Modèle Physique)</h2>
+                <p>C'est ici que Pegasus se distingue. Le calcul du score final s'inspire directement de la mécanique classique :</p>
+                <ul class="list-disc pl-5 space-y-2 mt-2">
+                    <li><strong class="text-[#4ba3e3]">La Résonance (Accélération) :</strong> Chaque axe validé multiplie le score de manière non-linéaire. C'est l'effet "boule de neige" : 3 axes ne valent pas 3 fois 1 axe, mais beaucoup plus.</li>
+                    <li><strong class="text-[#f1a934]">Le Frottement (Amortissement) :</strong> Comme un objet tombant dans un fluide qui atteint une vitesse limite, ajouter trop de chevaux "dilue" la qualité géométrique. L'algorithme applique donc un facteur d'amortissement : <code class="bg-[#2d3238] px-2 py-1 rounded text-sm">Score = Brut × Résonance / (1 + (Taille - 5) × 0.05)</code>.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-bold text-[#f1a934] mb-3 flex items-center gap-2">🏆 4. La Signature Géométrique (Découverte par IA)</h2>
+                <p>Grâce à une analyse exhaustive de 220 courses historiques via Python et Google Colab, une découverte majeure a été faite : <strong>les axes (6, 14) et (7, 15) apparaissent dans 100% des combinaisons mathématiquement optimales</strong>.</p>
+                <p class="mt-2">Le moteur Pegasus v3.21 intègre désormais un <strong>Bonus Signature</strong> : chaque fois que l'un de ces axes dominants est validé, le score de la combinaison est multiplié par 1.2 (+20%). C'est l'avantage injuste de la data science appliquée au turf.</p>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-bold text-[#f1a934] mb-3 flex items-center gap-2">📊 5. Transparence et Résultats</h2>
+                <p>Contrairement aux "vendeurs de rêves", Pegasus est transparent. Sur notre base historique de 220 courses, l'algorithme atteint un <strong class="text-[#2ecc71]">taux de réussite de 34%</strong> (chevaux trouvés dans le Top 5), contre 25% pour un choix purement aléatoire.</p>
+                <p class="mt-2 text-sm text-[#9ca3af]">⚠️ <em>Rappel : Les courses hippiques comportent une part d'aléa. Cet outil est une aide à la décision mathématique, pas une garantie de gain. Jouez de manière responsable.</em></p>
+            </section>
+
+        </div>
+
+        <!-- Call to Action -->
+        <div class="mt-12 text-center">
+            <p class="text-lg mb-6 text-[#adb5bd]">La théorie, c'est bien. La pratique, c'est mieux.</p>
+            <a href="/" class="inline-block bg-[#f1a934] hover:bg-[#d9952e] text-[#1f2225] font-black text-lg py-4 px-10 rounded-lg shadow-lg uppercase tracking-wider transition transform hover:scale-105">
+                🎯 Essayer l'outil Pegasus maintenant
+           a>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-[10px] text-[#6c757d] mt-12 pt-6 border-t border-[#2d3238]">
+            <p>© 2024-2026 JAFFRY-pegasus. Tous droits réservés. Licence propriétaire non-commerciale.</p>
+            <p class="mt-1">Jouer comporte des risques : endettement, isolement, dépendance. Appelez le 09 74 75 13 13.</p>
+        </div>
+    </div>
+</body>
+</html>
