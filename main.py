@@ -117,13 +117,72 @@ def lire_readme_html():
     try:
         with open(readme_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        # Conversion avec support des tableaux et blocs de code
         html = markdown2.markdown(content, extras=['tables', 'fenced-code-blocks'])
         return html
     except Exception as e:
         return f"<p style='color:#ef4444;'>Erreur lors du chargement de la documentation : {str(e)}</p>"
 
-def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message_succes="", chevaux_base_str=""):
+# Script JavaScript commun aux deux pages (isolé pour éviter les conflits Python)
+JS_SCRIPT = """
+<script>
+(function() {
+    function formaterAvecTirets(input) {
+        var cursorPos = input.selectionStart;
+        var oldLength = input.value.length;
+        var chiffres = input.value.replace(/[^0-9]/g, '');
+        if (chiffres.length === 0) { input.value = ''; return; }
+        var nums = [];
+        var i = 0;
+        while (i < chiffres.length && nums.length < 8) {
+            if (chiffres[i] === '1' && i + 1 < chiffres.length && '0123456'.indexOf(chiffres[i+1]) !== -1) {
+                nums.push(chiffres[i] + chiffres[i+1]); i += 2;
+            } else if (chiffres[i] !== '0') {
+                nums.push(chiffres[i]); i++;
+            } else { i++; }
+        }
+        var newValue = nums.join(' - ');
+        if (input.value !== newValue) {
+            input.value = newValue;
+            var newLength = input.value.length;
+            var diff = newLength - oldLength;
+            var newPos = cursorPos + diff;
+            if (newPos < 0) newPos = 0;
+            if (newPos > newLength) newPos = newLength;
+            input.setSelectionRange(newPos, newPos);
+        }
+    }
+    function init() {
+        var synInput = document.getElementById('synthesis-input');
+        var combInput = document.getElementById('combinaison-input');
+        var baseInput = document.getElementById('base-input');
+        if (synInput) synInput.addEventListener('input', function() { formaterAvecTirets(this); });
+        if (combInput) combInput.addEventListener('input', function() { formaterAvecTirets(this); });
+        if (baseInput) baseInput.addEventListener('input', function() { formaterAvecTirets(this); });
+    }
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+
+var selectedNumbers = [];
+function toggleGrille(num) {
+    var btn = document.getElementById('btn-' + num);
+    var index = selectedNumbers.indexOf(num);
+    if (index > -1) { selectedNumbers.splice(index, 1); btn.classList.remove('active'); }
+    else {
+        if (selectedNumbers.length >= 8) { alert('Maximum 8 chevaux autorisés !'); return; }
+        selectedNumbers.push(num); btn.classList.add('active');
+    }
+    document.getElementById('combinaison-input').value = selectedNumbers.join(' - ');
+}
+function resetGrille() {
+    selectedNumbers = [];
+    var btns = document.querySelectorAll('.grille-btn');
+    for (var i = 0; i < btns.length; i++) { btns[i].classList.remove('active'); }
+    document.getElementById('combinaison-input').value = '';
+}
+</script>
+"""
+
+def generer_interface(request, saisie_str, prono_list, score_prono, score_saisie, message_succes="", chevaux_base_str=""):
     infos = lire_donnees_quinte()
     date_str = infos.get("date", "")
     date_course = "Date en attente"
@@ -184,6 +243,8 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message
         arrivee_balls = '<span style="color:#94a3b8; font-style:italic;">En attente de la course</span>'
 
     message_html = f'<div class="success-banner">{message_succes}</div>' if message_succes else ''
+    
+    current_path = request.url.path
 
     html_content = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -309,8 +370,8 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message
     </div>
 
     <div class="nav-links">
-        <a href="/" class="nav-link {'active' if request.url.path == '/' else ''}">🎯 Pronostics</a>
-        <a href="/methode" class="nav-link {'active' if request.url.path == '/methode' else ''}">📖 Méthode & Licence</a>
+        <a href="/" class="nav-link {'active' if current_path == '/' else ''}">🎯 Pronostics</a>
+        <a href="/methode" class="nav-link {'active' if current_path == '/methode' else ''}">📖 Méthode & Licence</a>
     </div>
 
     <form action="/analyser" method="post">
@@ -429,62 +490,7 @@ def generer_interface(saisie_str, prono_list, score_prono, score_saisie, message
         <div class="disclaimer">PEGASUS est un outil d'analyse statistique et géométrique à titre purement indicatif. Il ne garantit aucun gain. Jouez avec modération.</div>
     </div>
 
-    <script>
-    (function() {
-        function formaterAvecTirets(input) {
-            var cursorPos = input.selectionStart;
-            var oldLength = input.value.length;
-            var chiffres = input.value.replace(/[^0-9]/g, '');
-            if (chiffres.length === 0) { input.value = ''; return; }
-            var nums = [];
-            var i = 0;
-            while (i < chiffres.length && nums.length < 8) {
-                if (chiffres[i] === '1' && i + 1 < chiffres.length && '0123456'.indexOf(chiffres[i+1]) !== -1) {
-                    nums.push(chiffres[i] + chiffres[i+1]); i += 2;
-                } else if (chiffres[i] !== '0') {
-                    nums.push(chiffres[i]); i++;
-                } else { i++; }
-            }
-            var newValue = nums.join(' - ');
-            if (input.value !== newValue) {
-                input.value = newValue;
-                var newLength = input.value.length;
-                var diff = newLength - oldLength;
-                var newPos = cursorPos + diff;
-                if (newPos < 0) newPos = 0;
-                if (newPos > newLength) newPos = newLength;
-                input.setSelectionRange(newPos, newPos);
-            }
-        }
-        function init() {
-            var synInput = document.getElementById('synthesis-input');
-            var combInput = document.getElementById('combinaison-input');
-            var baseInput = document.getElementById('base-input');
-            if (synInput) synInput.addEventListener('input', function() { formaterAvecTirets(this); });
-            if (combInput) combInput.addEventListener('input', function() { formaterAvecTirets(this); });
-            if (baseInput) baseInput.addEventListener('input', function() { formaterAvecTirets(this); });
-        }
-        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
-    })();
-
-    var selectedNumbers = [];
-    function toggleGrille(num) {
-        var btn = document.getElementById('btn-' + num);
-        var index = selectedNumbers.indexOf(num);
-        if (index > -1) { selectedNumbers.splice(index, 1); btn.classList.remove('active'); }
-        else {
-            if (selectedNumbers.length >= 8) { alert('Maximum 8 chevaux autorisés !'); return; }
-            selectedNumbers.push(num); btn.classList.add('active');
-        }
-        document.getElementById('combinaison-input').value = selectedNumbers.join(' - ');
-    }
-    function resetGrille() {
-        selectedNumbers = [];
-        var btns = document.querySelectorAll('.grille-btn');
-        for (var i = 0; i < btns.length; i++) { btns[i].classList.remove('active'); }
-        document.getElementById('combinaison-input').value = '';
-    }
-    </script>
+    {JS_SCRIPT}
 </body>
 </html>"""
 
@@ -503,6 +509,8 @@ async def index(request: Request):
 @app.get("/methode", response_class=HTMLResponse)
 async def methode(request: Request):
     readme_html = lire_readme_html()
+    
+    current_path = request.url.path
     
     html_content = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -569,8 +577,8 @@ async def methode(request: Request):
     </div>
 
     <div class="nav-links">
-        <a href="/" class="nav-link">🎯 Pronostics</a>
-        <a href="/methode" class="nav-link active">📖 Méthode & Licence</a>
+        <a href="/" class="nav-link {'active' if current_path == '/' else ''}">🎯 Pronostics</a>
+        <a href="/methode" class="nav-link {'active' if current_path == '/methode' else ''}">📖 Méthode & Licence</a>
     </div>
 
     <div class="section">
