@@ -14,8 +14,8 @@
     <style>
         body.bg-pegasus { background-image: url('/static/Horse-racing-1.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; }
         .overlay-sombre { background-color: rgba(15, 17, 18, 0.96); backdrop-filter: blur(4px); }
-        body, body *, body p, body span, body a, body td, body th, body div, body h1, body h2, body h3, body h4, body h5, body h6, body b, body strong, body li { color:#ffffff !important; }
-        .text-[#f1a934], .text-[#2ecc71], .text-[#4ba3e3] { }
+        /* ✅ CORRECTION : couleur de base sans !important, pour laisser Tailwind gérer les accents */
+        body, .overlay-sombre { color: #ffffff; }
         .highlight-box { background: rgba(241, 169, 52, 0.1); border-left: 4px solid #f1a934; }
     </style>
 </head>
@@ -92,7 +92,7 @@
             <p class="text-lg mb-6 text-[#adb5bd]">La théorie, c'est bien. La pratique, c'est mieux.</p>
             <a href="/" class="inline-block bg-[#f1a934] hover:bg-[#d9952e] text-[#1f2225] font-black text-lg py-4 px-10 rounded-lg shadow-lg uppercase tracking-wider transition transform hover:scale-105">
                 🎯 Essayer l'outil Pegasus maintenant
-           a>
+            </a>
         </div>
 
         <!-- Footer -->
