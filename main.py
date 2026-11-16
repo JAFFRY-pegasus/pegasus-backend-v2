@@ -12,9 +12,10 @@
 # =====================================================================
 
 """
-main.py v3.31 - CORRIGÉ
+main.py v3.31 - CORRIGÉ + SITEMAP
 Authentification propriétaire par COOKIE + Page "La Méthode" pour le SEO.
 Correction : suppression du double-wrap HTMLResponse qui causait l'erreur 500.
+Ajout : Route /sitemap.xml pour Google Search Console.
 """
 
 import sys
@@ -42,7 +43,7 @@ NOM_COOKIE = "pegasus_proprio"
 # CONFIGURATION & CHEMINS
 # =====================================================================
 print("=" * 60, flush=True)
-print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.31 (CORRIGÉ)", flush=True)
+print("🚀 DÉMARRAGE DE PEGASUS BACKEND V3.31 (CORRIGÉ + SITEMAP)", flush=True)
 print("=" * 60, flush=True)
 
 CHEMIN_BASE = os.path.dirname(os.path.abspath(__file__))
@@ -349,6 +350,23 @@ def deconnexion():
     resp = RedirectResponse(url="/", status_code=303)
     resp.delete_cookie(NOM_COOKIE)
     return resp
+
+# =====================================================================
+# ROUTE SITEMAP POUR GOOGLE SEARCH CONSOLE
+# =====================================================================
+@app.get("/sitemap.xml", response_class=HTMLResponse)
+def sitemap_xml():
+    """Sert le fichier sitemap.xml pour l'indexation Google"""
+    sitemap_path = os.path.join(CHEMIN_BASE, "sitemap.xml")
+    if os.path.exists(sitemap_path):
+        with open(sitemap_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content, media_type="application/xml")
+    return HTMLResponse(
+        content="<error>Sitemap non trouvé</error>", 
+        status_code=404, 
+        media_type="application/xml"
+    )
 
 if __name__ == '__main__':
     import uvicorn
